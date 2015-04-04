@@ -1,0 +1,9 @@
+#define NUMERO 257
+#define STRING 258
+#define QUOTE 259
+#define LPARENTESE 260
+#define RPARENTESE 261
+#define PONTO_VIRGULA 262
+#define PONTO 263
+#define MENOR 264
+#define MAIOR 265
