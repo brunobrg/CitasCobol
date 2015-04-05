@@ -34,7 +34,7 @@ extern FILE * yyin;
 %%
 
 Etapas:
-	TIPO MAIN {	initProcDivision(); } LEFT_PAR RIGHT_PAR Bloco
+	TIPO MAIN {	initProcDivision(); } LEFT_PAR RIGHT_PAR Bloco {inserirSaidaCobol("     STOP RUN.\n\n");}
 	;
 
 Bloco:
@@ -45,7 +45,7 @@ Bloco:
 
 Comandos:
 	Printf Comandos
-	| RETURN {inserirSaidaCobol("     STOP RUN.");} T_NUMBER Comandos
+	| RETURN T_NUMBER Comandos
 	| PVIRGULA {pulaLinha();} Comandos
 	| PVIRGULA
 	;
