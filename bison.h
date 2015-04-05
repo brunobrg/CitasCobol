@@ -61,32 +61,31 @@ extern int yydebug;
     PH = 271,
     TERMINOU = 272,
     DECLARACAO = 273,
-    FIMFUNC = 274,
-    FUNCAO = 275,
-    ESPERA = 276,
-    EXECUTE = 277,
-    PASSA = 278,
-    IGUAL = 279,
-    SOMA = 280,
-    SUBT = 281,
-    MULT = 282,
-    DIVIDE = 283,
-    ATRIBUI = 284,
-    MOD = 285,
-    ENDERECO = 286,
-    NUMERICAL = 287,
-    INCLUDE = 288,
-    PVIRGULA = 289,
-    LEFT_PAR = 290,
-    RIGHT_PAR = 291,
-    VIRGULA = 292,
-    ABRE_CHAVE = 293,
-    FECHA_CHAVE = 294,
-    RETURN = 295,
-    PRINTF = 296,
-    SCANF = 297,
-    VARUSE = 298,
-    MAIN = 299
+    FUNCAO = 274,
+    ESPERA = 275,
+    EXECUTE = 276,
+    PASSA = 277,
+    IGUAL = 278,
+    SOMA = 279,
+    SUBT = 280,
+    MULT = 281,
+    DIVIDE = 282,
+    ATRIBUI = 283,
+    MOD = 284,
+    ENDERECO = 285,
+    NUMERICAL = 286,
+    INCLUDE = 287,
+    PVIRGULA = 288,
+    LEFT_PAR = 289,
+    RIGHT_PAR = 290,
+    VIRGULA = 291,
+    ABRE_CHAVE = 292,
+    FECHA_CHAVE = 293,
+    RETURN = 294,
+    PRINTF = 295,
+    SCANF = 296,
+    VARUSE = 297,
+    MAIN = 298
   };
 #endif
 
@@ -95,12 +94,12 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 11 "bison.y" /* yacc.c:1909  */
+#line 12 "bison.y" /* yacc.c:1909  */
 
    char * strval;
    int    intval;
 
-#line 104 "bison.h" /* yacc.c:1909  */
+#line 103 "bison.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

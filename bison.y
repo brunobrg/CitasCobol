@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "analise.h"
 
 extern char * yytext;
 extern FILE * yyin;
@@ -16,7 +17,7 @@ extern FILE * yyin;
 %token <strval> T_NUMBER TIPO
 %token <strval> T_STRING TEXTO  STR
 %token AND OU IF DO THEN WHILE ELSE NOT PH
-%token TERMINOU DECLARACAO FIMFUNC FUNCAO ESPERA EXECUTE PASSA
+%token TERMINOU DECLARACAO FUNCAO ESPERA EXECUTE PASSA
 %token IGUAL SOMA SUBT MULT DIVIDE ATRIBUI MOD ENDERECO
 %token NUMERICAL
 
@@ -33,7 +34,7 @@ extern FILE * yyin;
 %%
 
 Etapas:
-	TIPO MAIN LEFT_PAR RIGHT_PAR Bloco
+	TIPO MAIN {	initProcDivision(); } LEFT_PAR RIGHT_PAR Bloco
 	;
 
 Bloco:
@@ -44,26 +45,19 @@ Bloco:
 
 Comandos:
 	Printf Comandos
+	| RETURN {inserirSaidaCobol("     STOP RUN.");} T_NUMBER Comandos
+	| PVIRGULA {pulaLinha();} Comandos
 	| PVIRGULA
 	;
 
 Printf:
-	PRINTF LEFT_PAR TEXTO RIGHT_PAR
+	PRINTF {inserirSaidaCobol("     DISPLAY ");} LEFT_PAR TEXTO  { inserirSaidaCobol($4);} RIGHT_PAR
 	;
 
 %%
 
 void main(void){
-	char arquivo[20];
-	printf("informe o arquivo: ");
-	scanf("%s", arquivo);
-
-	FILE * myfile = fopen(arquivo, "r");
-	yyin = myfile;
-
-	yyparse();
-
-	printf("Analise terminada\n");
+	init();
 }
 
 yyerror(char *s){

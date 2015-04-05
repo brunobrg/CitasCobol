@@ -14,8 +14,6 @@ NUMBER [0-9]
 ";"									return PVIRGULA;
 ","									return VIRGULA;
 "espera"							return ESPERA;
-"return"							return RETURN;
-"fimFunc"+"\n"+						{yyterminate(); return FIMFUNC;}
 "main"								return MAIN;
 (f|F)+(uncao)+						return FUNCAO;
 "declare"							return DECLARACAO;
@@ -23,6 +21,7 @@ NUMBER [0-9]
 ")"									return RIGHT_PAR;
 "{"									return ABRE_CHAVE;
 "}"									return FECHA_CHAVE;
+"return"							return RETURN;
 "numero"							return NUMERICAL;
 "texto"								return STR;
 "#include"							return INCLUDE;
