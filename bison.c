@@ -1276,7 +1276,7 @@ yyreduce:
 
   case 9:
 #line 48 "bison.y" /* yacc.c:1646  */
-    {inserirSaidaCobol(" STOP RUN.");}
+    {inserirSaidaCobol("     STOP RUN.");}
 #line 1281 "bison.c" /* yacc.c:1646  */
     break;
 

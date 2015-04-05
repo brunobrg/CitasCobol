@@ -51,7 +51,7 @@ Comandos:
 	;
 
 Printf:
-	PRINTF {inserirSaidaCobol("     DISPLAY ");} LEFT_PAR TEXTO  { inserirSaidaCobol($4);} RIGHT_PAR
+	PRINTF {inserirSaidaCobol("     DISPLAY ");} LEFT_PAR TEXTO  { inserirSaidaCobol($4); inserirSaidaCobol(".");} RIGHT_PAR
 	;
 
 %%
