@@ -11,44 +11,48 @@ NUMBER [0-9]
 
 
 %% /*REGRAS:*/
-"\n"								{contadorDeLinhas++;}
-"execute"							return EXECUTE;
-"passa"								return PASSA;
-","								return VIRGULA;
+";"									return PVIRGULA;
+","									return VIRGULA;
 "espera"							return ESPERA;
-"senao se"							return ELSEIF;
-"fimFunc"					{yyterminate(); return FIMFUNC;}
-(f|F)+(uncao)+							return FUNCAO;
+"return"							return RETURN;
+"fimFunc"+"\n"+						{yyterminate(); return FIMFUNC;}
+"main"								return MAIN;
+(f|F)+(uncao)+						return FUNCAO;
 "declare"							return DECLARACAO;
-"("								return LEFT_PAR;
-")"								return RIGHT_PAR;
+"("									return LEFT_PAR;
+")"									return RIGHT_PAR;
+"{"									return ABRE_CHAVE;
+"}"									return FECHA_CHAVE;
 "numero"							return NUMERICAL;
 "texto"								return STR;
+"#include"							return INCLUDE;
 (\".*\")+							{yylval.strval = strdup(yytext); return TEXTO;}
-(imprima|imprimir|escreva|escrever)+    			return PRINT;
-(ler|leia|receba|receber)+ 	            			return READ;
-(se)+                   		    			return IF;
-(declaracao|declare|declarar)+ 		    			return LOCAL;
+(printf)	  						return PRINTF;
+(scanf)		            			return SCANF;
+(if)+                   		    			return IF;
+(int|float|double|char)+ 		    			{yylval.strval = strdup(yytext); return TIPO;}
+(%+(d|f|lf|c|s|u|i))					{yylval.strval = strdup(yytext); return VARUSE;}
+
 "+"								return SOMA;
 "-"								return SUBT;
-"*"								return MULT;
 "/"								return DIVIDE;
 "="								return ATRIBUI;
-(\>)+ 					    			return MAIOR;
-(\<)+ 					    			return MENOR;
-(\=)+ 					    			return IGUAL;
-"!="								return NOT;
-(ou)+ 					    			return OU;
-(e)+ 					    			return AND;
-(senao)+ 				    			return ELSE;
-(enquanto)+ 				    			return WHILE;
-(faca)+ 				    			return DO;
-(entao)+ 		                    			return THEN;
-(fim)+ 					    			return TERMINOU;
+"<"								return('<');
+">"								return('>');
+"==" 					    			return IGUAL;
+"%"								return MOD;
+"!"								return NOT;
+"||" 					    			return OU;
+"&&" 					    			return AND;
+"&"									return ENDERECO;
+"else" 				    			return ELSE;
+"while"				    			return WHILE;
+"do"			    			return DO;
+
 {NUMBER}+                               			{yylval.strval = strdup(yytext); return T_NUMBER;}
 {STRING}				    			{yylval.strval = strdup(yytext); return T_STRING;}
+".h"									return PH;
 {SPACE}					    			/*ignore*/
-
 
 
 %%
