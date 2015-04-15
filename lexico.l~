@@ -15,7 +15,7 @@ DIGIT		[0-9]
 %% /*REGRAS:*/
 ";"					return PVIRGULA;
 ","					return VIRGULA;
-\"					return ASPAS;	
+\"					return ('"');	
 "("					return LEFT_PAR;
 ")"					return RIGHT_PAR;
 "{"					return ABRE_CHAVE;

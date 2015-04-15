@@ -49,12 +49,12 @@ Comandos:
 	| PVIRGULA
 	;
 
-Quote:
-	ASPAS STRING ASPAS {$$=$2;}
-	;
-
 Printf:
 	PRINTF {inserirSaidaCobol("     DISPLAY ");} LEFT_PAR Quote  { inserirSaidaCobol($4); inserirSaidaCobol(".");} RIGHT_PAR
+	;
+
+Quote:
+	ASPAS STRING ASPAS {$$=$2;}
 	;
 
 %%
