@@ -6,33 +6,35 @@
 %}
 
 /* TIPOS */
+L           [a-zA-Z_]
 WORD		[a-zA-Z_][a-zA-Z0-9_]*
 SPACE		[ \r\t]+
 DIGIT		[0-9]
 
+ASPAS [\"]
+
 
 
 %% /*REGRAS:*/
-";"					return PVIRGULA;
-","					return VIRGULA;
-\"					return ASPAS;	
-"("					return LEFT_PAR;
-")"					return RIGHT_PAR;
-"{"					return ABRE_CHAVE;
-"}"					return FECHA_CHAVE;
-"+"					return SOMA;
-"-"					return SUBT;
-"/"					return DIVIDE;
-"="					return ATRIBUI;
-"<"					return ('<');
-">"					return ('>');
+";"						return PVIRGULA;
+","						return VIRGULA;
+\"						return ASPAS;	
+"("						return LEFT_PAR;
+")"						return RIGHT_PAR;
+"{"						return ABRE_CHAVE;
+"}"						return FECHA_CHAVE;
+"+"						return SOMA;
+"-"						return SUBT;
+"/"						return DIVIDE;
+"="						return ATRIBUI;
+"<"						return ('<');
+">"						return ('>');
 "==" 					return IGUAL;
-"%"					return MOD;
-"!"					return NOT;
+"%"						return MOD;
+"!"						return NOT;
 "||" 					return OU;
 "&&" 					return AND;
-"&"					return ENDERECO;
-
+"&"						return ENDERECO;
 "main"					return MAIN;
 "return"				return RETURN;
 "#include"				return INCLUDE;
@@ -45,8 +47,9 @@ DIGIT		[0-9]
 "while"				    	return WHILE;
 "do"			    		return DO;
 
+L?\"(\\.|[^\\"])*\"		{yylval.strval = strdup(yytext); return TEXTO;}
 {DIGIT}+				{yylval.strval = strdup(yytext); return NUMBER;}
-{WORD}				.	{yylval.strval = strdup(yytext); return STRING;}
+{WORD}					{yylval.strval = strdup(yytext); return PALAVRA;}
 ".h"					return PH;
 {SPACE}					/*ignore*/
 

@@ -21,18 +21,21 @@ extern FILE * yyin;
 
 //novos
 %token INCLUDE   
-%token PVIRGULA LEFT_PAR RIGHT_PAR VIRGULA ASPAS
-%token ABRE_CHAVE FECHA_CHAVE RETURN
-%token <strval> PRINTF SCANF VARUSE
+%token PVIRGULA LEFT_PAR RIGHT_PAR VIRGULA ASPAS ENDERECO
+%token ABRE_CHAVE FECHA_CHAVE RETURN ENDE 
+%token <strval> PRINTF SCANF VARUSE PALAVRA TEXTO
 %token MAIN error
-
-%type <strval> Quote
 
 %start Etapas
 
 %%
 
-Etapas:
+Etapas: 
+	Main
+	;
+
+
+Main:
 	TIPO MAIN {	initProcDivision(); } LEFT_PAR RIGHT_PAR Bloco {inserirSaidaCobol("     STOP RUN.\n\n");}
 	;
 
@@ -45,18 +48,11 @@ Bloco:
 Comandos:
 	Printf Comandos
 	| RETURN NUMBER Comandos
-	| PVIRGULA {pulaLinha();} Comandos
-	| PVIRGULA
-	;
-
-Quote:
-	ASPAS STRING ASPAS {$$=$2;}
-	;
+	| PVIRGULA {pulaLinha();}
 
 Printf:
-	PRINTF {inserirSaidaCobol("     DISPLAY ");} LEFT_PAR Quote  { inserirSaidaCobol($4); inserirSaidaCobol(".");} RIGHT_PAR
+	PRINTF {inserirSaidaCobol("     DISPLAY ");} LEFT_PAR TEXTO  { inserirSaidaCobol($4); inserirSaidaCobol(".");} RIGHT_PAR
 	;
-
 %%
 
 void main(void){
