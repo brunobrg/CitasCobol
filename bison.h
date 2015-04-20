@@ -45,47 +45,39 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    T_NUMBER = 258,
+    NUMBER = 258,
     TIPO = 259,
-    T_STRING = 260,
-    TEXTO = 261,
-    STR = 262,
-    AND = 263,
-    OU = 264,
-    IF = 265,
-    DO = 266,
-    THEN = 267,
-    WHILE = 268,
-    ELSE = 269,
-    NOT = 270,
-    PH = 271,
-    TERMINOU = 272,
-    DECLARACAO = 273,
-    FUNCAO = 274,
-    ESPERA = 275,
-    EXECUTE = 276,
-    PASSA = 277,
-    IGUAL = 278,
-    SOMA = 279,
-    SUBT = 280,
-    MULT = 281,
-    DIVIDE = 282,
-    ATRIBUI = 283,
-    MOD = 284,
-    ENDERECO = 285,
-    NUMERICAL = 286,
-    INCLUDE = 287,
-    PVIRGULA = 288,
-    LEFT_PAR = 289,
-    RIGHT_PAR = 290,
-    VIRGULA = 291,
-    ABRE_CHAVE = 292,
-    FECHA_CHAVE = 293,
-    RETURN = 294,
-    PRINTF = 295,
-    SCANF = 296,
-    VARUSE = 297,
-    MAIN = 298
+    STRING = 260,
+    STR = 261,
+    AND = 262,
+    OU = 263,
+    IF = 264,
+    DO = 265,
+    THEN = 266,
+    WHILE = 267,
+    ELSE = 268,
+    NOT = 269,
+    PH = 270,
+    IGUAL = 271,
+    SOMA = 272,
+    SUBT = 273,
+    MULT = 274,
+    DIVIDE = 275,
+    ATRIBUI = 276,
+    MOD = 277,
+    INCLUDE = 278,
+    PVIRGULA = 279,
+    LEFT_PAR = 280,
+    RIGHT_PAR = 281,
+    VIRGULA = 282,
+    ASPAS = 283,
+    ABRE_CHAVE = 284,
+    FECHA_CHAVE = 285,
+    RETURN = 286,
+    PRINTF = 287,
+    SCANF = 288,
+    VARUSE = 289,
+    MAIN = 290
   };
 #endif
 
@@ -94,12 +86,12 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 12 "bison.y" /* yacc.c:1909  */
+#line 11 "bison.y" /* yacc.c:1909  */
 
    char * strval;
    int    intval;
 
-#line 103 "bison.h" /* yacc.c:1909  */
+#line 95 "bison.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

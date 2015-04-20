@@ -1,0 +1,9 @@
+//ignoring compilation files
+*.c
+
+//ignoreing temp files
+*~
+*.c~
+*.md~
+*.y~
+*.l~
