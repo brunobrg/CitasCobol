@@ -5,6 +5,7 @@
 #include "analise.h"
 
 extern FILE * yyin;
+extern int contadorDeLinhas;
 
 %}
 
@@ -40,15 +41,23 @@ Main:
 	;
 
 Bloco:
-	| ABRE_CHAVE Bloco
-	| Comandos Bloco
-	| FECHA_CHAVE
+	| ABRE_CHAVE Comandos FECHA_CHAVE
 	;
 
 Comandos:
-	Printf Comandos
-	| RETURN NUMBER Comandos
-	| PVIRGULA {pulaLinha();}
+	| Linha_Comando Comandos
+	;
+
+Linha_Comando:
+	Comando PVIRGULA {pulaLinha();}
+	;
+
+Comando:
+	Printf 
+	| RETURN 
+	;
+
+
 
 Printf:
 	PRINTF {inserirSaidaCobol("     DISPLAY ");} LEFT_PAR TEXTO  { inserirSaidaCobol($4); inserirSaidaCobol(".");} RIGHT_PAR
@@ -60,7 +69,8 @@ void main(void){
 }
 
 yyerror(char *s){
-	printf("Erro encontrado");
+	codigoCorreto = 0;
+	printf("Erro encontrado na linha %d.\n", contadorDeLinhas);
 }
 
 int yywrap(void)

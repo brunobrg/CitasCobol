@@ -16,6 +16,7 @@ ASPAS [\"]
 
 
 %% /*REGRAS:*/
+"\n"					{contadorDeLinhas++;}
 ";"						return PVIRGULA;
 ","						return VIRGULA;
 \"						return ASPAS;	

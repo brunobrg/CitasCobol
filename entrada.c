@@ -1,7 +1,11 @@
+#include <stdio.h>
+
+#include "minhaFuncao.h"
+
 int main ()
 {
 	printf("haha");
 	printf("AUEHUAHEUIHAHWE");
-	printf("Hello world tosco");
+	s("Hello world tosco");
 	return 0;
 }
