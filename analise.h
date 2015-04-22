@@ -22,7 +22,7 @@ SaidaCobol * saidaCobol;
 extern FILE * yyin;
 
 /* prototipos */
-void init();
+void init(int, char *[]);
 void initIdDivision(char[]);
 void initProcDivision();
 void inserirSaidaCobol(char[]);
@@ -31,7 +31,7 @@ void escreveArquivo(char[]);
 void pulaLinha();
 
 
-void init()
+void init(int argc, char *argv[])
 {
 	char arq[20];
 

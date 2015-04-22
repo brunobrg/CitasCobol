@@ -54,9 +54,8 @@ Linha_Comando:
 
 Comando:
 	Printf 
-	| RETURN 
+	| RETURN NUMBER;
 	;
-
 
 
 Printf:
@@ -64,12 +63,11 @@ Printf:
 	;
 %%
 
-void main(void){
-	init();
+void main(int argc, char *argv[]){
+	init(argc, argv);
 }
 
 yyerror(char *s){
-	codigoCorreto = 0;
 	printf("Erro encontrado na linha %d.\n", contadorDeLinhas);
 }
 
