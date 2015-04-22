@@ -1,7 +1,7 @@
 %{option main
 
  #include "bison.h"
- int contadorDeLinhas =1;
+ int contLinhasC =1;
 
 %}
 
@@ -16,7 +16,7 @@ ASPAS [\"]
 
 
 %% /*REGRAS:*/
-"\n"					{contadorDeLinhas++;}
+"\n"					{contLinhasC++;}
 ";"						return PVIRGULA;
 ","						return VIRGULA;
 \"						return ASPAS;	

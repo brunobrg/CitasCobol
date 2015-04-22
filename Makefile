@@ -1,12 +1,12 @@
 all: removeold compilabison compilaflex compilac clean
 
 removeold:
-	rm -rf programa
+	rm -rf ccobol
 compilabison: bison.y
 	bison -d -o bison.c bison.y
 compilaflex: lexico.l
 	flex lexico.l
 compilac: bison.c lex.yy.c
-	gcc bison.c lex.yy.c -o ./programa
+	gcc bison.c lex.yy.c -o ./ccobol
 clean:
 	rm -rf bison.c lex.yy.c y.tab.c bison.h bison.tab.c

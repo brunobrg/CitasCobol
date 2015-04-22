@@ -17,7 +17,7 @@ typedef struct _SaidaCobol
 }SaidaCobol;
 
 /* variaveis globais */
-int contLinhas;
+int contLinhasCobol;
 SaidaCobol * saidaCobol;
 extern FILE * yyin;
 
@@ -65,10 +65,10 @@ void init(int argc, char *argv[])
 void pulaLinha()
 {
 	char str[10];
-	contLinhas++;
-	if(contLinhas > 1)
+	contLinhasCobol++;
+	if(contLinhasCobol > 1)
 		inserirSaidaCobol("\n");
-	sprintf(str, "%04d", contLinhas);
+	sprintf(str, "%04d", contLinhasCobol);
 	inserirSaidaCobol(str);
 	inserirSaidaCobol("00");
 }

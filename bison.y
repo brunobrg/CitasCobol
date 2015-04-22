@@ -5,7 +5,7 @@
 #include "analise.h"
 
 extern FILE * yyin;
-extern int contadorDeLinhas;
+extern int contLinhasC;
 
 %}
 
@@ -68,7 +68,7 @@ void main(int argc, char *argv[]){
 }
 
 yyerror(char *s){
-	printf("Erro encontrado na linha %d.\n", contadorDeLinhas);
+	printf("Erro encontrado na linha %d.\n", contLinhasC);
 }
 
 int yywrap(void)
