@@ -35,16 +35,17 @@ void init(int argc, char *argv[])
 {
 	char arq[20];
 
-	saidaCobol = NULL;
-	contLinhas = 0;
 
-	printf("informe o arquivo: ");
-	scanf("%s", arq);
-	
-	initIdDivision(arq);
+	if(argc < 2)
+	{
+		printf("Too few arguments.\n");
+		exit(1);
+	}
+
+	initIdDivision(argv[1]);
 
 
-	FILE * myfile = fopen(arq, "r");
+	FILE * myfile = fopen(argv[1], "r");
 
 	if(myfile)
 	{
