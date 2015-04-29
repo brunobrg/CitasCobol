@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "analise.h"
+#include "analise2.h"
 
 extern FILE * yyin;
 extern int contLinhasC;
