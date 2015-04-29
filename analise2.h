@@ -13,6 +13,7 @@ struct stat st = {0};
 typedef struct _Tokens
 {
 	/* 
+	CADEIA DE TOKENS QUE COMPOE 1 LINHA
     token: deve ter 30 posicoes, exceto se for quote;
     linha: deve ter 65 posicoes;
 	*/
@@ -23,6 +24,8 @@ typedef struct _Tokens
 typedef struct _SaidaCobol
 {
 	/* 
+	CADEIA DE LINHAS QUE COMPOE 1 ARQUIVO
+	numLinha: 1,2,3,....
     marcador: '*' para linha de comentario;
               ' ' para linha de comando;
               '-' para continuacao de linha;  
@@ -44,8 +47,9 @@ extern FILE * yyin;
 void init(int, char *[]);
 SaidaCobol * initIdDivision(SaidaCobol *,char *);
 SaidaCobol * initProcDivision(SaidaCobol *);
+SaidaCobol * inserirLinha(SaidaCobol *, char, Tokens *);
 Tokens * criaLinha();
-Tokens * inserirToken(Tokens *, char *);
+Tokens * inserirToken(Tokens *, char[]);
 void escreveArquivo(SaidaCobol *, char *);
 
 
@@ -78,7 +82,46 @@ void init(int argc, char *argv[])
 	}
 }
 
-void criaLinha()
+SaidaCobol * initIdDivision(SaidaCobol * saidaCobol, char * arq)
+{
+
+	char auxArq[strlen(arq)];
+	strcpy(auxArq, arq);
+
+	int i;
+	for(i = 2; auxArq[i] != '.' ;i++);
+		auxArq[i] = '\0';
+
+	char auxArqCob[strlen(auxArq + 4)];
+	strcat(auxArqCob,auxArq);
+	strcat(auxArqCob,".cob");
+
+	Tokens * linha = (Tokens *) malloc(sizeof(Tokens));
+	linha = inserirToken(linha, auxArqCob);
+	linha = inserirToken(linha, "C it as Cobol");
+	linha = inserirToken(linha, "FAQ example");
+	saidaCobol = inserirLinha(saidaCobol,'*',linha);
+
+	Tokens * linha2 = (Tokens *) malloc(sizeof(Tokens));
+	linha2 = inserirToken(linha2, "IDENTIFICATION DIVISION.");
+	saidaCobol = inserirLinha(saidaCobol,' ',linha2);
+
+	Tokens * linha3 = (Tokens *) malloc(sizeof(Tokens));
+    linha3 = inserirToken(linha3,"PROGRAM-ID.");
+	linha3 = inserirToken(linha3,auxArq);
+	linha3 = inserirToken(linha3,".");
+	saidaCobol = inserirLinha(saidaCobol,' ',linha3);
+
+}
+
+void initProcDivision()
+{
+	pulaLinha();
+	inserirToken(" PROCEDURE DIVISION.");
+	pulaLinha();
+}
+
+void inserirLinha()
 {
 	char str[10];
 	contLinhasCobol++;
@@ -89,34 +132,6 @@ void criaLinha()
 	inserirToken("00");
 }
 
-void initIdDivision(SaidaCobol saidaCobol, char * arq)
-{
-
-	char auxArq[strlen(arq)];
-	strcpy(auxArq, arq);
-	for(int i = 2; auxArq[i] != '.' ;i++);
-		auxArq[i] = '\0';
-
-	criaLinha();
-	inserirToken("* ");
-	inserirToken(auxArq);
-	inserirToken(".cob ");
-	inserirToken("C it as Cobol ");
-	inserirToken("FAQ example");
-	pulaLinha();
-	inserirToken(" IDENTIFICATION DIVISION.");
-	pulaLinha();
-	inserirToken(" PROGRAM-ID. ");
-	inserirToken(auxArq);
-	inserirToken(".");
-}
-
-void initProcDivision()
-{
-	pulaLinha();
-	inserirToken(" PROCEDURE DIVISION.");
-	pulaLinha();
-}
 
 Token * criaToken(char strAux[30])
 {
