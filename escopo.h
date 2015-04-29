@@ -98,11 +98,13 @@ void criaEscopo(char newName[40])
 	{
 		Escopo * add = addEscopo( newName, escopoAtual);
 		ListaDeEscopo * aux = listaDeEscopo;
-		ListaDeEscopo * addLista = listaDeEscopo;
+		ListaDeEscopo * newLista = addLista();
+		
 		while(aux->proximo != NULL)
 			aux = aux->proximo;
 
-		aux->escopo = add;
+		aux->proximo = newLista;
+		aux->proximo->escopo = add;
 	}
 	entraEscopo(add);
 }
@@ -112,7 +114,12 @@ void imprimeEscopos(ListaDeEscopo * aux)
 	int posLista = 1;
 	while(aux != NULL)
 	{
-		printf("posLista: %d, escopo.nome: %s\n", posLista, aux->escopo->nome);
+		printf("posLista: %d, ", posLista); 
+		if(aux->escopo != NULL)
+		{
+			printf("escopo.nome: %s\n", aux->escopo->nome);
+			printf("anterior? %s\n", aux->escopo->anterior->nome);
+		}
 		posLista += 1;
 		aux = aux->proximo;
 	}
