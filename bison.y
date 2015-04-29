@@ -23,9 +23,9 @@ extern int contadorDeLinhas;
 //novos
 %token INCLUDE   
 %token PVIRGULA LEFT_PAR RIGHT_PAR VIRGULA ASPAS ENDERECO
-%token ABRE_CHAVE FECHA_CHAVE RETURN ENDE 
-%token <strval> PRINTF SCANF VARUSE PALAVRA TEXTO
-%token MAIN error
+%token ABRE_CHAVE FECHA_CHAVE RETURN END 
+%token <strval> PRINTF SCANF VARUSE PALAVRA TEXTO MAIN
+%token  error
 
 %start Etapas
 
@@ -37,11 +37,11 @@ Etapas:
 
 
 Main:
-	TIPO MAIN {	initProcDivision(); } LEFT_PAR RIGHT_PAR Bloco {inserirSaidaCobol("     STOP RUN.\n\n");}
+	TIPO MAIN {	initProcDivision(); criaEscopo($2); } LEFT_PAR RIGHT_PAR Bloco {inserirSaidaCobol("     STOP RUN.\n\n");}
 	;
 
 Bloco:
-	| ABRE_CHAVE Comandos FECHA_CHAVE
+	| ABRE_CHAVE  Comandos FECHA_CHAVE
 	;
 
 Comandos:

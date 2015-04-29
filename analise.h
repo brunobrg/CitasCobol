@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
+#include "escopo.h"
 #define MAX 100
 
 /* structs */
@@ -19,7 +20,10 @@ typedef struct _SaidaCobol
 /* variaveis globais */
 int contLinhas;
 SaidaCobol * saidaCobol;
+extern Escopo * escopo;
+extern Escopo * escopoAtual;
 extern FILE * yyin;
+extern int idEscopo;
 
 /* prototipos */
 void init(int, char *[]);
@@ -31,9 +35,12 @@ void escreveArquivo(char[]);
 void pulaLinha();
 
 
+
 void init(int argc, char *argv[])
 {
 	char arq[20];
+	escopo = NULL;
+	idEscopo = 0;
 
 
 	if(argc < 2)
@@ -50,6 +57,7 @@ void init(int argc, char *argv[])
 	if(myfile)
 	{
 		yyin = myfile;
+		initEscopo();
 		yyparse();
 		printf("Analise terminada\n");
 		escreveArquivo(arq);
