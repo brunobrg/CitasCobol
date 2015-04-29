@@ -4,9 +4,14 @@ typedef struct _escopo
 	int id;
 	struct _s_declarados * s_declarados;
 	struct _s_usados * s_usados;
-	struct _escopo * proximo;
 	struct _escopo * anterior;
 }Escopo;
+
+typedef struct _listaDeEscopo
+{
+	struct _listaDeEscopo * proximo;
+	struct _escopo * escopo;
+}ListaDeEscopo;
 
 typedef struct _s_usados
 {
@@ -25,21 +30,34 @@ typedef struct s_declarados
 }S_declarados;
 
 
+
 void initEscopo();
 Escopo * addEscopo(char[40], Escopo *);
 void criaEscopo(char[40]);
-void entraEscopo(char[40]);
+void entraEscopo(Escopo *);
+ListaDeEscopo * addLista();
+void imprimeEscopos(ListaDeEscopo *);
+
+
 
 int idEscopo;
 Escopo * escopo;
 Escopo * escopoAtual;
+ListaDeEscopo * listaDeEscopo;
 
-
-void entraEscopo(char name[40])
+void entraEscopo(Escopo * temp)
 {
-	
+	escopoAtual = temp;	
 }
 
+ListaDeEscopo * addLista()
+{
+	ListaDeEscopo * addLista = (ListaDeEscopo*) malloc(sizeof(ListaDeEscopo));
+	addLista->proximo = NULL;
+	addLista->escopo = NULL;
+
+	return addLista;
+}
 
 Escopo * addEscopo(char newName[40], Escopo * atual)
 {
@@ -52,7 +70,6 @@ Escopo * addEscopo(char newName[40], Escopo * atual)
 		add->id = idEscopo;
 		add->s_declarados = atual->s_declarados;
 		add->s_usados = NULL;
-		add->proximo = NULL;
 		add->anterior = atual;
 	}
 	else
@@ -61,7 +78,6 @@ Escopo * addEscopo(char newName[40], Escopo * atual)
 		add->id = idEscopo;
 		add->s_declarados = NULL;
 		add->s_usados = NULL;
-		add->proximo = NULL;
 		add->anterior = NULL;
 	}
 
@@ -70,24 +86,42 @@ Escopo * addEscopo(char newName[40], Escopo * atual)
 
 void criaEscopo(char newName[40])
 {
-	Escopo * aux = escopo;
-	Escopo * add = addEscopo( newName, escopoAtual);
-
 	idEscopo+=1;
-
-	if(aux == NULL)
-		aux = add;
+	Escopo * add;
+	if(listaDeEscopo == NULL)
+	{
+		add = addEscopo(newName, NULL);
+		listaDeEscopo = addLista();
+		listaDeEscopo->escopo = add;
+	}
 	else
 	{
+		Escopo * add = addEscopo( newName, escopoAtual);
+		ListaDeEscopo * aux = listaDeEscopo;
+		ListaDeEscopo * addLista = listaDeEscopo;
 		while(aux->proximo != NULL)
 			aux = aux->proximo;
 
-		aux = add;
+		aux->escopo = add;
+	}
+	entraEscopo(add);
+}
+
+void imprimeEscopos(ListaDeEscopo * aux)
+{
+	int posLista = 1;
+	while(aux != NULL)
+	{
+		printf("posLista: %d, escopo.nome: %s\n", posLista, aux->escopo->nome);
+		posLista += 1;
+		aux = aux->proximo;
 	}
 }
 
 void initEscopo()
 {
-	escopo = addEscopo("global", NULL);
+	listaDeEscopo = NULL;
+	criaEscopo("global");
 
 }
+
