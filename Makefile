@@ -1,5 +1,5 @@
 all: removeold compilabison compilaflex compilac clean
-
+	
 removeold:
 	rm -rf ccobol
 compilabison: bison.y

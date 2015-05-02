@@ -1,7 +1,9 @@
-int main ()
+
+   int main ()
 {
-	printf("haha");
-	printf("AUEHUAHEUIHAHWE");
-	printf("Hello world tosco");
+	printf("thdksljnbhsgyrtgsdflvnk jhdgftwiu fjsodfjs fjsdpofdsjwq1");
+
+		printf("thdksljnbhsgyrtgsdflvnkjhdgftwiufjsodfjsdpofjsdpofdsjwq1");
+
 	return 0;
 }

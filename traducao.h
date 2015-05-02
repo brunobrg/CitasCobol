@@ -10,9 +10,10 @@
 typedef struct _TokenList
 {
 	/* 
-    Lista de tokens. Cada token deve ter 30 posicoes;
+    Lista de tokens. Cada token deve ter 30 posicoes,
+                     exceto se estiver entre aspas.
 	*/
-	char                token[31];
+	char              * token;
 	struct _TokenList * proximo;
 }TokenList;
 
@@ -48,7 +49,6 @@ SaidaCobol  * saidaCobol = NULL;
 
 /* prototipos */
 void         init(int, char * []);
-void         iniciarSaida();
 char       * nomeProgramaCob(char *);
 void         initIdDivision(char *);
 void         initProcDivision();
@@ -58,7 +58,7 @@ void         pularLinha();
 Linha      * criarLinhaA();
 Linha      * criarLinhaB();
 Linha      * criarComentario();
-void         inserirToken(Linha **, char[]);
+void         inserirToken(Linha **, char *);
 void         organizarSaida();
 char       * imprimirTL(TokenList *);
 void         escreverArquivo(char *);
@@ -80,13 +80,9 @@ void init(int argc, char *argv[])
 
 		char * nomePrograma = nomeProgramaCob(argv[1]);
 		initIdDivision(nomePrograma);
-	
-		/*
 
 		yyin = myfile;
 		yyparse();
-		printf("Analise terminada.\n");
-	    */
 
 	    organizarSaida();
 		escreverArquivo(nomePrograma);
@@ -113,17 +109,10 @@ char * nomeProgramaCob(char * argv)
     return strdup(auxArq);
 }
 
-void initIdDivision(char * arqC)
+void initIdDivision(char * arqCob)
 {
-	char nomeProg[strlen(arqC)];
-	strcpy(nomeProg,arqC);
-
-    int i;
-	for(i = 2; nomeProg[i] != '.' ;i++);
-        nomeProg[i] = '\0';
-
 	Linha * linha = criarComentario();
-	inserirToken(&linha, nomeProg);
+	inserirToken(&linha, arqCob);
 	inserirToken(&linha, "C it as Cobol");
 	inserirToken(&linha, "FAQ example.");
 	inserirSaida(linha);
@@ -132,9 +121,16 @@ void initIdDivision(char * arqC)
 	inserirToken(&linha2, "IDENTIFICATION DIVISION");
 	inserirSaida(linha2);
 
+	char nomeProg[strlen(arqCob)];
+	strcpy(nomeProg,arqCob);
+
+    int i;
+	for(i = 2; nomeProg[i] != '.' ;i++);
+        nomeProg[i] = '\0';
+
 	Linha * linha3 = criarLinhaA();
     inserirToken(&linha3, "PROGRAM-ID.");
-	inserirToken(&linha3, nomeProg);
+	inserirToken(&linha3, strdup(nomeProg));
 	inserirSaida(linha3); 
 
 }
@@ -231,12 +227,12 @@ Linha * criarComentario()
     return linha;
 }
 
-void inserirToken(Linha ** linha, char token[31])
+void inserirToken(Linha ** linha, char * token)
 {
 
     TokenList * novoTk = 
         (TokenList *) malloc(sizeof(TokenList));
-    strcpy(novoTk->token, token);
+    novoTk->token = token;
     novoTk->proximo = NULL;
 
     TokenList * cursor = (*linha)->texto;
@@ -304,9 +300,7 @@ char * imprimirTL(TokenList * TL)
 
 void escreverArquivo(char * arq)
 {
-	FILE * file;
-
-	file = fopen(arq, "w+");
+	FILE * file = fopen(arq, "w+");
 
     if(saidaCobol == NULL)
     {
@@ -317,7 +311,8 @@ void escreverArquivo(char * arq)
 
 	while(saidaCobol != NULL)
 	{
-		if(saidaCobol->linha->marcador == '*')
+		if((saidaCobol->linha->marcador == '*') || 
+			(saidaCobol->linha->texto == NULL))
 		{
 	        fprintf(file, "%06d%c%s\n", 
 	            saidaCobol->linha->numeracao,
