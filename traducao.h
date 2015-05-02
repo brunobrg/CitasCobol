@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
+#include "escopo.h"
 
 /* structs */
 typedef struct _TokenList
@@ -44,7 +45,10 @@ typedef struct _SaidaCobol
 }SaidaCobol;
 
 /* variaveis globais */
+extern Escopo * escopo;
+extern Escopo * escopoAtual;
 extern FILE * yyin;
+extern int idEscopo;
 SaidaCobol  * saidaCobol = NULL;
 
 /* prototipos */
@@ -73,6 +77,9 @@ void init(int argc, char *argv[])
 		exit(1);
 	}
 
+	escopo = NULL;
+	idEscopo = 0;
+
 	FILE * myfile = fopen(argv[1], "r");
   
 	if(myfile)
@@ -82,8 +89,10 @@ void init(int argc, char *argv[])
 		initIdDivision(nomePrograma);
 
 		yyin = myfile;
+	    initEscopo();
 		yyparse();
 
+        imprimeEscopos(listaDeEscopo);
 	    organizarSaida();
 		escreverArquivo(nomePrograma);
 	}

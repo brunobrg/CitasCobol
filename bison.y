@@ -4,7 +4,6 @@
 #include <string.h>
 #include "traducao.h"
 
-
 extern FILE * yyin;
 extern int contLinhasC;
 
