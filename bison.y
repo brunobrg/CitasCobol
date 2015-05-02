@@ -2,10 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "analise2.h"
+#include "traducao.h"
+
 
 extern FILE * yyin;
-extern int contadorDeLinhas;
+extern int contLinhasC;
 
 %}
 
@@ -31,35 +32,47 @@ extern int contadorDeLinhas;
 
 %%
 
-Etapas: 
-	Main
+Etapas 
+	: Main
 	;
 
+Main
+    : TIPO MAIN Argumentos 
+      {initProcDivision();criaEscopo($2);}  
+      Bloco
+      {fechaMain();}
+    ;
 
-Main:
-	TIPO MAIN {	initProcDivision(); criaEscopo($2); } LEFT_PAR RIGHT_PAR Bloco {inserirSaidaCobol("     STOP RUN.\n\n");}
-	;
+Argumentos
+    : LEFT_PAR RIGHT_PAR
+    ;
 
-Bloco:
-	| ABRE_CHAVE  Comandos FECHA_CHAVE
-	;
+Bloco
+    : ABRE_CHAVE FECHA_CHAVE
+    | ABRE_CHAVE Comandos FECHA_CHAVE
+    ;
 
-Comandos:
+Comandos
+    :
 	| Linha_Comando Comandos
 	;
 
-Linha_Comando:
-	Comando PVIRGULA {pulaLinha();}
+Linha_Comando
+    : Comando PVIRGULA
 	;
 
-Comando:
-	Printf 
+Comando
+    : Printf 
 	| RETURN NUMBER;
 	;
 
-
-Printf:
-	PRINTF {inserirSaidaCobol("     DISPLAY ");} LEFT_PAR TEXTO  { inserirSaidaCobol($4); inserirSaidaCobol(".");} RIGHT_PAR
+Printf
+    : PRINTF LEFT_PAR TEXTO RIGHT_PAR 
+      { Linha * linha = criarLinhaB();
+        inserirToken(&linha, "DISPLAY");
+        inserirToken(&linha, $3);
+        inserirSaida(linha);
+      }
 	;
 %%
 
@@ -68,7 +81,7 @@ void main(int argc, char *argv[]){
 }
 
 yyerror(char *s){
-	printf("Erro encontrado na linha %d.\n", contadorDeLinhas);
+	printf("Erro encontrado na linha %d.\n", contLinhasC);
 }
 
 int yywrap(void)
