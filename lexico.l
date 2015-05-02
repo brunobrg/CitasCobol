@@ -13,8 +13,6 @@ DIGIT		[0-9]
 
 ASPAS [\"]
 
-
-
 %% /*REGRAS:*/
 "\n"					{contLinhasC++;}
 ";"						return PVIRGULA;

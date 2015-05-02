@@ -5,52 +5,63 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
-#define MAX 100
 
 /* structs */
-struct stat st = {0};
-
-typedef struct _Tokens
+typedef struct _TokenList
 {
 	/* 
-	CADEIA DE TOKENS QUE COMPOE 1 LINHA
-    token: deve ter 30 posicoes, exceto se for quote;
-    linha: deve ter 65 posicoes;
+    Lista de tokens. Cada token deve ter 30 posicoes;
 	*/
-	char * token;
-	struct _Tokens * proximo;
-}Tokens;
+	char                token[31];
+	struct _TokenList * proximo;
+}TokenList;
+
+typedef struct _Linha
+{
+	/* 
+	numeracao: 1,2,3,....
+    marcador: '*' para linha de comentario;
+              ' ' para linha de comando;
+              '-' para continuacao de linha;  
+    texto: lista de tokens.
+	*/
+    int         numeracao;
+    char        marcador;
+	TokenList * texto;  
+	
+}Linha;
 
 typedef struct _SaidaCobol
 {
 	/* 
-	CADEIA DE LINHAS QUE COMPOE 1 ARQUIVO
-	numLinha: 1,2,3,....
-    marcador: '*' para linha de comentario;
-              ' ' para linha de comando;
-              '-' para continuacao de linha;  
-    linha: lista de tokens. Deve ter 65 posicoes;
-	*/
-	int     numLinha;
-    char    marcador;
-	Tokens * linha;  
+    Lista duplamente encadeada de linhas.
+    Forma o texto do arquivo de saida.
+    */
+	Linha              * linha;
 	struct _SaidaCobol * anterior;
 	struct _SaidaCobol * proximo;
 }SaidaCobol;
 
 /* variaveis globais */
-int contLinhasCobol;
-SaidaCobol * saidaCobol;
 extern FILE * yyin;
+SaidaCobol  * saidaCobol = NULL;
 
 /* prototipos */
-void init(int, char *[]);
-SaidaCobol * initIdDivision(SaidaCobol *,char *);
-SaidaCobol * initProcDivision(SaidaCobol *);
-SaidaCobol * inserirLinha(SaidaCobol *, char, Tokens *);
-Tokens * criaLinha();
-Tokens * inserirToken(Tokens *, char[]);
-void escreveArquivo(SaidaCobol *, char *);
+void         init(int, char * []);
+void         iniciarSaida();
+char       * nomeProgramaCob(char *);
+void         initIdDivision(char *);
+void         initProcDivision();
+void         fechaMain();
+void         inserirSaida(Linha *);
+void         pularLinha();
+Linha      * criarLinhaA();
+Linha      * criarLinhaB();
+Linha      * criarComentario();
+void         inserirToken(Linha **, char[]);
+void         organizarSaida();
+char       * imprimirTL(TokenList *);
+void         escreverArquivo(char *);
 
 
 void init(int argc, char *argv[])
@@ -62,120 +73,265 @@ void init(int argc, char *argv[])
 		exit(1);
 	}
 
-	saidaCobol = initIdDivision(saidaCobol, argv[1]);
-
-
 	FILE * myfile = fopen(argv[1], "r");
-
+  
 	if(myfile)
 	{
+
+		char * nomePrograma = nomeProgramaCob(argv[1]);
+		initIdDivision(nomePrograma);
+	
+		/*
+
 		yyin = myfile;
 		yyparse();
-		printf("Analise terminada\n");
-		escreveArquivo(saidaCobol,argv[1]);
+		printf("Analise terminada.\n");
+	    */
+
+	    organizarSaida();
+		escreverArquivo(nomePrograma);
 	}
 	else
 	{
-		printf("arquivo nao encontrado. Abortando...");
+		printf("Arquivo nao encontrado. Abortando...");
 		scanf("%*c");
 		exit(1);
 	}
 }
 
-SaidaCobol * initIdDivision(SaidaCobol * saidaCobol, char * arq)
+char * nomeProgramaCob(char * argv)
 {
-
-	char auxArq[strlen(arq)];
-	strcpy(auxArq, arq);
+	int tamanho = strlen(argv) + 4;
+	char auxArq[tamanho];
+	strcpy(auxArq, argv);
 
 	int i;
 	for(i = 2; auxArq[i] != '.' ;i++);
-		auxArq[i] = '\0';
+        auxArq[i] = '\0';
 
-	char auxArqCob[strlen(auxArq + 4)];
-	strcat(auxArqCob,auxArq);
-	strcat(auxArqCob,".cob");
+	strcat(auxArq,".cob");
+    return strdup(auxArq);
+}
 
-	Tokens * linha = (Tokens *) malloc(sizeof(Tokens));
-	linha = inserirToken(linha, auxArqCob);
-	linha = inserirToken(linha, "C it as Cobol");
-	linha = inserirToken(linha, "FAQ example");
-	saidaCobol = inserirLinha(saidaCobol,'*',linha);
+void initIdDivision(char * arqC)
+{
+	char nomeProg[strlen(arqC)];
+	strcpy(nomeProg,arqC);
 
-	Tokens * linha2 = (Tokens *) malloc(sizeof(Tokens));
-	linha2 = inserirToken(linha2, "IDENTIFICATION DIVISION.");
-	saidaCobol = inserirLinha(saidaCobol,' ',linha2);
+    int i;
+	for(i = 2; nomeProg[i] != '.' ;i++);
+        nomeProg[i] = '\0';
 
-	Tokens * linha3 = (Tokens *) malloc(sizeof(Tokens));
-    linha3 = inserirToken(linha3,"PROGRAM-ID.");
-	linha3 = inserirToken(linha3,auxArq);
-	linha3 = inserirToken(linha3,".");
-	saidaCobol = inserirLinha(saidaCobol,' ',linha3);
+	Linha * linha = criarComentario();
+	inserirToken(&linha, nomeProg);
+	inserirToken(&linha, "C it as Cobol");
+	inserirToken(&linha, "FAQ example.");
+	inserirSaida(linha);
+    
+	Linha * linha2 = criarLinhaA();
+	inserirToken(&linha2, "IDENTIFICATION DIVISION");
+	inserirSaida(linha2);
+
+	Linha * linha3 = criarLinhaA();
+    inserirToken(&linha3, "PROGRAM-ID.");
+	inserirToken(&linha3, nomeProg);
+	inserirSaida(linha3); 
 
 }
 
 void initProcDivision()
 {
-	pulaLinha();
-	inserirToken(" PROCEDURE DIVISION.");
-	pulaLinha();
+    pularLinha();
+
+	Linha * linha = criarLinhaA();
+    inserirToken(&linha,"PROCEDURE DIVISION");
+	inserirSaida(linha);
+
+	pularLinha();
 }
 
-void inserirLinha()
+void fechaMain()
 {
-	char str[10];
-	contLinhasCobol++;
-	if(contLinhasCobol > 1)
-		inserirSaidaCobol("\n");
-	sprintf(str, "%04d", contLinhasCobol);
-	inserirToken(str);
-	inserirToken("00");
+    pularLinha();
+
+	Linha * linha = criarLinhaB();
+    inserirToken(&linha,"STOP RUN");
+	inserirSaida(linha);
+
+    Linha * linha2 = criarLinhaB();
+    inserirToken(&linha2,"EXIT");
+	inserirSaida(linha2);
+
 }
 
 
-Token * criaToken(char strAux[30])
+void inserirSaida(Linha * linha)
 {
-    Token * add = (Token*) malloc(sizeof(Token));
-    strcpy(add->palavra, strAux);
-    add->proximo == NULL;
-    return add;
-}
 
-void inserirToken(char strAux[30])
-{
-	Token * aux = addToken(strAux);
+	SaidaCobol * novoElemento =
+	    (SaidaCobol *) malloc(sizeof(SaidaCobol));
+	novoElemento->linha = linha;
+	novoElemento->proximo = NULL;
+    
+    if(saidaCobol == NULL)
+    {
+    	saidaCobol = novoElemento;
+        saidaCobol->anterior = NULL;
 
-	if(token == NULL)
-	{
-		token = aux;
+    }
+    else 
+    {
+    	SaidaCobol * cursor = saidaCobol;
+
+	    while (cursor->proximo != NULL)
+	    {
+		    cursor = cursor->proximo;
+	    }
+	    cursor->proximo = novoElemento;
+	    novoElemento->anterior = cursor;
 	}
-	else
+
+}
+
+void pularLinha()
+{
+
+	Linha * linha = criarLinhaA(linha);
+	inserirSaida(linha);
+
+}
+
+Linha * criarLinhaA()
+{
+    Linha * linha = (Linha *) malloc(sizeof(Linha));
+    linha->numeracao = 0;
+    linha->marcador = ' ';
+    linha->texto = NULL;
+    return linha;
+}
+
+
+Linha * criarLinhaB()
+{
+    Linha * linha = (Linha *) malloc(sizeof(Linha));
+    linha->numeracao = 0;
+    linha->marcador = ' ';
+    linha->texto = NULL;
+    inserirToken(&linha,"    ");
+    return linha;
+
+}
+
+Linha * criarComentario()
+{
+    Linha * linha = (Linha *) malloc(sizeof(Linha));
+    linha->numeracao = 0;
+    linha->marcador = '*';
+    linha->texto = NULL;
+    return linha;
+}
+
+void inserirToken(Linha ** linha, char token[31])
+{
+
+    TokenList * novoTk = 
+        (TokenList *) malloc(sizeof(TokenList));
+    strcpy(novoTk->token, token);
+    novoTk->proximo = NULL;
+
+    TokenList * cursor = (*linha)->texto;
+
+    if(cursor == NULL)
+    {
+        (*linha)->texto = novoTk;
+    }
+    else
+    {
+    	Linha * guardaLinha = *linha;
+
+        while (cursor->proximo != NULL)
+	    {
+		    cursor = cursor->proximo;
+	    }
+        cursor->proximo = novoTk;
+
+        *linha = guardaLinha;
+    }
+
+}
+
+void organizarSaida()
+{
+	if(saidaCobol == NULL)
+    {
+		printf("%s\n", "Saida em branco.");
+		scanf("%*c");
+		exit(1);
+    }
+
+    SaidaCobol * cursor = saidaCobol;
+	int i = 1;
+
+	while(cursor != NULL)
 	{
-		Token * aux2 = token;
-		while(aux2->proximo != NULL)
+		cursor->linha->numeracao = i;
+        i++;
+	    cursor = cursor->proximo;
+	}
+
+}
+
+char * imprimirTL(TokenList * TL)
+{
+	char saida[65] = "";
+
+	if(TL != NULL)
+	{
+		TokenList * cursor = TL;
+	    strcat(saida,cursor->token);
+
+		while(cursor->proximo != NULL)
 		{
-			aux2 = aux2->proximo;
+			strcat(saida," ");
+			strcat(saida,cursor->proximo->token);
+			cursor = cursor->proximo;
 		}
-		aux2->proximo = aux;
 	}
+
+    return strdup(saida);
+
 }
 
-void escreveArquivo(char arq[30])
+void escreverArquivo(char * arq)
 {
-	int i = 0;
 	FILE * file;
-	Token * aux = token;
-
-	for(i = 2; arq[i] != '.' ;i++);
-		arq[i] = '\0';
-	strcat(arq, ".cob");
 
 	file = fopen(arq, "w+");
 
-	while(aux != NULL)
+    if(saidaCobol == NULL)
+    {
+		printf("%s\n", "Saida em branco.");
+		scanf("%*c");
+		exit(1);
+    }
+
+	while(saidaCobol != NULL)
 	{
-		fprintf(file, "%s", aux->palavra);
-		aux = aux->proximo;
+		if(saidaCobol->linha->marcador == '*')
+		{
+	        fprintf(file, "%06d%c%s\n", 
+	            saidaCobol->linha->numeracao,
+	            saidaCobol->linha->marcador,
+	            imprimirTL(saidaCobol->linha->texto));
+	    }
+	    else
+	    {
+	    	fprintf(file, "%06d%c%s.\n", 
+	            saidaCobol->linha->numeracao,
+	            saidaCobol->linha->marcador,
+	            imprimirTL(saidaCobol->linha->texto));
+	    }
+	    saidaCobol = saidaCobol->proximo;
 	}
 
 	fclose(file);

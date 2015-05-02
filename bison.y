@@ -31,35 +31,48 @@ extern int contLinhasC;
 
 %%
 
-Etapas: 
-	Main
+Etapas 
+	: Main
 	;
 
 
-Main:
-	TIPO MAIN {	initProcDivision(); } LEFT_PAR RIGHT_PAR Bloco {inserirSaidaCobol("     STOP RUN.\n\n");}
+Main
+    : TIPO MAIN Argumentos 
+	  {initProcDivision();}  
+	  Bloco
+	  {fechaMain();}
 	;
 
-Bloco:
-	| ABRE_CHAVE Comandos FECHA_CHAVE
+Argumentos
+    : LEFT_PAR RIGHT_PAR
+    ;
+
+Bloco
+    : ABRE_CHAVE FECHA_CHAVE
+    | ABRE_CHAVE Comandos FECHA_CHAVE
 	;
 
-Comandos:
+Comandos
+    :
 	| Linha_Comando Comandos
 	;
 
-Linha_Comando:
-	Comando PVIRGULA {pulaLinha();}
+Linha_Comando
+    : Comando PVIRGULA
 	;
 
-Comando:
-	Printf 
+Comando
+    : Printf 
 	| RETURN NUMBER;
 	;
 
-
-Printf:
-	PRINTF {inserirSaidaCobol("     DISPLAY ");} LEFT_PAR TEXTO  { inserirSaidaCobol($4); inserirSaidaCobol(".");} RIGHT_PAR
+Printf
+    : PRINTF LEFT_PAR TEXTO RIGHT_PAR 
+      { Linha * linha = criarLinhaB();
+        inserirToken(&linha, "DISPLAY");
+        inserirToken(&linha, $3);
+        inserirSaida(linha);
+      }
 	;
 %%
 
