@@ -34,7 +34,7 @@ Etapas
 
 Main
     : TIPO MAIN Argumentos 
-      {initProcDivision($2); criaEscopo($2);}  
+      {initProcDivision($2);}  
       Bloco
       {fechaMain(); saiEscopo();}
     ;

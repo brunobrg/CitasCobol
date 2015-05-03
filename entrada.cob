@@ -4,7 +4,7 @@
 000004 
 000005 PROCEDURE DIVISION.
 000006 
-000007     DISPLAY "tok\A" "tokB".
+000007     DISPLAY "haha" "AUEHUAHEUIHAHWE" "Hello world tosco" "tok\A" "tokB".
 000008     DISPLAY "tokD".
 000009     DISPLAY "kjdsfhksj\\sdflksd".
 000010     DISPLAY "tokC" "tokD" "tokC\E" "tokF".
