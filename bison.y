@@ -37,7 +37,7 @@ Etapas:
 
 
 Main:
-	TIPO MAIN {	initProcDivision(); criaEscopo($2); } LEFT_PAR RIGHT_PAR Bloco {inserirSaidaCobol("     STOP RUN.\n\n");}
+	TIPO MAIN {	initProcDivision(); criaEscopo($2); } LEFT_PAR RIGHT_PAR Bloco {inserirSaidaCobol("     STOP RUN.\n\n"); saiEscopo();}
 	;
 
 Bloco:
@@ -54,7 +54,12 @@ Linha_Comando:
 
 Comando:
 	Printf 
+	| Declaracao
 	| RETURN NUMBER;
+	;
+
+Declaracao:
+	TIPO PALAVRA {adicionaSimbolo(escopoAtual, "declarada", $1, $2);}
 	;
 
 

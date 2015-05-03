@@ -1,6 +1,6 @@
 //ignoring compilation files
 *.c
-
+*.anjuta
 //ignoreing temp files
 *~
 *.c~

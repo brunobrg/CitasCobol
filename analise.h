@@ -60,7 +60,8 @@ void init(int argc, char *argv[])
 		initEscopo();
 		yyparse();
 		printf("Analise terminada\n");
-		imprimeEscopos(listaDeEscopo);
+		//imprimeEscopos(listaDeEscopo);
+		imprimeSimbolos(listaDeEscopo);
 		escreveArquivo(arq);
 	}
 	else
