@@ -93,7 +93,9 @@ void init(int argc, char *argv[])
 		yyin = myfile;
 	    initEscopo();
 		yyparse();
-        imprimeEscopos(listaDeEscopo);
+        //imprimeEscopos(listaDeEscopo);
+        imprimeSimbolos(listaDeEscopo);
+
 
 	    organizarSaida();
 		escreverArquivo(nomePrograma);
