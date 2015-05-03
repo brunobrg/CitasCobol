@@ -1,8 +1,5 @@
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "traducao.h"
+#include "comandos.h"
 
 extern FILE * yyin;
 extern int contLinhasC;
@@ -37,7 +34,7 @@ Etapas
 
 Main
     : TIPO MAIN Argumentos 
-      {initProcDivision();criaEscopo($2);}  
+      {initProcDivision($2);}  
       Bloco
       {fechaMain();}
     ;
@@ -67,11 +64,7 @@ Comando
 
 Printf
     : PRINTF LEFT_PAR TEXTO RIGHT_PAR 
-      { Linha * linha = criarLinhaB();
-        inserirToken(&linha, "DISPLAY");
-        inserirToken(&linha, $3);
-        inserirSaida(linha);
-      }
+      { imprimir($3); }
 	;
 %%
 
@@ -81,6 +74,7 @@ void main(int argc, char *argv[]){
 
 yyerror(char *s){
 	printf("Erro encontrado na linha %d.\n", contLinhasC);
+  printf("%s.\n",s);
 }
 
 int yywrap(void)
