@@ -65,7 +65,17 @@ Comando:
 	;
 
 Atribuicao:
-	PALAVRA ATRIBUI NUMBER SOMA NUMBER {}
+	PALAVRA ATRIBUI NUMBER SOMA NUMBER 
+	{		
+		Linha * linha = criarLinhaB();
+		inserirToken(&linha, "COMPUTE");
+		inserirToken(&linha, $1);
+		inserirToken(&linha, "=");
+		inserirToken(&linha, $3);
+		inserirToken(&linha, "+");
+		inserirToken(&linha, $5);
+		inserirSaida(linha);
+	}
 	;
 
 Declaracao:

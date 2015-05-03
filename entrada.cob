@@ -14,7 +14,8 @@
 000014     DISPLAY "haha" "AUEHUAHEUIHAHWE" "Hello world tosco" "tok\A" "tokB".
 000015     DISPLAY "tokD".
 000016     DISPLAY "kjdsfhksj\\sdflksd".
-000017     DISPLAY "tokC" "tokD" "tokC\E" "tokF".
-000018 
-000019     STOP RUN.
-000020     EXIT.
+000017     COMPUTE x = 3 + 2.
+000018     DISPLAY "tokC" "tokD" "tokC\E" "tokF".
+000019 
+000020     STOP RUN.
+000021     EXIT.
