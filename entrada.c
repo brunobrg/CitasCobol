@@ -3,7 +3,7 @@ int main ()
 	printf("haha");
 	printf("AUEHUAHEUIHAHWE");
 	printf("Hello world tosco");
-	int x = 100;
+	int x;
 	float y;
 	int z;
 	int vlvvflvv;
@@ -11,6 +11,8 @@ int main ()
 	printf("tokB\ntokD\nkjdsfhksj\\sdflksd\n");
 	printf("tokC");
 		printf("tokD");
+
+	x = 3 + 2;
 
 	printf("tokC\E");
 

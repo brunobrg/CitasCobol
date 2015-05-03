@@ -60,7 +60,12 @@ Linha_Comando
 Comando:
 	Printf 
 	| Declaracao
+	| Atribuicao
 	| RETURN NUMBER;
+	;
+
+Atribuicao:
+	PALAVRA ATRIBUI NUMBER SOMA NUMBER {}
 	;
 
 Declaracao:
