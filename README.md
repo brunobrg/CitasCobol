@@ -16,10 +16,10 @@ O ccobol, ao receber um código em C válido, dentro de seu escopo, deve gerar u
 
 ## Entregas
 
-      DATA     |             RELEASE
+      DATA     |            RELEASE
 ---------------|------------------------------
 ~~06/04/2015~~ | ~~Release 0 - "Hello,world"~~
-~~04/05/2015~~ |       ~~Release 1 ~~
+~~04/05/2015~~ |       ~~Release 1~~
 08/06/2015     |         Release 2 
 29/06/2015     |   Release 3 - "Stop Run"
 
