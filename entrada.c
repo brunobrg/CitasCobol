@@ -1,16 +1,7 @@
 int main ()
 {
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-	printf("12345678901234567890123456hjhgjhgjhgjhghghjghjghjgjhgjhgj");
-=======
-	printf("haha");
-	printf("AUEHUAHEUIHAHWE");
-	printf("Hello world tosco");
-=======
 
->>>>>>> r1-bp
 	int x;
 	float y;
 	int z;
@@ -25,7 +16,6 @@ int main ()
 	printf("tokC\E");
 
 	printf("tokF");
->>>>>>> r1-bp
 
 	return 0;
 }
