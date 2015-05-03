@@ -1,11 +1,8 @@
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "analise.h"
+#include "comandos.h"
 
 extern FILE * yyin;
-extern int contadorDeLinhas;
+extern int contLinhasC;
 
 %}
 
@@ -31,25 +28,33 @@ extern int contadorDeLinhas;
 
 %%
 
-Etapas: 
-	Main
+Etapas 
+	: Main
 	;
 
+Main
+    : TIPO MAIN Argumentos 
+      {initProcDivision($2); criaEscopo($2);}  
+      Bloco
+      {fechaMain(); saiEscopo();}
+    ;
 
-Main:
-	TIPO MAIN {	initProcDivision(); criaEscopo($2); } LEFT_PAR RIGHT_PAR Bloco {inserirSaidaCobol("     STOP RUN.\n\n"); saiEscopo();}
-	;
+Argumentos
+    : LEFT_PAR RIGHT_PAR
+    ;
 
-Bloco:
-	| ABRE_CHAVE  Comandos FECHA_CHAVE
-	;
+Bloco
+    : ABRE_CHAVE FECHA_CHAVE
+    | ABRE_CHAVE Comandos FECHA_CHAVE
+    ;
 
-Comandos:
+Comandos
+    :
 	| Linha_Comando Comandos
 	;
 
-Linha_Comando:
-	Comando PVIRGULA {pulaLinha();}
+Linha_Comando
+    : Comando PVIRGULA
 	;
 
 Comando:
@@ -62,10 +67,12 @@ Declaracao:
 	TIPO PALAVRA {adicionaSimbolo(escopoAtual, "declarada", $1, $2);}
 	;
 
-
-Printf:
-	PRINTF {inserirSaidaCobol("     DISPLAY ");} LEFT_PAR TEXTO  { inserirSaidaCobol($4); inserirSaidaCobol(".");} RIGHT_PAR
+Printf
+    : PRINTF LEFT_PAR TEXTO RIGHT_PAR 
+      { imprimir($3); }
 	;
+
+
 %%
 
 void main(int argc, char *argv[]){
@@ -73,7 +80,8 @@ void main(int argc, char *argv[]){
 }
 
 yyerror(char *s){
-	printf("Erro encontrado na linha %d.\n", contadorDeLinhas);
+	printf("Erro encontrado na linha %d.\n", contLinhasC);
+  printf("%s.\n",s);
 }
 
 int yywrap(void)

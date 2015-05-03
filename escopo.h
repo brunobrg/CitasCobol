@@ -1,3 +1,4 @@
+/* structs */
 typedef struct _escopo
 {
 	char nome[40];
@@ -20,8 +21,13 @@ typedef struct _simbolos
 	struct _simbolos * proximo; 
 }Simbolos;
 
+/* variaveis globais */
+int idEscopo;
+Escopo * escopo;
+Escopo * escopoAtual;
+ListaDeEscopo * listaDeEscopo;
 
-
+/* prototipos */
 void initEscopo();
 Escopo * addEscopo(char[40], Escopo *);
 void criaEscopo(char[40]);
@@ -29,6 +35,7 @@ void saiEscopo();
 void entraEscopo(Escopo *);
 ListaDeEscopo * addLista();
 void imprimeEscopos(ListaDeEscopo *);
+
 
 //Simbolos
 void adicionaSimbolo(Escopo * , char[40] , char[40], char[40]);
@@ -40,6 +47,8 @@ Escopo * escopo;
 Escopo * escopoAtual;
 ListaDeEscopo * listaDeEscopo;
 
+
+/* implementacao */
 void entraEscopo(Escopo * temp)
 {
 	escopoAtual = temp;	
