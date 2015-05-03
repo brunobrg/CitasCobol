@@ -18,14 +18,9 @@ typedef struct _simbolos
 {
 	char tipo[6];
 	char nome[15];
+	char * value;
 	struct _simbolos * proximo; 
 }Simbolos;
-
-/* variaveis globais */
-int idEscopo;
-Escopo * escopo;
-Escopo * escopoAtual;
-ListaDeEscopo * listaDeEscopo;
 
 /* prototipos */
 void initEscopo();
@@ -41,11 +36,11 @@ void imprimeEscopos(ListaDeEscopo *);
 void adicionaSimbolo(Escopo * , char[40] , char[40], char[40]);
 
 
-
 int idEscopo;
 Escopo * escopo;
 Escopo * escopoAtual;
 ListaDeEscopo * listaDeEscopo;
+Simbolos * listaDeVariaveis;
 
 
 /* implementacao */
@@ -138,6 +133,7 @@ void saiEscopo()
 
 void initEscopo()
 {
+	listaDeVariaveis = NULL;
 	listaDeEscopo = NULL;
 	criaEscopo("global");
 
@@ -150,6 +146,26 @@ Simbolos * addSimbolo(char tipo[40], char nome[40])
 	strcpy(add->tipo, tipo);
 	strcpy(add->nome, nome);
 	add->proximo = NULL;
+	add->value = NULL;
+}
+
+void valorSimbolo(Escopo * escTemp, char tipo[40], char nomeSimbolo[40], char * valor)
+{
+	if(escTemp != NULL)
+	{
+		Simbolos * aux = escTemp->s_declarados;
+		while(aux != NULL)
+		{
+			if(!strcmp(aux->nome, nomeSimbolo) && !strcmp(aux->tipo, tipo))
+			{
+				aux->value = valor;
+				printf("\nEncontrou!\n %s = %s\n", aux->nome, aux->value);
+				return;
+			}
+
+			aux = aux->proximo;
+		}
+	}
 }
 
 void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], char nomeSimbolo[40])
@@ -172,6 +188,20 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], char nomeSim
 					aux = aux->proximo;
 
 				aux->proximo = add;
+			}
+
+			Simbolos * add2 = addSimbolo(tipo, nomeSimbolo);
+
+			if(listaDeVariaveis == NULL)
+				listaDeVariaveis = add2;
+			else
+			{
+				Simbolos * aux2 = listaDeVariaveis;
+				
+				while(aux2->proximo!= NULL)
+					aux2 = aux2->proximo;
+
+				aux2->proximo = add2;
 			}
 
 		}

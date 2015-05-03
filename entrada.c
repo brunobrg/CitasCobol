@@ -3,8 +3,8 @@ int main ()
 	printf("haha");
 	printf("AUEHUAHEUIHAHWE");
 	printf("Hello world tosco");
-	int x;
-	int y;
+	int x = 100;
+	float y;
 	int z;
 	int vlvvflvv;
 	printf("tok\A");

@@ -65,6 +65,7 @@ Comando:
 
 Declaracao:
 	TIPO PALAVRA {adicionaSimbolo(escopoAtual, "declarada", $1, $2);}
+	| TIPO PALAVRA ATRIBUI NUMBER { adicionaSimbolo(escopoAtual, "declarada", $1, $2); valorSimbolo(escopoAtual, $1, $2, $4);}
 	;
 
 Printf
