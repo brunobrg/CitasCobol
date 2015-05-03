@@ -1,8 +1,6 @@
 int main ()
 {
-	printf("haha");
-	printf("AUEHUAHEUIHAHWE");
-	printf("Hello world tosco");
+
 	int x;
 	float y;
 	int z;
