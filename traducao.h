@@ -174,6 +174,11 @@ void initProcDivision(char * argmain)
 
 	pularLinha();
 
+    Linha * linha2 = criarLinhaA();
+    inserirToken(&linha2,"000000-MAIN");
+    inserirToken(&linha2,"SECTION");
+	inserirSaida(linha2);
+
 	criaEscopo(argmain);
 }
 
@@ -187,9 +192,13 @@ void fechaMain()
     inserirToken(&linha,"STOP RUN");
 	inserirSaida(linha);
 
-    Linha * linha2 = criarLinhaB();
-    inserirToken(&linha2,"EXIT");
+	Linha * linha2 = criarLinhaB();
+    inserirToken(&linha2,"000000-EXIT");
 	inserirSaida(linha2);
+
+    Linha * linha3 = criarLinhaB();
+    inserirToken(&linha3,"EXIT");
+	inserirSaida(linha3);
 
 }
 
@@ -431,7 +440,7 @@ void initDataDivision()
 			{
 				inserirToken(&linha, "01");
 				inserirToken(&linha, aux->nome);
-				inserirToken(&linha, "PIC S9(39)V9(38");
+				inserirToken(&linha, "PIC S9(18)V9(18)");
 			}
 			
 			if(aux->value != NULL)
