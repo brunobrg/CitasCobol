@@ -45,6 +45,7 @@ typedef struct _SaidaCobol
 }SaidaCobol;
 
 /* variaveis globais */
+extern ListaDeEscopo * listaDeEscopo;
 extern Simbolos * listaDeVariaveis;
 extern Escopo * escopo;
 extern Escopo * escopoAtual;
@@ -71,7 +72,7 @@ void         organizarSaida();
 void         limparPrintBuff();
 char       * imprimirTL(TokenList *);
 void         escreverArquivo(char *);
-
+void		 escreverErro(char *);
 /* implementacao */
 void init(int argc, char *argv[])
 {
@@ -100,8 +101,15 @@ void init(int argc, char *argv[])
        	initDataDivision();
        
 
-	    organizarSaida();
-		escreverArquivo(nomePrograma);
+       	if(verificaLista(listaDeEscopo) || 1)
+       	{
+		    organizarSaida();
+			escreverArquivo(nomePrograma);
+		}
+		else
+		{
+			escreverErro(nomePrograma);
+		}
 	}
 	else
 	{
@@ -322,6 +330,16 @@ char * imprimirTL(TokenList * TL)
     return strdup(saida);
 
 }
+
+void escreverErro(char * arq)
+{
+	FILE * file = fopen(arq, "w+");
+
+    fprintf(file, "Erro no arquivo, por favor arrumar os erros.");
+
+	fclose(file);
+}
+
 
 void escreverArquivo(char * arq)
 {
