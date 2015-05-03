@@ -13,3 +13,13 @@ O ccobol, ao receber um código em C válido, dentro de seu escopo, deve gerar u
 * Seja preferencialmente executável pelo gnuCobol;
 * Preze pela clareza do código.
 * Ao ser compilado, gere um executável cujos outputs sejam os mesmos outputs do executável gerado pelo gcc para o código C de entrada, dado que os inputs sejam também os mesmos. Nos casos em que houver divergência de outputs, essa divergência deve ser razoável e, preferencialmente, prevista.
+
+## Entregas
+
+      DATA     |             RELEASE
+---------------|------------------------------
+~~06/04/2015~~ | ~~Release 0 - "Hello,world"~~
+~~04/05/2015~~ |       ~~Release 1 ~~
+08/06/2015     |         Release 2 
+29/06/2015     |   Release 3 - "Stop Run"
+
