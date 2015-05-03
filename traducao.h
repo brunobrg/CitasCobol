@@ -49,13 +49,14 @@ extern Escopo * escopo;
 extern Escopo * escopoAtual;
 extern FILE * yyin;
 extern int idEscopo;
-SaidaCobol  * saidaCobol = NULL;
+SaidaCobol * saidaCobol = NULL;
 
 /* prototipos */
 void         init(int, char * []);
 char       * nomeProgramaCob(char *);
 void         initIdDivision(char *);
 void         initProcDivision();
+void         initPrintBuff();
 void         fechaMain();
 void         inserirSaida(Linha *);
 void         pularLinha();
@@ -64,10 +65,11 @@ Linha      * criarLinhaB();
 Linha      * criarComentario();
 void         inserirToken(Linha **, char *);
 void         organizarSaida();
+void         limparPrintBuff();
 char       * imprimirTL(TokenList *);
 void         escreverArquivo(char *);
 
-
+/* implementacao */
 void init(int argc, char *argv[])
 {
 
@@ -91,8 +93,8 @@ void init(int argc, char *argv[])
 		yyin = myfile;
 	    initEscopo();
 		yyparse();
-
         imprimeEscopos(listaDeEscopo);
+
 	    organizarSaida();
 		escreverArquivo(nomePrograma);
 	}
@@ -144,7 +146,7 @@ void initIdDivision(char * arqCob)
 
 }
 
-void initProcDivision()
+void initProcDivision(char * argmain)
 {
     pularLinha();
 
@@ -153,10 +155,14 @@ void initProcDivision()
 	inserirSaida(linha);
 
 	pularLinha();
+
+	criaEscopo(argmain);
 }
 
 void fechaMain()
 {
+    limparPrintBuff();
+
     pularLinha();
 
 	Linha * linha = criarLinhaB();
@@ -222,7 +228,7 @@ Linha * criarLinhaB()
     linha->numeracao = 0;
     linha->marcador = ' ';
     linha->texto = NULL;
-    inserirToken(&linha,"    ");
+    inserirToken(&linha,"   ");
     return linha;
 
 }
@@ -275,8 +281,8 @@ void organizarSaida()
     }
 
     SaidaCobol * cursor = saidaCobol;
+	
 	int i = 1;
-
 	while(cursor != NULL)
 	{
 		cursor->linha->numeracao = i;
@@ -320,11 +326,12 @@ void escreverArquivo(char * arq)
 
 	while(saidaCobol != NULL)
 	{
+
 		if((saidaCobol->linha->marcador == '*') || 
 			(saidaCobol->linha->texto == NULL))
 		{
 	        fprintf(file, "%06d%c%s\n", 
-	            saidaCobol->linha->numeracao,
+	        	saidaCobol->linha->numeracao,
 	            saidaCobol->linha->marcador,
 	            imprimirTL(saidaCobol->linha->texto));
 	    }
@@ -332,7 +339,7 @@ void escreverArquivo(char * arq)
 	    {
 	    	fprintf(file, "%06d%c%s.\n", 
 	            saidaCobol->linha->numeracao,
-	            saidaCobol->linha->marcador,
+	    		saidaCobol->linha->marcador,
 	            imprimirTL(saidaCobol->linha->texto));
 	    }
 	    saidaCobol = saidaCobol->proximo;

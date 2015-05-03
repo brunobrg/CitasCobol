@@ -2,9 +2,8 @@
    int main ()
 {
 
-	printf("thdksljnbhsgyrtgsdflvnk jhdgftwiu fjsodfjs fjsdpofdsjwq1");
-
-		printf("thdksljnbhsgyrtgsdflvnkjhdgftwiufjsodfjsdpofjsdpofdsjwq1");
+	printf("tokA\ntokB\ntokC\n");
+	printf("tokD\n");
 
 
 	return 0;
