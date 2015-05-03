@@ -45,11 +45,14 @@ typedef struct _SaidaCobol
 }SaidaCobol;
 
 /* variaveis globais */
+extern ListaDeEscopo * listaDeEscopo;
+extern Simbolos * listaDeVariaveis;
 extern Escopo * escopo;
 extern Escopo * escopoAtual;
 extern FILE * yyin;
 extern int idEscopo;
 SaidaCobol * saidaCobol;
+SaidaCobol * saidaVariaveis;
 Linha * printbuff;
 
 /* prototipos */
@@ -57,6 +60,7 @@ void         init(int, char * []);
 char       * nomeProgramaCob(char *);
 void         initIdDivision(char *);
 void         initProcDivision();
+void 		 initDataDivision();
 void         fechaMain();
 void         inserirSaida(Linha *);
 void         pularLinha();
@@ -68,7 +72,7 @@ void         organizarSaida();
 void         limparPrintBuff();
 char       * imprimirTL(TokenList *);
 void         escreverArquivo(char *);
-
+void		 escreverErro(char *);
 /* implementacao */
 void init(int argc, char *argv[])
 {
@@ -93,10 +97,19 @@ void init(int argc, char *argv[])
 		yyin = myfile;
 	    initEscopo();
 		yyparse();
-        imprimeEscopos(listaDeEscopo);
+       	
+       	initDataDivision();
+       
 
-	    organizarSaida();
-		escreverArquivo(nomePrograma);
+       	if(verificaLista(listaDeEscopo) || 1)
+       	{
+		    organizarSaida();
+			escreverArquivo(nomePrograma);
+		}
+		else
+		{
+			escreverErro(nomePrograma);
+		}
 	}
 	else
 	{
@@ -318,6 +331,16 @@ char * imprimirTL(TokenList * TL)
 
 }
 
+void escreverErro(char * arq)
+{
+	FILE * file = fopen(arq, "w+");
+
+    fprintf(file, "Erro no arquivo, por favor arrumar os erros.");
+
+	fclose(file);
+}
+
+
 void escreverArquivo(char * arq)
 {
 	FILE * file = fopen(arq, "w+");
@@ -351,4 +374,104 @@ void escreverArquivo(char * arq)
 	}
 
 	fclose(file);
+}
+
+void inserirSaidaVariaveis(Linha * linha)
+{
+
+	SaidaCobol * novoElemento =
+	    (SaidaCobol *) malloc(sizeof(SaidaCobol));
+	novoElemento->linha = linha;
+	novoElemento->proximo = NULL;
+    
+    if(saidaVariaveis == NULL)
+    {
+    	saidaVariaveis = novoElemento;
+        saidaVariaveis->anterior = NULL;
+
+    }
+    else 
+    {
+    	SaidaCobol * cursor = saidaVariaveis;
+
+	    while (cursor->proximo != NULL)
+	    {
+		    cursor = cursor->proximo;
+	    }
+	    cursor->proximo = novoElemento;
+	    novoElemento->anterior = cursor;
+	}
+
+}
+
+void initDataDivision()
+{
+	saidaVariaveis = NULL;
+	if(listaDeVariaveis != NULL)
+	{
+		Linha * linha = criarLinhaA();
+		inserirToken(&linha, "DATA DIVISION");
+		inserirSaidaVariaveis(linha);
+		linha = criarLinhaA();
+		inserirToken(&linha, "WORKING-STORAGE SECTION");
+		inserirSaidaVariaveis(linha);
+
+		Simbolos * aux = listaDeVariaveis;
+		while(aux != NULL)
+		{
+			
+			linha = criarLinhaB();
+			if(!strcmp(aux->tipo, "int"))
+			{
+				inserirToken(&linha, "01");
+				inserirToken(&linha, aux->nome);
+				inserirToken(&linha, "PIC S9(05)");
+			}
+			else if(!strcmp(aux->tipo, "float"))
+			{
+				inserirToken(&linha, "01");
+				inserirToken(&linha, aux->nome);
+				inserirToken(&linha, "PIC S9(39)V9(38");
+			}
+			
+			if(aux->value != NULL)
+			{
+				inserirToken(&linha, "VALUE");
+				inserirToken(&linha, aux->value);
+			}
+
+			inserirSaidaVariaveis(linha);
+
+			aux = aux->proximo;
+		}
+		linha = criarLinhaA();
+		inserirSaidaVariaveis(linha);
+
+	}
+
+	if(saidaVariaveis != NULL)
+	{
+		SaidaCobol * aux = saidaCobol;
+		while(aux != NULL)
+		{
+			if(aux->linha->texto != NULL)
+			{
+				if(!strcmp(aux->linha->texto->token, "PROCEDURE DIVISION"))
+				{
+					break;
+				}
+			}
+			aux = aux->proximo;
+			
+		}
+		SaidaCobol * tail = aux;
+		SaidaCobol * head = aux->anterior;
+
+		head->proximo = saidaVariaveis;
+
+		SaidaCobol * aux2 = head->proximo;
+		while(aux2->proximo != NULL)
+			aux2 = aux2->proximo;
+		aux2->proximo = tail;
+	}
 }

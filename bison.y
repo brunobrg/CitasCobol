@@ -36,7 +36,7 @@ Main
     : TIPO MAIN Argumentos 
       {initProcDivision($2);}  
       Bloco
-      {fechaMain();}
+      {fechaMain(); adicionaSimbolos(); saiEscopo();}
     ;
 
 Argumentos
@@ -57,15 +57,38 @@ Linha_Comando
     : Comando PVIRGULA
 	;
 
-Comando
-    : Printf 
+Comando:
+	Printf 
+	| Declaracao
+	| Atribuicao
 	| RETURN NUMBER;
+	;
+
+Atribuicao:
+	PALAVRA ATRIBUI NUMBER SOMA NUMBER 
+	{		
+		Linha * linha = criarLinhaB();
+		inserirToken(&linha, "COMPUTE");
+		inserirToken(&linha, $1);
+		inserirToken(&linha, "=");
+		inserirToken(&linha, $3);
+		inserirToken(&linha, "+");
+		inserirToken(&linha, $5);
+		inserirSaida(linha);
+	}
+	;
+
+Declaracao:
+	TIPO PALAVRA {adicionaSimbolo(escopoAtual, "declarada", $1, $2);}
+	| TIPO PALAVRA ATRIBUI NUMBER { adicionaSimbolo(escopoAtual, "declarada", $1, $2); valorSimbolo(escopoAtual, $1, $2, $4);}
 	;
 
 Printf
     : PRINTF LEFT_PAR TEXTO RIGHT_PAR 
       { imprimir($3); }
 	;
+
+
 %%
 
 void main(int argc, char *argv[]){
