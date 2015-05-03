@@ -49,14 +49,14 @@ extern Escopo * escopo;
 extern Escopo * escopoAtual;
 extern FILE * yyin;
 extern int idEscopo;
-SaidaCobol * saidaCobol = NULL;
+SaidaCobol * saidaCobol;
+Linha * printbuff;
 
 /* prototipos */
 void         init(int, char * []);
 char       * nomeProgramaCob(char *);
 void         initIdDivision(char *);
 void         initProcDivision();
-void         initPrintBuff();
 void         fechaMain();
 void         inserirSaida(Linha *);
 void         pularLinha();
@@ -122,6 +122,11 @@ char * nomeProgramaCob(char * argv)
 
 void initIdDivision(char * arqCob)
 {
+
+	//init saidaCobol e printbuff
+	saidaCobol = NULL;
+	printbuff = NULL;
+
 	Linha * linha = criarComentario();
 	inserirToken(&linha, arqCob);
 	inserirToken(&linha, "C it as Cobol");

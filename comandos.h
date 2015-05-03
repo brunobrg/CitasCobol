@@ -1,7 +1,6 @@
 #include "traducao.h"
 
 /* variaveis globais */
-Linha printbuff;
 
 /* prototipos */
 void imprimir(char *);
@@ -22,15 +21,15 @@ void imprimir(char * str)
 	Linha * linha;
 	char * token;
 
-	if(printbuff.texto == NULL)
+	if(printbuff == NULL)
     {
         linha = criarLinhaB();
         inserirToken(&linha, "DISPLAY");
     }
     else
     {
-      	*linha = printbuff;
-      	printbuff.texto = NULL;
+      	linha = printbuff;
+      	printbuff = NULL;
     }
 
 	// remove aspas
@@ -56,7 +55,7 @@ void imprimir(char * str)
 		    inserirToken(&linha, token);
 		    inserirSaida(linha);
 		    linha = NULL;
-            printbuff.texto = NULL;
+            printbuff = NULL;
             if (strlen(str) > 1)
             {
                 novaLinha = strsep (&str, "\\");
@@ -83,14 +82,14 @@ void imprimir(char * str)
 
 void guardaBuffer(Linha * linha)
 {
-    printbuff = *linha;
+    printbuff = linha;
 }
 
 void limparPrintBuff()
 {
  
-	if (printbuff.texto != NULL)
+	if (printbuff != NULL)
 	{
-		inserirSaida(&printbuff);
+		inserirSaida(printbuff);
 	}
 }
