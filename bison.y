@@ -36,7 +36,7 @@ Main
     : TIPO MAIN Argumentos 
       {initProcDivision($2);}  
       Bloco
-      {fechaMain(); saiEscopo();}
+      {fechaMain(); adicionaSimbolos(); saiEscopo();}
     ;
 
 Argumentos

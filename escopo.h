@@ -177,7 +177,21 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], char nomeSim
 		}
 		else if(!strcmp(pos, "usada"))
 		{
+			Simbolos * add = addSimbolo(tipo, nomeSimbolo);
 
+			if(escTemp->s_usados == NULL)
+			{
+				escTemp->s_usados = add;
+			}
+			else
+			{
+				Simbolos * aux = escTemp->s_usados;
+				
+				while(aux->proximo!= NULL)
+					aux = aux->proximo;
+
+				aux->proximo = add;
+			}
 		}
 	}
 }
@@ -200,4 +214,61 @@ void imprimeSimbolos(ListaDeEscopo * aux)
 
 		imprimeSimbolos(aux->proximo);
 	}
+}
+
+
+
+int verificaSimbolo(Simbolos * dec, Simbolos * usaHead)
+{
+	if(dec == NULL)
+		return 1;
+	else
+	{
+		Simbolos * usa = usaHead;
+		while(usa !=NULL)
+		{
+			if(!strcmp(dec->nome, usa->nome))
+			{
+				return 1 * verificaSimbolo(dec->proximo, usaHead);
+			}
+			
+			usa = usa->proximo;
+		}
+		printf("\" %s %s \" declarada e nao utilizada\n", dec->tipo, dec->nome);
+		return 0 * verificaSimbolo(dec->proximo, usaHead);
+	}
+}
+
+int verificaEscopo(Escopo * aux)
+{
+	if(aux == NULL)
+		return 1;
+	else
+	{
+		printf("\nDentro de: %s\n", aux->nome);
+		return 1 * verificaSimbolo(aux->s_declarados, aux->s_usados) ;
+	}
+}
+
+int verificaLista(ListaDeEscopo * aux)
+{
+	if(aux != NULL)
+	{
+		return 1 * verificaLista(aux->proximo) * verificaEscopo(aux->escopo);
+	}
+	else
+		return 1;
+}
+
+void adicionaSimbolos()
+{
+	adicionaSimbolo(escopoAtual, "usada", "int", "x");
+	adicionaSimbolo(escopoAtual, "usada", "int", "y");
+	adicionaSimbolo(escopoAtual, "usada", "int", "z");
+	adicionaSimbolo(escopoAtual, "usada", "int", "x1");
+	adicionaSimbolo(escopoAtual, "usada", "int", "x2");
+	adicionaSimbolo(escopoAtual, "usada", "int", "x3");
+	adicionaSimbolo(escopoAtual, "usada", "int", "x4");
+	adicionaSimbolo(escopoAtual, "usada", "int", "x5");
+
 }

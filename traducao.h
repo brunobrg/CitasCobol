@@ -96,6 +96,13 @@ void init(int argc, char *argv[])
         //imprimeEscopos(listaDeEscopo);
         imprimeSimbolos(listaDeEscopo);
 
+        int ok = verificaLista(listaDeEscopo);
+
+        printf("\nlista ok?");
+        if(ok)
+        	printf(" sim\n");
+        else
+        	printf(" nao\n");
 
 	    organizarSaida();
 		escreverArquivo(nomePrograma);

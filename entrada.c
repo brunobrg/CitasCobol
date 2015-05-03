@@ -6,7 +6,7 @@ int main ()
 	int x;
 	int y;
 	int z;
-
+	int vlvvflvv;
 	printf("tok\A");
 	printf("tokB\ntokD\nkjdsfhksj\\sdflksd\n");
 	printf("tokC");
