@@ -41,7 +41,7 @@ void imprimir(char * str)
 
     while(novaLinha != NULL)
     {
-    	token = (char *) malloc(sizeof(char));
+    	token = (char *) malloc(strlen(novaLinha)*sizeof(char));
     	if(str == NULL)
     	{
             sprintf(token,"\"%s\"", novaLinha);

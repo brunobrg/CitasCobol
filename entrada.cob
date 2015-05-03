@@ -4,10 +4,7 @@
 000004 
 000005 PROCEDURE DIVISION.
 000006 
-000007     DISPLAY "tok\A" "tokB".
-000008     DISPLAY "tokD".
-000009     DISPLAY "kjdsfhksj\\sdflksd".
-000010     DISPLAY "tokC" "tokD" "tokC\E" "tokF".
-000011 
-000012     STOP RUN.
-000013     EXIT.
+000007     DISPLAY "12345678901234567890123456hjhgjhgjhgjhghghjghjghjgjhgjhgj".
+000008 
+000009     STOP RUN.
+000010     EXIT.
