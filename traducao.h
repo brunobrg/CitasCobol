@@ -442,7 +442,12 @@ void initDataDivision()
 				inserirToken(&linha, aux->nome);
 				inserirToken(&linha, "PIC S9(18)V9(18)");
 			}
-			
+			else if(!strcmp(aux->tipo, "char"))
+			{
+				inserirToken(&linha, "01");
+				inserirToken(&linha, aux->nome);
+				inserirToken(&linha, "PICTURE X(10)");
+			}
 			if(aux->value != NULL)
 			{
 				inserirToken(&linha, "VALUE");
