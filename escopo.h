@@ -208,7 +208,7 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], char nomeSim
 		else if(!strcmp(pos, "usada"))
 		{
 			Simbolos * add = addSimbolo(tipo, nomeSimbolo);
-
+			printf("Escopo: %s,  Variavel: %s %s\n", escTemp->nome, tipo, nomeSimbolo);
 			if(escTemp->s_usados == NULL)
 			{
 				escTemp->s_usados = add;
@@ -222,6 +222,8 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], char nomeSim
 
 				aux->proximo = add;
 			}
+			if(escTemp->anterior!=NULL)
+				adicionaSimbolo(escTemp->anterior, pos, tipo, nomeSimbolo);
 		}
 	}
 }
