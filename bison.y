@@ -11,11 +11,12 @@ extern int contLinhasC;
    int    intval;
 }
 
-%token <strval> NUMBER TIPO
-%token <strval> STRING STR
+%token <strval> NUMBER TIPO SOMA SUBT MULT DIVIDE
+%token <strval> STRING STR 
 %token AND OU IF DO THEN WHILE ELSE NOT PH
-%token IGUAL SOMA SUBT MULT DIVIDE ATRIBUI MOD 
+%token IGUAL  ATRIBUI MOD
 
+%type <strval> Atribuicao_Simples_Valor Sinais
 
 //novos
 %token INCLUDE   
@@ -44,8 +45,7 @@ Argumentos
     ;
 
 Bloco
-    : ABRE_CHAVE FECHA_CHAVE
-    | ABRE_CHAVE Comandos FECHA_CHAVE
+    : ABRE_CHAVE Comandos FECHA_CHAVE
     ;
 
 Comandos
@@ -60,22 +60,51 @@ Linha_Comando
 Comando:
 	Printf 
 	| Declaracao
-	| Atribuicao
+	| Atribuicoes
 	| RETURN NUMBER;
 	;
 
-Atribuicao:
-	PALAVRA ATRIBUI NUMBER SOMA NUMBER 
+Sinais:
+	SOMA {$$ = $1;}
+	| SUBT {$$ = $1;}
+	| MULT {$$ = $1;}
+	| DIVIDE {$$ = $1;}
+	;
+
+Atribuicoes:
+	Atribuicao_Simples
+	| Atribuicao_Complex
+	;
+
+Atribuicao_Complex:
+	PALAVRA ATRIBUI NUMBER Sinais NUMBER 
 	{		
 		Linha * linha = criarLinhaB();
 		inserirToken(&linha, "COMPUTE");
 		inserirToken(&linha, $1);
 		inserirToken(&linha, "=");
 		inserirToken(&linha, $3);
-		inserirToken(&linha, "+");
+		inserirToken(&linha, $4);
 		inserirToken(&linha, $5);
 		inserirSaida(linha);
 	}
+	;
+
+Atribuicao_Simples:
+	PALAVRA ATRIBUI Atribuicao_Simples_Valor
+	{
+		Linha * linha = criarLinhaB();
+		inserirToken(&linha, "MOVE");
+		inserirToken(&linha, $1);
+		inserirToken(&linha, "TO");
+		inserirToken(&linha, $3);
+		inserirSaida(linha);
+	}
+	;
+
+Atribuicao_Simples_Valor:
+	PALAVRA {$$ = $1;}
+	| NUMBER {$$ = $1;}
 	;
 
 Declaracao:

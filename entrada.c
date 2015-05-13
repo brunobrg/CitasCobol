@@ -12,7 +12,11 @@ int main ()
 	printf("tokC");
 		printf("tokD");
 
-	x = 3 + 2;
+	x = 3;
+	y = x;
+	z = 3 / 2;
+	d = 5 * 8;
+	x = 4 - 5;
 
 	printf("tokC\E");
 

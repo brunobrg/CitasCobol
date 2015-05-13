@@ -22,9 +22,10 @@ ASPAS [\"]
 ")"								return RIGHT_PAR;
 "{"								return ABRE_CHAVE;
 "}"								return FECHA_CHAVE;
-"+"								return SOMA;
-"-"								return SUBT;
-"/"								return DIVIDE;
+"+"								{yylval.strval = strdup(yytext); return SOMA;}
+"-"								{yylval.strval = strdup(yytext); return SUBT;}
+"*"                             {yylval.strval = strdup(yytext); return MULT;}
+"/"								{yylval.strval = strdup(yytext); return DIVIDE;}
 "="								return ATRIBUI;
 "<"								return ('<');
 ">"								return ('>');

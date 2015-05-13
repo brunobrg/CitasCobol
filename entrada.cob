@@ -16,9 +16,13 @@
 000016     DISPLAY "tok\A" "tokB".
 000017     DISPLAY "tokD".
 000018     DISPLAY "kjdsfhksj\\sdflksd".
-000019     COMPUTE x = 3 + 2.
-000020     DISPLAY "tokC" "tokD" "tokC\E" "tokF".
-000021 
-000022     STOP RUN.
-000023     000000-EXIT.
-000024     EXIT.
+000019     MOVE x TO 3.
+000020     MOVE y TO x.
+000021     COMPUTE z = 3 / 2.
+000022     COMPUTE d = 5 * 8.
+000023     COMPUTE x = 4 - 5.
+000024     DISPLAY "tokC" "tokD" "tokC\E" "tokF".
+000025 
+000026     STOP RUN.
+000027     000000-EXIT.
+000028     EXIT.
