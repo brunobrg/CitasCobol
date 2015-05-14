@@ -1,9 +1,22 @@
 %{
-#include "comandos.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include "estruturaC.h"
+#include "estruturaCobol.h"
+#include "traducao.h"
 
-extern FILE * yyin;
-extern int contLinhasC;
-
+/* Variaveis globais */
+extern FILE     * yyin;
+int               contLinhasC = 1;
+ListaDeEscopo   * listaDeEscopo;
+Simbolos        * listaDeVariaveis;
+Escopo          * escopo = NULL;
+Escopo          * escopoAtual;
+int               idEscopo = 0;
+char            * nomePrograma;
+Linha           * printbuff = NULL;
+HierarquiaCobol * arvoreSaida;
+SaidaCobol      * saidaVariaveis;
 %}
 
 %union {
@@ -11,62 +24,52 @@ extern int contLinhasC;
    int    intval;
 }
 
-%token <strval> NUMBER TIPO
-%token <strval> STRING STR
-%token AND OU IF DO THEN WHILE ELSE NOT PH
-%token IGUAL SOMA SUBT MULT DIVIDE ATRIBUI MOD 
-
-
-//novos
-%token INCLUDE   
-%token PVIRGULA LEFT_PAR RIGHT_PAR VIRGULA ASPAS ENDERECO
-%token ABRE_CHAVE FECHA_CHAVE RETURN END 
-%token <strval> PRINTF SCANF VARUSE PALAVRA TEXTO MAIN
-%token  error
-
-%start Etapas
+%token <strval> WORD NUMBER QUOTE
+%token LE GE EQUAL NEQUAL
+%token AND OR
+%token <strval> TYPE
+%token IF ELSE WHILE DO RETURN
+%token <strval> PRINTF VARUSE MAIN
+%token INCLUDE PH
+%start Global
 
 %%
 
-Etapas 
+Global 
 	: Main
 	;
 
 Main
-    : TIPO MAIN Argumentos 
-      {initProcDivision($2);}  
+    : TYPE MAIN Argumentos 
+      {/* initProcDivision($2); */}  
       Bloco
-      {fechaMain(); adicionaSimbolos(); saiEscopo();}
+      {/* fechaMain(); adicionaSimbolos(); saiEscopo(); */}
     ;
 
 Argumentos
-    : LEFT_PAR RIGHT_PAR
+    : '(' ')'
     ;
 
 Bloco
-    : ABRE_CHAVE FECHA_CHAVE
-    | ABRE_CHAVE Comandos FECHA_CHAVE
+    : '{' Comandos '}'
     ;
 
 Comandos
     :
-	| Linha_Comando Comandos
+	| Comando Comandos
 	;
 
-Linha_Comando
-    : Comando PVIRGULA
+Comando
+    : Printf ';'
+	| Declaracao ';'
+	| Atribuicao ';'
+	| RETURN NUMBER ';'
 	;
 
-Comando:
-	Printf 
-	| Declaracao
-	| Atribuicao
-	| RETURN NUMBER;
-	;
-
-Atribuicao:
-	PALAVRA ATRIBUI NUMBER SOMA NUMBER 
+Atribuicao
+    : WORD '=' NUMBER '+' NUMBER 
 	{		
+	    /*
 		Linha * linha = criarLinhaB();
 		inserirToken(&linha, "COMPUTE");
 		inserirToken(&linha, $1);
@@ -75,32 +78,103 @@ Atribuicao:
 		inserirToken(&linha, "+");
 		inserirToken(&linha, $5);
 		inserirSaida(linha);
+		*/
 	}
 	;
 
-Declaracao:
-	TIPO PALAVRA {adicionaSimbolo(escopoAtual, "declarada", $1, $2);}
-	| TIPO PALAVRA ATRIBUI NUMBER { adicionaSimbolo(escopoAtual, "declarada", $1, $2); valorSimbolo(escopoAtual, $1, $2, $4);}
+Declaracao
+    : TYPE WORD
+    { /* 
+      adicionaSimbolo(escopoAtual, "declarada", $1, $2);
+      */
+    }
+	| TYPE WORD '=' NUMBER 
+	{ /* 
+	  adicionaSimbolo(escopoAtual, "declarada", $1, $2); valorSimbolo(escopoAtual, $1, $2, $4);
+	  */
+	}
 	;
 
 Printf
-    : PRINTF LEFT_PAR TEXTO RIGHT_PAR 
-      { imprimir($3); }
+    : PRINTF '(' QUOTE ')'
+      { /*imprimir($3,&printbuff); */}
 	;
-
 
 %%
 
 void main(int argc, char *argv[]){
-	init(argc, argv);
+	
+	/*--- Abre input: arq_entrada ---*/
+
+	if(argc < 2)
+		yyerror(0);
+
+	FILE * arq_entrada = fopen(argv[1], "r");
+
+	/* --- --- --- --- --- --- --- ---*/
+  
+	if(arq_entrada)
+	{
+      int passo;
+      for(passo=0;passo<=2;passo++)
+      {
+        switch ( passo )
+        {
+          case 0: /* Pre-processamento */
+            yyin = arq_entrada;
+            criarDivisions(&arvoreSaida);
+            nomePrograma = nomeProgramaCob(argv[1]);
+            criarIdDivision(&arvoreSaida->conteudo,nomePrograma);
+            break;
+          case 1: /* Escopo e Tabela de Variaveis*/ 
+            //initEscopo();
+            //initDataDivision();
+            break;
+          case 2: /* Traducao */
+            //yyparse();
+
+            // retirar essas linhas depois:
+            organizarSaida(&arvoreSaida->conteudo);
+		    escreverArquivo(arvoreSaida->conteudo,nomePrograma);
+
+            /*
+   	        if(verificaLista(listaDeEscopo) || 1)
+   	        {
+	          organizarSaida(&arvoreSaida->conteudo);
+		      escreverArquivo(arvoreSaida->conteudo,nomePrograma);
+	        }
+	        else
+	        {
+		      escreverErro(nomePrograma);
+	        }
+	        */
+            break;
+        }
+      }
+	}
+	else /* Arquivo nao encontrado. */
+	{
+	    yyerror(1);
+	}
 }
 
-yyerror(char *s){
-	printf("Erro encontrado na linha %d.\n", contLinhasC);
-  printf("%s.\n",s);
+yyerror(int error_code){
+
+  printf("ERRO: ");
+  switch ( error_code )
+  {
+    case 0 :
+      printf("Nome do arquivo não informado.\n");
+	  exit(1);
+    case 1 :
+      printf("Arquivo não encontrado.\n");
+      exit(1);
+    default : 
+      printf("Erro encontrado na linha %d.\n", contLinhasC);
+      break;
+  }
+
+
 }
 
-int yywrap(void)
-{
-	return 1; 
-}
+
