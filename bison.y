@@ -15,8 +15,11 @@ Escopo          * escopoAtual;
 int               idEscopo = 0;
 char            * nomePrograma;
 Linha           * printbuff = NULL;
-HierarquiaCobol * arvoreSaida;
+SaidaCobol      * saidaCobol;
 SaidaCobol      * saidaVariaveis;
+int               passoComp;
+
+
 %}
 
 %union {
@@ -43,7 +46,7 @@ Main
     : TYPE MAIN Argumentos 
       {/* initProcDivision($2); */}  
       Bloco
-      {/* fechaMain(); adicionaSimbolos(); saiEscopo(); */}
+      {/* fechaMain(); */}
     ;
 
 Argumentos
@@ -69,7 +72,8 @@ Comando
 Atribuicao
     : WORD '=' NUMBER '+' NUMBER 
 	{		
-	    /*
+	  /* calcula(expressao);
+    **** encapsular:
 		Linha * linha = criarLinhaB();
 		inserirToken(&linha, "COMPUTE");
 		inserirToken(&linha, $1);
@@ -78,6 +82,7 @@ Atribuicao
 		inserirToken(&linha, "+");
 		inserirToken(&linha, $5);
 		inserirSaida(linha);
+    ****
 		*/
 	}
 	;
@@ -109,45 +114,53 @@ void main(int argc, char *argv[]){
 	if(argc < 2)
 		yyerror(0);
 
-	FILE * arq_entrada = fopen(argv[1], "r");
+  FILE * arq_entrada = fopen(argv[1], "r");
+  nomePrograma = nomeProgramaCob(argv[1]);
+  FILE * arq_saida = fopen(nomePrograma, "w+");
 
 	/* --- --- --- --- --- --- --- ---*/
   
 	if(arq_entrada)
 	{
-      int passo;
-      for(passo=0;passo<=2;passo++)
+      for(passoComp=0;passoComp<=2;passoComp++)
       {
-        switch ( passo )
+        switch ( passoComp )
         {
-          case 0: /* Pre-processamento */
+          case 0: /* Pré-processamento */
+            printf("* Pré-processamento...\n");
+            //yyparse();
             yyin = arq_entrada;
-            criarDivisions(&arvoreSaida);
-            nomePrograma = nomeProgramaCob(argv[1]);
-            criarIdDivision(&arvoreSaida->conteudo,nomePrograma);
+            criarDivisions(&saidaCobol);
+            escreverIdntDivision(&saidaCobol->conteudo,nomePrograma);
             break;
-          case 1: /* Escopo e Tabela de Variaveis*/ 
+          case 1: /* Escopo e Tabela de Variaveis*/
+            printf("* Montando tabela de variáveis...\n");          
+            //yyparse();
             //initEscopo();
-            //initDataDivision();
+            //escreverDataDivision();
             break;
           case 2: /* Traducao */
+            printf("* Gerando programa Cobol...\n");
             //yyparse();
+            fclose(arq_entrada);
 
-            // retirar essas linhas depois:
-            organizarSaida(&arvoreSaida->conteudo);
-		    escreverArquivo(arvoreSaida->conteudo,nomePrograma);
+            organizarSaida(&saidaCobol);
+		        escreverArquivo(arq_saida,saidaCobol);
+            free(saidaCobol);
+            fclose(arq_saida);
 
             /*
    	        if(verificaLista(listaDeEscopo) || 1)
    	        {
-	          organizarSaida(&arvoreSaida->conteudo);
-		      escreverArquivo(arvoreSaida->conteudo,nomePrograma);
-	        }
-	        else
-	        {
-		      escreverErro(nomePrograma);
-	        }
-	        */
+	          organizarSaida(&saidaCobol->conteudo);
+		        escreverArquivo(saidaCobol->conteudo);
+	          }
+	          else
+	          {
+		         escreverErro(nomePrograma);
+	          }
+	          */
+            printf("*** Tradução completa.\n");
             break;
         }
       }
@@ -160,15 +173,15 @@ void main(int argc, char *argv[]){
 
 yyerror(int error_code){
 
-  printf("ERRO: ");
+  printf("*** ERRO %i: ", error_code);
   switch ( error_code )
   {
     case 0 :
       printf("Nome do arquivo não informado.\n");
-	  exit(1);
+	    exit(1);
     case 1 :
       printf("Arquivo não encontrado.\n");
-      exit(1);
+      exit(1);    
     default : 
       printf("Erro encontrado na linha %d.\n", contLinhasC);
       break;

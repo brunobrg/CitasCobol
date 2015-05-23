@@ -28,29 +28,30 @@ typedef struct _Linha
 	
 }Linha;
 
-typedef struct _SaidaCobol
+typedef struct _BlocoCobol
 {
 	/* 
     Lista duplamente encadeada de linhas.
     Forma o texto do arquivo de saida.
     */
 	Linha              * linha;
-	struct _SaidaCobol * anterior;
-	struct _SaidaCobol * proximo;
-}SaidaCobol;
+	struct _BlocoCobol * anterior;
+	struct _BlocoCobol * proximo;
+}BlocoCobol;
 
-typedef struct _HierarquiaCobol
+typedef struct _SaidaCobol
 {
 	/*
-	Arvore binaria composta por:
-	  Divisions
-	  Sections
-	  Paragrafos
+	Arvore binaria composta por nos de blocosCobol.
+	Cada bloco pode ser:
+	  uma Division;
+	  uma Section; ou
+	  um Paragrafo.
 	*/
-	char                    * identificacao;
-	SaidaCobol              * conteudo;
-	struct _HierarquiaCobol * lateral;
-	struct _HierarquiaCobol * inferior;
-}HierarquiaCobol;
+	char               * identificacao;
+	BlocoCobol         * conteudo;
+	struct _SaidaCobol * lateral;
+	struct _SaidaCobol * inferior;
+}SaidaCobol;
 
 #endif /* !ESTRUTURACOBOL_H_INCLUDED */

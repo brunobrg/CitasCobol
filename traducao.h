@@ -5,25 +5,18 @@
 
 /* prototipos */
 char            * nomeProgramaCob(char *);
-void              criarDivisions();
-void              criarIdDivision(SaidaCobol **, char *);
+void              criarDivisions(SaidaCobol **);
+void              escreverIdntfDivision(BlocoCobol **, char *);
 /*
 void              initProcDivision();
 void 		      initDataDivision();
 void              fechaMain();
 */
-void              inserirSaida(SaidaCobol **, Linha *);
-void              pularLinha(SaidaCobol **);
-Linha           * criarLinhaA();
-Linha           * criarLinhaB();
-Linha           * criarComentario();
-void              inserirToken(Linha **, char *);
 void              organizarSaida(SaidaCobol **);
 /*
 void              limparPrintBuff();
 */
-char            * imprimirTL(TokenList *);
-void              escreverArquivo(SaidaCobol *, char *);
+void              escreverArquivo(FILE *, SaidaCobol *);
 /*
 void		      escreverErro(char *); 
 */
