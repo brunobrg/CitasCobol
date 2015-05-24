@@ -1,8 +1,20 @@
 %{
-#include "comandos.h"
 
-extern FILE * yyin;
-extern int contLinhasC;
+#include <stdio.h>
+#include <stdlib.h>
+#include "estruturaC.h"
+#include "estruturaCobol.h"
+#include "traducao.h"
+
+/* Variaveis globais */
+extern FILE     * yyin;              /* Arquivo do parser */
+FILE            * arq_entrada;       /* Arquivo de entrada */
+FILE            * arq_saida;         /* Arquivo de saida */
+int               contLinhasC = 1;   /* Contador do arq de entrada */   
+char            * nomePrograma;      /* Nome do programa */
+SaidaCobol      * saidaCobol = NULL; /* Arvore de blocosCobol */
+int               p;                 /* Passo de compilacao */
+int               qntErros=0;        /* Quantidade de erros */
 
 %}
 
@@ -11,125 +23,185 @@ extern int contLinhasC;
    int    intval;
 }
 
-%token <strval> NUMBER TIPO SOMA SUBT MULT DIVIDE
-%token <strval> STRING STR 
-%token AND OU IF DO THEN WHILE ELSE NOT PH
-%token IGUAL  ATRIBUI MOD
-
-%type <strval> Atribuicao_Simples_Valor Sinais
-
-//novos
-%token INCLUDE   
-%token PVIRGULA LEFT_PAR RIGHT_PAR VIRGULA ASPAS ENDERECO
-%token ABRE_CHAVE FECHA_CHAVE RETURN END 
-%token <strval> PRINTF SCANF VARUSE PALAVRA TEXTO MAIN
-%token  error
-
-%start Etapas
+%token <strval> WORD NUMBER QUOTE
+%token LE GE EQUAL NEQUAL
+%token AND OR
+%token <strval> TYPE
+%token IF ELSE WHILE DO RETURN
+%token <strval> PRINTF VARUSE MAIN
+%token INCLUDE PH
+%start Global
 
 %%
 
-Etapas 
-	: Main
-	;
+Global 
+    : Main
+    ;
 
 Main
-    : TIPO MAIN Argumentos 
-      {initProcDivision($2);}  
+    : TYPE MAIN Argumentos 
+      { if(p==2) abreMain(&saidaCobol); }  
       Bloco
-      {fechaMain(); adicionaSimbolos(); saiEscopo();}
+      { if(p==2) fechaMain(&saidaCobol); }
     ;
 
 Argumentos
-    : LEFT_PAR RIGHT_PAR
+    : '(' ')'
     ;
 
 Bloco
-    : ABRE_CHAVE Comandos FECHA_CHAVE
+    : '{' Comandos '}'
     ;
 
 Comandos
     :
-	| Linha_Comando Comandos
-	;
+    | Comando Comandos
+    ;
 
-Linha_Comando
-    : Comando PVIRGULA
-	;
+Comando
+    : Printf ';'
+    | Declaracao ';'
+    | Atribuicao ';'
+    | RETURN NUMBER ';'
+    ;
 
-Comando:
-	Printf 
-	| Declaracao
-	| Atribuicoes
-	| RETURN NUMBER;
-	;
+Atribuicao
+    : WORD '=' NUMBER '+' NUMBER 
+      { if (p==2)
+        {		
+         /**** encapsular em uma funcao ****/
+		     Linha * linha = criarLinhaB();
+		     inserirToken(&linha, "COMPUTE");
+		     inserirToken(&linha, $1);
+		     inserirToken(&linha, "=");
+		     inserirToken(&linha, $3);
+		     inserirToken(&linha, "+");
+		     inserirToken(&linha, $5);
+		     inserirProcDiv(&saidaCobol, linha);
+         /****                          ****/
+        }
+      }
+    ;
 
-Sinais:
-	SOMA {$$ = $1;}
-	| SUBT {$$ = $1;}
-	| MULT {$$ = $1;}
-	| DIVIDE {$$ = $1;}
-	;
-
-Atribuicoes:
-	Atribuicao_Simples
-	| Atribuicao_Complex
-	;
-
-Atribuicao_Complex:
-	PALAVRA ATRIBUI NUMBER Sinais NUMBER 
-	{		
-		Linha * linha = criarLinhaB();
-		inserirToken(&linha, "COMPUTE");
-		inserirToken(&linha, $1);
-		inserirToken(&linha, "=");
-		inserirToken(&linha, $3);
-		inserirToken(&linha, $4);
-		inserirToken(&linha, $5);
-		inserirSaida(linha);
-	}
-	;
-
-Atribuicao_Simples:
-	PALAVRA ATRIBUI Atribuicao_Simples_Valor
-	{
-		Linha * linha = criarLinhaB();
-		inserirToken(&linha, "MOVE");
-		inserirToken(&linha, $1);
-		inserirToken(&linha, "TO");
-		inserirToken(&linha, $3);
-		inserirSaida(linha);
-	}
-	;
-
-Atribuicao_Simples_Valor:
-	PALAVRA {$$ = $1;}
-	| NUMBER {$$ = $1;}
-	;
-
-Declaracao:
-	TIPO PALAVRA {adicionaSimbolo(escopoAtual, "declarada", $1, $2);}
-	| TIPO PALAVRA ATRIBUI NUMBER { adicionaSimbolo(escopoAtual, "declarada", $1, $2); valorSimbolo(escopoAtual, $1, $2, $4);}
-	;
+Declaracao
+    : TYPE WORD
+      { /* if(p==1) */
+        adicionaSimbolo("declarada", $1, $2); 
+      }
+    | TYPE WORD '=' NUMBER 
+      { /* if(p==1) */
+        adicionaSimbolo("declarada", $1, $2); 
+        valorSimbolo($1, $2, $4);
+      }
+    ;
 
 Printf
-    : PRINTF LEFT_PAR TEXTO RIGHT_PAR 
-      { imprimir($3); }
-	;
-
+    : PRINTF '(' QUOTE ')'
+      { if(p==2) imprimir(&saidaCobol,$3); }
+	  ;
 
 %%
 
 void main(int argc, char *argv[]){
-	init(argc, argv);
+	
+	/*--- Abre input: arq_entrada ---*/
+
+	if(argc < 2)
+		yyerror(0);
+
+  arq_entrada = fopen(argv[1], "r");
+  nomePrograma = nomeProgramaCob(argv[1]);
+
+	/* --- --- --- --- --- --- --- ---*/
+  
+	if(arq_entrada)
+	{
+      for(p=0;p<=2;p++)
+      {
+        switch ( p )
+        {
+                                          /*  os 3 passos de parse nao
+                                              estao funcionando pq nao
+                                              consegui usar o yy_flush_buffer. 
+                                              quando conseguir, tirar os comentarios indicados.
+                                          */
+
+          case 0: /* p=0: Pré-processamento */
+            printf("* Pré-processamento...\n");
+            //yyin = arq_entrada;          // tirar comentario
+            //yyparse();                   // tirar comentario
+            criarDivisions(&saidaCobol);
+            escreverIdntDivision(&saidaCobol,nomePrograma);
+            break;
+          case 1: /* p=1: Escopo e Tabela de Variaveis*/
+            printf("* Montando tabela de variáveis...\n"); 
+            //yyin = arq_entrada;           // tirar comentario
+            //yyparse();                    // tirar comentario
+            break;
+          case 2: /* p=2: Traducao */
+            printf("* Lendo o programa...\n");
+            yyin = arq_entrada;
+            initEscopo();                      // mover para o passo 1
+
+            yyparse();
+            terminaEscopo();
+
+            escreverDataDivision(&saidaCobol); //mover para o passo 1
+
+            fclose(arq_entrada);
+
+            //if(verificaListaEscopo()) {}
+            //else yyerror(2);
+
+            if(qntErros == 0)
+            {
+              arq_saida = fopen(nomePrograma, "w+");
+              organizarSaida(&saidaCobol);
+		          escreverArquivo(arq_saida,saidaCobol);
+              printf("***** Tradução completa.\n");
+              fclose(arq_saida);
+            }
+
+            free(saidaCobol);
+            break;
+
+        }
+      }
+	}
+	else /* Arquivo nao encontrado. */
+	{
+	    yyerror(1);
+	}
 }
 
-yyerror(char *s){
-	printf("Erro encontrado na linha %d.\n", contLinhasC);
-  printf("%s.\n",s);
-}
-
-int yywrap(void)
+yyerror(int error_code)
 {
-	return 1; 
+  qntErros++;
+  printf("*** ERRO %i: ", error_code);
+  switch ( error_code )
+  {
+    case 0 :
+      printf("Nome do arquivo não informado.\n");
+	    exit(1);
+    case 1 :
+      printf("Arquivo não encontrado.\n");
+      exit(1);   
+    case 2:
+      printf("Erro no arquivo de saída.\n");
+      fprintf(arq_saida, "Erro no arquivo, por favor arrumar os erros.\n");
+      exit(1);
+    case 3:
+      printf("linha %d.\n", contLinhasC);
+      printf("***         Printf() vazio.\n");
+      break;
+    default : 
+      printf("Erro encontrado na linha %d.\n", contLinhasC);
+      break;
+  }
+}
+
+warning(char * msg)
+{
+  printf("*** WARNING: linha %d.\n", contLinhasC);
+  printf("***          %s\n",msg);
 }
