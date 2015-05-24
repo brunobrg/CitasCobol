@@ -96,22 +96,22 @@ Simbolos * addSimbolo(char tipo[40], char nome[40])
 	add->value = NULL;
 }
 
-void adicionaSimbolo(char pos[40], char tipo[40], char nomeSimbolo[40])
+void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], char nomeSimbolo[40])
 {
-	if(escopoAtual != NULL)
+	if(escTemp != NULL)
 	{
 		if(!strcmp(pos, "declarada"))
 		{
 			Simbolos * add = addSimbolo(tipo, nomeSimbolo);
 
-            printf("Escopo: %s, Variavel: %s %s\n", escopoAtual->nome, tipo, nomeSimbolo);
-			if(escopoAtual->s_declarados == NULL)
+            //printf("Escopo: %s, Variavel: %s %s\n", escTemp->nome, tipo, nomeSimbolo);
+			if(escTemp->s_declarados == NULL)
 			{
-				escopoAtual->s_declarados = add;
+				escTemp->s_declarados = add;
 			}
 			else
 			{
-				Simbolos * aux = escopoAtual->s_declarados;
+				Simbolos * aux = escTemp->s_declarados;
 				
 				while(aux->proximo!= NULL)
 					aux = aux->proximo;
@@ -119,8 +119,8 @@ void adicionaSimbolo(char pos[40], char tipo[40], char nomeSimbolo[40])
 				aux->proximo = add;
 			}
 
-			if(escopoAtual->anterior!=NULL)
-                adicionaSimbolo(escopoAtual->anterior, pos, tipo, nomeSimbolo);
+			if(escTemp->anterior!=NULL)
+                adicionaSimbolo(escTemp->anterior, pos, tipo, nomeSimbolo);
 
 			Simbolos * add2 = addSimbolo(tipo, nomeSimbolo);
 
@@ -143,13 +143,13 @@ void adicionaSimbolo(char pos[40], char tipo[40], char nomeSimbolo[40])
 		{
 			Simbolos * add = addSimbolo(tipo, nomeSimbolo);
 
-			if(escopoAtual->s_usados == NULL)
+			if(escTemp->s_usados == NULL)
 			{
-				escopoAtual->s_usados = add;
+				escTemp->s_usados = add;
 			}
 			else
 			{
-				Simbolos * aux = escopoAtual->s_usados;
+				Simbolos * aux = escTemp->s_usados;
 				
 				while(aux->proximo!= NULL)
 					aux = aux->proximo;
@@ -254,12 +254,12 @@ void saiEscopo()
 
 void adicionaSimbolos()
 {
-adicionaSimbolo("usada", "int", "x");
-adicionaSimbolo("usada", "int", "y");
-adicionaSimbolo("usada", "int", "z");
-adicionaSimbolo("usada", "int", "x1");
-adicionaSimbolo("usada", "int", "x2");
-adicionaSimbolo("usada", "int", "x3");
-adicionaSimbolo("usada", "int", "x4");
-adicionaSimbolo("usada", "int", "x5");
+adicionaSimbolo(escopoAtual, "usada", "int", "x");
+adicionaSimbolo(escopoAtual, "usada", "int", "y");
+adicionaSimbolo(escopoAtual, "usada", "int", "z");
+adicionaSimbolo(escopoAtual, "usada", "int", "x1");
+adicionaSimbolo(escopoAtual, "usada", "int", "x2");
+adicionaSimbolo(escopoAtual, "usada", "int", "x3");
+adicionaSimbolo(escopoAtual, "usada", "int", "x4");
+adicionaSimbolo(escopoAtual, "usada", "int", "x5");
 }

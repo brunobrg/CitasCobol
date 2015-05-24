@@ -45,14 +45,28 @@ IS                      (u|U|l|L)*
                           yylval.strval = strdup(yytext); 
                           return(WORD); }
  
-0[xX]{H}+{IS}?          { contaColn(); return(NUMBER); }
-0{D}+{IS}?              { contaColn(); return(NUMBER); }
-{D}+{IS}?               { contaColn(); return(NUMBER); }
-L?'(\\.|[^\\'])+'       { contaColn(); return(NUMBER); }
+0[xX]{H}+{IS}?          { contaColn(); 
+                          yylval.strval = strdup(yytext);
+                          return(NUMBER); }
+0{D}+{IS}?              { contaColn(); 
+                          yylval.strval = strdup(yytext);
+                          return(NUMBER); }
+{D}+{IS}?               { contaColn(); 
+                          yylval.strval = strdup(yytext);
+                          return(NUMBER); }
+L?'(\\.|[^\\'])+'       { contaColn(); 
+                          yylval.strval = strdup(yytext);
+                          return(NUMBER); }
 
-{D}+{E}{FS}?            { contaColn(); return(NUMBER); }
-{D}*"."{D}+({E})?{FS}?  { contaColn(); return(NUMBER); }
-{D}+"."{D}*({E})?{FS}?  { contaColn(); return(NUMBER); }
+{D}+{E}{FS}?            { contaColn(); 
+                          yylval.strval = strdup(yytext);
+                          return(NUMBER); }
+{D}*"."{D}+({E})?{FS}?  { contaColn(); 
+                          yylval.strval = strdup(yytext);
+                          return(NUMBER); }
+{D}+"."{D}*({E})?{FS}?  { contaColn(); 
+                          yylval.strval = strdup(yytext);
+                          return(NUMBER); }
 
 L?\"(\\.|[^\\"])*\"     { contaColn(); 
 	                        yylval.strval = strdup(yytext); 

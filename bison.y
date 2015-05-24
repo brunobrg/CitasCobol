@@ -15,6 +15,8 @@ char            * nomePrograma;      /* Nome do programa */
 SaidaCobol      * saidaCobol = NULL; /* Arvore de blocosCobol */
 int               p;                 /* Passo de compilacao */
 int               qntErros=0;        /* Quantidade de erros */
+extern Escopo   * escopoAtual;
+
 
 %}
 
@@ -30,6 +32,9 @@ int               qntErros=0;        /* Quantidade de erros */
 %token IF ELSE WHILE DO RETURN
 %token <strval> PRINTF VARUSE MAIN
 %token INCLUDE PH
+
+%type <strval> Atribuicao_Simples_Valor Operacao
+
 %start Global
 
 %%
@@ -61,12 +66,24 @@ Comandos
 Comando
     : Printf ';'
     | Declaracao ';'
-    | Atribuicao ';'
+    | Atribuicoes ';'
     | RETURN NUMBER ';'
     ;
 
-Atribuicao
-    : WORD '=' NUMBER '+' NUMBER 
+Operacao
+    : '+' {$$ = "+";}
+    | '-' {$$ = "-";}
+    | '*' {$$ = "*";}
+    | '/' {$$ = "/";}
+    ;
+
+Atribuicoes
+    : Atribuicao_Simples
+    | Atribuicao_Complex
+    ;
+
+Atribuicao_Complex
+    : WORD '=' NUMBER Operacao NUMBER 
       { if (p==2)
         {		
          /**** encapsular em uma funcao ****/
@@ -75,7 +92,7 @@ Atribuicao
 		     inserirToken(&linha, $1);
 		     inserirToken(&linha, "=");
 		     inserirToken(&linha, $3);
-		     inserirToken(&linha, "+");
+		     inserirToken(&linha, $4);
 		     inserirToken(&linha, $5);
 		     inserirProcDiv(&saidaCobol, linha);
          /****                          ****/
@@ -83,14 +100,35 @@ Atribuicao
       }
     ;
 
+Atribuicao_Simples
+    : WORD '=' Atribuicao_Simples_Valor
+      { if (p==2)
+        {
+         /**** encapsular em uma funcao ****/
+         Linha * linha = criarLinhaB();
+         inserirToken(&linha, "MOVE");
+         inserirToken(&linha, $3);
+         inserirToken(&linha, "TO");
+         inserirToken(&linha, $1);
+         inserirProcDiv(&saidaCobol, linha);
+         /****                          ****/
+        }
+      }
+    ;
+
+Atribuicao_Simples_Valor
+    : WORD   {$$ = $1;}
+    | NUMBER {$$ = $1;}
+    ;
+
 Declaracao
     : TYPE WORD
       { /* if(p==1) */
-        adicionaSimbolo("declarada", $1, $2); 
+        adicionaSimbolo(escopoAtual,"declarada", $1, $2); 
       }
     | TYPE WORD '=' NUMBER 
       { /* if(p==1) */
-        adicionaSimbolo("declarada", $1, $2); 
+        adicionaSimbolo(escopoAtual,"declarada", $1, $2); 
         valorSimbolo($1, $2, $4);
       }
     ;
