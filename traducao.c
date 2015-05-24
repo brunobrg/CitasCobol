@@ -6,7 +6,9 @@
 #include "traducao.h"
 
 /* variaveis globais */
-int contLinhasCobol = 1;
+int                contLinhasCobol = 1;
+extern Simbolos  * listaDeVariaveis;  
+
 
 /* implementacao */
 char * nomeProgramaCob(char * argv)
@@ -82,7 +84,6 @@ Linha * criarLinhaA()
     return linha;
 }
 
-
 Linha * criarLinhaB()
 {
     Linha * linha = criarLinhaA();
@@ -97,6 +98,12 @@ Linha * criarComentario()
     return linha;
 }
 
+Linha * linhaVazia()
+{
+
+	Linha * linha = criarLinhaA();
+	return linha;
+}
 
 void inserirBloco(BlocoCobol ** bloco, Linha * linha)
 {
@@ -126,13 +133,10 @@ void inserirBloco(BlocoCobol ** bloco, Linha * linha)
 
 }
 
-void inserirProcDiv(SaidaCobol ** saidaCobol, Linha * linha)
-{
-	SaidaCobol * cursor = (*saidaCobol)->lateral; /* environment div */
-	cursor = cursor->lateral; /* data division */               
-    cursor = cursor->lateral; /* procedure division */
-    BlocoCobol ** prcDiv = &(cursor->conteudo);
-    inserirBloco(prcDiv,linha);
+void inserirIdntDiv(SaidaCobol ** saidaCobol, Linha * linha)
+{              
+    BlocoCobol ** idtDiv = &((*saidaCobol)->conteudo);
+    inserirBloco(idtDiv,linha);
 }
 
 void inserirDataDiv(SaidaCobol ** saidaCobol, Linha * linha)
@@ -143,13 +147,13 @@ void inserirDataDiv(SaidaCobol ** saidaCobol, Linha * linha)
     inserirBloco(dtaDiv,linha);
 }
 
-void pularLinha(BlocoCobol ** saida)
+void inserirProcDiv(SaidaCobol ** saidaCobol, Linha * linha)
 {
-
-	Linha * linha;
-	linha = criarLinhaA();
-	inserirBloco(saida, linha);
-
+	SaidaCobol * cursor = (*saidaCobol)->lateral; /* environment div */
+	cursor = cursor->lateral; /* data division */               
+    cursor = cursor->lateral; /* procedure division */
+    BlocoCobol ** prcDiv = &(cursor->conteudo);
+    inserirBloco(prcDiv,linha);
 }
 
 void criarDivisions(SaidaCobol ** head)
@@ -188,8 +192,6 @@ void criarDivisions(SaidaCobol ** head)
 void escreverIdntDivision(SaidaCobol ** saidaCobol, char * arqCob)
 {
 
-    BlocoCobol ** idntDiv = &((*saidaCobol)->conteudo);
-
     // Coloca virgula
     char * arq_virgula = (char *) 
         malloc((strlen(arqCob)+1)*sizeof(char));
@@ -200,12 +202,12 @@ void escreverIdntDivision(SaidaCobol ** saidaCobol, char * arqCob)
 	Linha * linha = criarComentario();
 	inserirToken(&linha, arq_virgula);
 	inserirToken(&linha, "criado por C it as Cobol v0.2");
-	inserirBloco(idntDiv,linha);
+	inserirIdntDiv(saidaCobol,linha);
     
     // Cria proximas linhas 
 	Linha * linha2 = criarLinhaA();
 	inserirToken(&linha2, "IDENTIFICATION DIVISION");
-	inserirBloco(idntDiv,linha2);
+	inserirIdntDiv(saidaCobol,linha2);
 
 	char nomeProg[strlen(arqCob)];
 	strcpy(nomeProg,arqCob);
@@ -217,58 +219,101 @@ void escreverIdntDivision(SaidaCobol ** saidaCobol, char * arqCob)
 	Linha * linha3 = criarLinhaA();
     inserirToken(&linha3, "PROGRAM-ID.");
 	inserirToken(&linha3, strdup(nomeProg));
-	inserirBloco(idntDiv,linha3); 
+	inserirIdntDiv(saidaCobol,linha3); 
 
-	pularLinha(idntDiv);
+	Linha * linhaV = linhaVazia();
+	inserirIdntDiv(saidaCobol,linhaV);
+
+}
+
+void escreverDataDivision(SaidaCobol ** saidaCobol)
+{
+	if(listaDeVariaveis != NULL)
+	{
+		Linha * linha = criarLinhaA();
+		inserirToken(&linha, "DATA DIVISION");
+		inserirDataDiv(saidaCobol,linha);
+
+		linha = criarLinhaA();
+		inserirToken(&linha, "WORKING-STORAGE SECTION");
+		inserirDataDiv(saidaCobol,linha);
+
+		Simbolos * aux = listaDeVariaveis;
+		while(aux != NULL)
+		{
+			
+			linha = criarLinhaB();
+			if(strcmp(aux->tipo, "int"))
+			{
+				inserirToken(&linha, "01");
+				inserirToken(&linha, aux->nome);
+				inserirToken(&linha, "PIC S9(05)");
+			}
+			else if(strcmp(aux->tipo, "float"))
+			{
+				inserirToken(&linha, "01");
+				inserirToken(&linha, aux->nome);
+				inserirToken(&linha, "PIC S9(18)V9(18)");
+			}
+			else if(strcmp(aux->tipo, "char"))
+			{
+				inserirToken(&linha, "01");
+				inserirToken(&linha, aux->nome);
+				inserirToken(&linha, "PICTURE X(10)");
+			}
+			if(aux->value != NULL)
+			{
+				inserirToken(&linha, "VALUE");
+				inserirToken(&linha, aux->value);
+			}
+
+			inserirDataDiv(saidaCobol,linha);
+
+			aux = aux->proximo;
+		}
+		linha = criarLinhaA();
+		inserirDataDiv(saidaCobol,linha);
+
+	}
 
 }
 
 void escreverProcDivision(SaidaCobol ** saidaCobol)
 {
-	SaidaCobol * cursor = (*saidaCobol)->lateral; /* environment div */
-	cursor = cursor->lateral; /* data division */               
-    cursor = cursor->lateral; /* procedure division */
-    BlocoCobol ** prcDiv = &(cursor->conteudo);
 
 	Linha * linha = criarLinhaA();
     inserirToken(&linha,"PROCEDURE DIVISION");
-	inserirBloco(prcDiv,linha);
+	inserirProcDiv(saidaCobol,linha);
 
-	pularLinha(prcDiv);
+	Linha * linhaV = linhaVazia();
+	inserirProcDiv(saidaCobol,linhaV);
 
     Linha * linha2 = criarLinhaA();
     inserirToken(&linha2,"000000-MAIN");
     inserirToken(&linha2,"SECTION");
-	inserirBloco(prcDiv,linha2);
+	inserirProcDiv(saidaCobol,linha2);
 
-	//criaEscopo("main");
 }
 
-void fechaMain(SaidaCobol ** saidaCobol, Linha * printbuff)
+void fechaMainSection(SaidaCobol ** saidaCobol)
 {
-	SaidaCobol * cursor = (*saidaCobol)->lateral; /* environment div */
-	cursor = cursor->lateral; /* data division */               
-    cursor = cursor->lateral; /* procedure division */
-    BlocoCobol ** prcDiv = &(cursor->conteudo);
 
-    limparPrintBuff(saidaCobol,printbuff);
+    limparPrintBuff(saidaCobol);
 
-    pularLinha(prcDiv);
+	Linha * linhaV = linhaVazia();
+	inserirProcDiv(saidaCobol,linhaV);
 
 	Linha * linha = criarLinhaB();
     inserirToken(&linha,"STOP RUN");
-	inserirBloco(prcDiv,linha);
+	inserirProcDiv(saidaCobol,linha);
 
 	Linha * linha2 = criarLinhaB();
     inserirToken(&linha2,"000000-EXIT");
-	inserirBloco(prcDiv,linha2);
+	inserirProcDiv(saidaCobol,linha2);
 
     Linha * linha3 = criarLinhaB();
     inserirToken(&linha3,"EXIT");
-	inserirBloco(prcDiv,linha3);
-
-	//adicionaSimbolos();
-    //saiEscopo();
+	inserirProcDiv(saidaCobol,linha3);
 
 }
 
@@ -336,111 +381,3 @@ void escreverArquivo(FILE * file, SaidaCobol * saidaCobol)
 	}
 
 }
-
-/*
-void inserirSaidaVariaveis(Linha * linha)
-{
-
-	BlocoCobol * novoElemento =
-	    (BlocoCobol *) malloc(sizeof(BlocoCobol));
-	novoElemento->linha = linha;
-	novoElemento->proximo = NULL;
-    
-    if(saidaVariaveis == NULL)
-    {
-    	saidaVariaveis = novoElemento;
-        saidaVariaveis->anterior = NULL;
-
-    }
-    else 
-    {
-    	BlocoCobol * cursor = saidaVariaveis;
-
-	    while (cursor->proximo != NULL)
-	    {
-		    cursor = cursor->proximo;
-	    }
-	    cursor->proximo = novoElemento;
-	    novoElemento->anterior = cursor;
-	}
-
-}
-
-void initDataDivision()
-{
-	saidaVariaveis = NULL;
-	if(listaDeVariaveis != NULL)
-	{
-		Linha * linha = criarLinhaA();
-		inserirToken(&linha, "DATA DIVISION");
-		inserirSaidaVariaveis(linha);
-		linha = criarLinhaA();
-		inserirToken(&linha, "WORKING-STORAGE SECTION");
-		inserirSaidaVariaveis(linha);
-
-		Simbolos * aux = listaDeVariaveis;
-		while(aux != NULL)
-		{
-			
-			linha = criarLinhaB();
-			if(!strcmp(aux->tipo, "int"))
-			{
-				inserirToken(&linha, "01");
-				inserirToken(&linha, aux->nome);
-				inserirToken(&linha, "PIC S9(05)");
-			}
-			else if(!strcmp(aux->tipo, "float"))
-			{
-				inserirToken(&linha, "01");
-				inserirToken(&linha, aux->nome);
-				inserirToken(&linha, "PIC S9(18)V9(18)");
-			}
-			else if(!strcmp(aux->tipo, "char"))
-			{
-				inserirToken(&linha, "01");
-				inserirToken(&linha, aux->nome);
-				inserirToken(&linha, "PICTURE X(10)");
-			}
-			if(aux->value != NULL)
-			{
-				inserirToken(&linha, "VALUE");
-				inserirToken(&linha, aux->value);
-			}
-
-			inserirSaidaVariaveis(linha);
-
-			aux = aux->proximo;
-		}
-		linha = criarLinhaA();
-		inserirSaidaVariaveis(linha);
-
-	}
-
-	if(saidaVariaveis != NULL)
-	{
-		BlocoCobol * aux = saidaCobol;
-		while(aux != NULL)
-		{
-			if(aux->linha->texto != NULL)
-			{
-				if(!strcmp(aux->linha->texto->token, "PROCEDURE DIVISION"))
-				{
-					break;
-				}
-			}
-			aux = aux->proximo;
-			
-		}
-		BlocoCobol * tail = aux;
-		BlocoCobol * head = aux->anterior;
-
-		head->proximo = saidaVariaveis;
-
-		BlocoCobol * aux2 = head->proximo;
-		while(aux2->proximo != NULL)
-			aux2 = aux2->proximo;
-		aux2->proximo = tail;
-	}
-}
-
-*/

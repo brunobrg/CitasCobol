@@ -1,8 +1,7 @@
 int main ()
 {
 
-
-	int x;
+	int x = 1;
 	float y;
 	int z;
 	int vlvvflvv;

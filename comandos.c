@@ -2,11 +2,28 @@
 #include <string.h>
 #include <stdlib.h>
 #include "estruturaCobol.h"
+#include "escopo.h"
 #include "traducao.h"
 
-/* implementacao */
+/* variaveis globais */
+Linha * printbuff = NULL; /* Buffer de string a imprimir */
 
-void imprimir(SaidaCobol ** saidaCobol, char * str, Linha ** printbuff)
+
+/* implementacao */
+void abreMain(SaidaCobol ** saidaCobol)
+{
+    escreverProcDivision(saidaCobol);
+    criaEscopo("main");
+}
+
+void fechaMain(SaidaCobol ** saidaCobol)
+{
+    fechaMainSection(saidaCobol);
+    adicionaSimbolos();
+    saiEscopo();
+}
+
+void imprimir(SaidaCobol ** saidaCobol, char * str)
 {
     // erro se o printf for vazio
 	if(strlen(str)<3)
@@ -16,15 +33,15 @@ void imprimir(SaidaCobol ** saidaCobol, char * str, Linha ** printbuff)
 	Linha * linha;
 	char * token;
 
-	if(*printbuff == NULL)
+	if(printbuff == NULL)
     {
         linha = criarLinhaB();
         inserirToken(&linha, "DISPLAY");
     }
     else
     {
-      	linha = *printbuff;
-      	*printbuff = NULL;
+      	linha = printbuff;
+      	printbuff = NULL;
     }
 
 	// remove aspas
@@ -41,7 +58,7 @@ void imprimir(SaidaCobol ** saidaCobol, char * str, Linha ** printbuff)
     	{
             sprintf(token,"\"%s\"", novaLinha);
     		inserirToken(&linha, token);
-            *printbuff = linha;
+            printbuff = linha;
 	        novaLinha = NULL;
     	}
     	else if (str[0] == 'n')
@@ -50,7 +67,7 @@ void imprimir(SaidaCobol ** saidaCobol, char * str, Linha ** printbuff)
 		    inserirToken(&linha, token);
 		    inserirProcDiv(saidaCobol,linha);
 		    linha = NULL;
-            *printbuff = NULL;
+            printbuff = NULL;
             if (strlen(str) > 1)
             {
                 novaLinha = strsep (&str, "\\");
@@ -75,9 +92,8 @@ void imprimir(SaidaCobol ** saidaCobol, char * str, Linha ** printbuff)
 
 }
 
-void limparPrintBuff(SaidaCobol ** saidaCobol, Linha * printbuff)
-{
- 
+void limparPrintBuff(SaidaCobol ** saidaCobol)
+ {
 	if ( printbuff != NULL )
 	{
 		inserirProcDiv(saidaCobol,printbuff);

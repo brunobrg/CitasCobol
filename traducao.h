@@ -6,13 +6,14 @@
 /* prototipos */
 char            * nomeProgramaCob(char *);
 Linha           * criarLinhaB();
-void              inserirProcDiv(SaidaCobol **, Linha *);
+void              inserirIdntDiv(SaidaCobol **, Linha *);
 void              inserirDataDiv(SaidaCobol **, Linha *);
+void              inserirProcDiv(SaidaCobol **, Linha *);
 void              criarDivisions(SaidaCobol **);
 void              escreverIdntfDivision(SaidaCobol **, char *);
 void 		      escreverDataDivision(SaidaCobol **);
 void              escreverProcDivision(SaidaCobol **);
-void              fechaMain(SaidaCobol **,Linha *);
+void              fechaMainSection(SaidaCobol **);
 void              organizarSaida(SaidaCobol **);
 void              escreverArquivo(FILE *, SaidaCobol *);
 

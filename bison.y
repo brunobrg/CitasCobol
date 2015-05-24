@@ -7,21 +7,14 @@
 #include "traducao.h"
 
 /* Variaveis globais */
-extern FILE     * yyin;            /* Arquivo do parser */
-FILE            * arq_entrada;     /* Arquivo de entrada */
-FILE            * arq_saida;       /* Arquivo de saida */
-int               contLinhasC = 1; /* Contador do arquivo de entrada */
-ListaDeEscopo   * listaDeEscopo;
-Simbolos        * listaDeVariaveis;
-Escopo          * escopo = NULL;
-Escopo          * escopoAtual;
-int               idEscopo = 0;      
-char            * nomePrograma;     /* Nome do programa */
-Linha           * printbuff = NULL; /* Buffer de string a imprimir */
-SaidaCobol      * saidaCobol;       /* Arvore de blocosCobol */
-SaidaCobol      * saidaVariaveis;   
-int               p;                /* Passo de compilacao */
-int               qntErros=0;       /* Quantidade de erros */
+extern FILE     * yyin;              /* Arquivo do parser */
+FILE            * arq_entrada;       /* Arquivo de entrada */
+FILE            * arq_saida;         /* Arquivo de saida */
+int               contLinhasC = 1;   /* Contador do arq de entrada */   
+char            * nomePrograma;      /* Nome do programa */
+SaidaCobol      * saidaCobol = NULL; /* Arvore de blocosCobol */
+int               p;                 /* Passo de compilacao */
+int               qntErros=0;        /* Quantidade de erros */
 
 %}
 
@@ -47,9 +40,9 @@ Global
 
 Main
     : TYPE MAIN Argumentos 
-      { if(p==2) escreverProcDivision(&saidaCobol); }  
+      { if(p==2) abreMain(&saidaCobol); }  
       Bloco
-      { if(p==2) fechaMain(&saidaCobol,printbuff); }
+      { if(p==2) fechaMain(&saidaCobol); }
     ;
 
 Argumentos
@@ -74,39 +67,38 @@ Comando
 
 Atribuicao
     : WORD '=' NUMBER '+' NUMBER 
-    {		
-	  /* calcula(expressao);
-    **** encapsular:
-		Linha * linha = criarLinhaB();
-		inserirToken(&linha, "COMPUTE");
-		inserirToken(&linha, $1);
-		inserirToken(&linha, "=");
-		inserirToken(&linha, $3);
-		inserirToken(&linha, "+");
-		inserirToken(&linha, $5);
-		inserirSaida(linha);
-    ****
-		*/
-    }
+      { if (p==2)
+        {		
+         /**** encapsular em uma funcao ****/
+		     Linha * linha = criarLinhaB();
+		     inserirToken(&linha, "COMPUTE");
+		     inserirToken(&linha, $1);
+		     inserirToken(&linha, "=");
+		     inserirToken(&linha, $3);
+		     inserirToken(&linha, "+");
+		     inserirToken(&linha, $5);
+		     inserirProcDiv(&saidaCobol, linha);
+         /****                          ****/
+        }
+      }
     ;
 
 Declaracao
     : TYPE WORD
-    { /* 
-      adicionaSimbolo(escopoAtual, "declarada", $1, $2);
-      */
-    }
+      { /* if(p==1) */
+        adicionaSimbolo("declarada", $1, $2); 
+      }
     | TYPE WORD '=' NUMBER 
-    { /* 
-	  adicionaSimbolo(escopoAtual, "declarada", $1, $2); valorSimbolo(escopoAtual, $1, $2, $4);
-	  */
-    }
+      { /* if(p==1) */
+        adicionaSimbolo("declarada", $1, $2); 
+        valorSimbolo($1, $2, $4);
+      }
     ;
 
 Printf
     : PRINTF '(' QUOTE ')'
-      { if(p==2) imprimir(&saidaCobol,$3,&printbuff); }
-	;
+      { if(p==2) imprimir(&saidaCobol,$3); }
+	  ;
 
 %%
 
@@ -128,35 +120,45 @@ void main(int argc, char *argv[]){
       {
         switch ( p )
         {
+                                          /*  os 3 passos de parse nao
+                                              estao funcionando pq nao
+                                              consegui usar o yy_flush_buffer. 
+                                              quando conseguir, tirar os comentarios indicados.
+                                          */
+
           case 0: /* p=0: Pré-processamento */
             printf("* Pré-processamento...\n");
-            //yyin = arq_entrada;
-            //yyparse();
+            //yyin = arq_entrada;          // tirar comentario
+            //yyparse();                   // tirar comentario
             criarDivisions(&saidaCobol);
             escreverIdntDivision(&saidaCobol,nomePrograma);
             break;
           case 1: /* p=1: Escopo e Tabela de Variaveis*/
             printf("* Montando tabela de variáveis...\n"); 
-            //yyin = arq_entrada;
-            //yyparse();
-            //initEscopo();
-            //escreverDataDivision();
+            //yyin = arq_entrada;           // tirar comentario
+            //yyparse();                    // tirar comentario
             break;
           case 2: /* p=2: Traducao */
             printf("* Lendo o programa...\n");
             yyin = arq_entrada;
+            initEscopo();                      // mover para o passo 1
+
             yyparse();
+            terminaEscopo();
+
+            escreverDataDivision(&saidaCobol); //mover para o passo 1
+
             fclose(arq_entrada);
 
-            if(verificaLista(listaDeEscopo)) {}
-            else yyerror(2);
+            //if(verificaListaEscopo()) {}
+            //else yyerror(2);
 
             if(qntErros == 0)
             {
               arq_saida = fopen(nomePrograma, "w+");
               organizarSaida(&saidaCobol);
 		          escreverArquivo(arq_saida,saidaCobol);
-              printf("*** Tradução completa.\n");
+              printf("***** Tradução completa.\n");
               fclose(arq_saida);
             }
 
@@ -172,8 +174,8 @@ void main(int argc, char *argv[]){
 	}
 }
 
-yyerror(int error_code){
-
+yyerror(int error_code)
+{
   qntErros++;
   printf("*** ERRO %i: ", error_code);
   switch ( error_code )
@@ -198,4 +200,8 @@ yyerror(int error_code){
   }
 }
 
-
+warning(char * msg)
+{
+  printf("*** WARNING: linha %d.\n", contLinhasC);
+  printf("***          %s\n",msg);
+}
