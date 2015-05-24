@@ -3,10 +3,9 @@
 
 #include "estruturaCobol.h"
 
-/* prototipos 
-void imprimir(char *, Linha **);
-void guardaBuffer(Linha *,Linha **);
-void limparPrintBuff(); */
+/* prototipos */
+void imprimir(SaidaCobol **, char *, Linha **);
+void limparPrintBuff(SaidaCobol **, Linha **); 
 
 #endif /* !COMANDOS_H_INCLUDED  */
  

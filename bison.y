@@ -6,18 +6,20 @@
 #include "traducao.h"
 
 /* Variaveis globais */
-extern FILE     * yyin;
-int               contLinhasC = 1;
+extern FILE     * yyin;            /* Arquivo do parser */
+FILE            * arq_entrada;     /* Arquivo de entrada */
+FILE            * arq_saida;       /* Arquivo de saida */
+int               contLinhasC = 1; /* Contador do arquivo de entrada */
 ListaDeEscopo   * listaDeEscopo;
 Simbolos        * listaDeVariaveis;
 Escopo          * escopo = NULL;
 Escopo          * escopoAtual;
-int               idEscopo = 0;
-char            * nomePrograma;
-Linha           * printbuff = NULL;
-SaidaCobol      * saidaCobol;
-SaidaCobol      * saidaVariaveis;
-int               passoComp;
+int               idEscopo = 0;      
+char            * nomePrograma;     /* Nome do programa */
+Linha           * printbuff = NULL; /* Buffer de string a imprimir */
+SaidaCobol      * saidaCobol;       /* Arvore de blocosCobol */
+SaidaCobol      * saidaVariaveis;   
+int               p;                /* Passo de compilacao */
 
 
 %}
@@ -44,9 +46,9 @@ Global
 
 Main
     : TYPE MAIN Argumentos 
-      {/* initProcDivision($2); */}  
+      { if(p=2) escreverProcDivision(&saidaCobol); }  
       Bloco
-      {/* fechaMain(); */}
+      { if(p=2) fechaMain(&saidaCobol); }
     ;
 
 Argumentos
@@ -102,7 +104,7 @@ Declaracao
 
 Printf
     : PRINTF '(' QUOTE ')'
-      { /*imprimir($3,&printbuff); */}
+      { if(p=2) imprimir(&saidaCobol,$3,&printbuff); }
 	;
 
 %%
@@ -114,34 +116,34 @@ void main(int argc, char *argv[]){
 	if(argc < 2)
 		yyerror(0);
 
-  FILE * arq_entrada = fopen(argv[1], "r");
+  arq_entrada = fopen(argv[1], "r");
   nomePrograma = nomeProgramaCob(argv[1]);
-  FILE * arq_saida = fopen(nomePrograma, "w+");
+  arq_saida = fopen(nomePrograma, "w+");
 
 	/* --- --- --- --- --- --- --- ---*/
   
 	if(arq_entrada)
 	{
-      for(passoComp=0;passoComp<=2;passoComp++)
+      for(p=0;p<=2;p++)
       {
-        switch ( passoComp )
+        switch ( p )
         {
-          case 0: /* Pré-processamento */
+          case 0: /* p=0: Pré-processamento */
             printf("* Pré-processamento...\n");
             //yyparse();
             yyin = arq_entrada;
             criarDivisions(&saidaCobol);
-            escreverIdntDivision(&saidaCobol->conteudo,nomePrograma);
+            escreverIdntDivision(&saidaCobol,nomePrograma);
             break;
-          case 1: /* Escopo e Tabela de Variaveis*/
+          case 1: /* p=1: Escopo e Tabela de Variaveis*/
             printf("* Montando tabela de variáveis...\n");          
             //yyparse();
             //initEscopo();
             //escreverDataDivision();
             break;
-          case 2: /* Traducao */
+          case 2: /* p=2: Traducao */
             printf("* Gerando programa Cobol...\n");
-            //yyparse();
+            yyparse();
             fclose(arq_entrada);
 
             organizarSaida(&saidaCobol);
@@ -157,7 +159,7 @@ void main(int argc, char *argv[]){
 	          }
 	          else
 	          {
-		         escreverErro(nomePrograma);
+		         yyerror(2);
 	          }
 	          */
             printf("*** Tradução completa.\n");
@@ -181,7 +183,11 @@ yyerror(int error_code){
 	    exit(1);
     case 1 :
       printf("Arquivo não encontrado.\n");
-      exit(1);    
+      exit(1);   
+    case 2:
+      printf("Erro no arquivo de saída.\n");
+      fprintf(arq_saida, "Erro no arquivo, por favor arrumar os erros.\n");
+      exit(1);
     default : 
       printf("Erro encontrado na linha %d.\n", contLinhasC);
       break;
