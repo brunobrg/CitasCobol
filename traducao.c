@@ -5,14 +5,8 @@
 #include "estruturaCobol.h"
 #include "traducao.h"
 
-/*
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <dirent.h>
-#include "escopo.h"
-#include "comandos.h"
-*/
+/* variaveis globais */
+int contLinhasCobol = 1;
 
 /* implementacao */
 char * nomeProgramaCob(char * argv)
@@ -250,14 +244,14 @@ void escreverProcDivision(SaidaCobol ** saidaCobol)
 	//criaEscopo("main");
 }
 
-void fechaMain(SaidaCobol ** saidaCobol)
+void fechaMain(SaidaCobol ** saidaCobol, Linha * printbuff)
 {
 	SaidaCobol * cursor = (*saidaCobol)->lateral; /* environment div */
 	cursor = cursor->lateral; /* data division */               
     cursor = cursor->lateral; /* procedure division */
     BlocoCobol ** prcDiv = &(cursor->conteudo);
 
-    //limparPrintBuff();
+    limparPrintBuff(saidaCobol,printbuff);
 
     pularLinha(prcDiv);
 
@@ -284,11 +278,10 @@ void organizarBloco(BlocoCobol ** blocoCobol)
     {
         BlocoCobol * cursor = *blocoCobol;
 	
-	    int i = 1;
 	    while(cursor != NULL)
 	    {
-	    	cursor->linha->numeracao = i;
-            i++;
+	    	cursor->linha->numeracao = contLinhasCobol;
+            contLinhasCobol++;
 	        cursor = cursor->proximo;
 	    }
     }

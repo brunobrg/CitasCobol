@@ -6,7 +6,7 @@
 %}
 
 /* TIPOS */
-D		                [0-9]
+D		                    [0-9]
 L                       [a-zA-Z_]
 H                       [a-fA-F0-9]
 E                       [Ee][+-]?{D}+
@@ -40,7 +40,7 @@ IS                      (u|U|l|L)*
 ".h"                    { contaColn(); return PH; }
 "\n"                    { contaColn(); contLinhasC++; }
 
-{L}({L}|{D})*		    { contaColn(); 
+{L}({L}|{D})*		        { contaColn(); 
                           yylval.strval = strdup(yytext); 
                           return(WORD); }
  
@@ -54,7 +54,7 @@ L?'(\\.|[^\\'])+'       { contaColn(); return(NUMBER); }
 {D}+"."{D}*({E})?{FS}?  { contaColn(); return(NUMBER); }
 
 L?\"(\\.|[^\\"])*\"     { contaColn(); 
-	                      yylval.strval = strdup(yytext); 
+	                        yylval.strval = strdup(yytext); 
                           return(QUOTE); }
 
 "&&"                    { contaColn(); return(AND); }

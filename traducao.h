@@ -12,7 +12,7 @@ void              criarDivisions(SaidaCobol **);
 void              escreverIdntfDivision(SaidaCobol **, char *);
 void 		      escreverDataDivision(SaidaCobol **);
 void              escreverProcDivision(SaidaCobol **);
-void              fechaMain(SaidaCobol **);
+void              fechaMain(SaidaCobol **,Linha *);
 void              organizarSaida(SaidaCobol **);
 void              escreverArquivo(FILE *, SaidaCobol *);
 

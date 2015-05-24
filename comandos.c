@@ -4,24 +4,13 @@
 #include "estruturaCobol.h"
 #include "traducao.h"
 
-/*
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <dirent.h>
-#include "comandos.h"
-*/
-
 /* implementacao */
 
 void imprimir(SaidaCobol ** saidaCobol, char * str, Linha ** printbuff)
 {
     // erro se o printf for vazio
-	if(strcmp(str,"\"\"") == 0)
-	{
-		char erro[] = "Zero-length printf";
-		yyerror(erro);
-	}
+	if(strlen(str)<3)
+       yyerror(3);
 
     // busca linha no buffer
 	Linha * linha;
@@ -89,7 +78,7 @@ void imprimir(SaidaCobol ** saidaCobol, char * str, Linha ** printbuff)
 void limparPrintBuff(SaidaCobol ** saidaCobol, Linha * printbuff)
 {
  
-	if (printbuff != NULL)
+	if ( printbuff != NULL )
 	{
 		inserirProcDiv(saidaCobol,printbuff);
 	}

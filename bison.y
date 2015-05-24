@@ -1,4 +1,5 @@
 %{
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "estruturaC.h"
@@ -20,7 +21,7 @@ Linha           * printbuff = NULL; /* Buffer de string a imprimir */
 SaidaCobol      * saidaCobol;       /* Arvore de blocosCobol */
 SaidaCobol      * saidaVariaveis;   
 int               p;                /* Passo de compilacao */
-
+int               qntErros=0;       /* Quantidade de erros */
 
 %}
 
@@ -41,14 +42,14 @@ int               p;                /* Passo de compilacao */
 %%
 
 Global 
-	: Main
-	;
+    : Main
+    ;
 
 Main
     : TYPE MAIN Argumentos 
-      { if(p=2) escreverProcDivision(&saidaCobol); }  
+      { if(p==2) escreverProcDivision(&saidaCobol); }  
       Bloco
-      { if(p=2) fechaMain(&saidaCobol); }
+      { if(p==2) fechaMain(&saidaCobol,printbuff); }
     ;
 
 Argumentos
@@ -61,19 +62,19 @@ Bloco
 
 Comandos
     :
-	| Comando Comandos
-	;
+    | Comando Comandos
+    ;
 
 Comando
     : Printf ';'
-	| Declaracao ';'
-	| Atribuicao ';'
-	| RETURN NUMBER ';'
-	;
+    | Declaracao ';'
+    | Atribuicao ';'
+    | RETURN NUMBER ';'
+    ;
 
 Atribuicao
     : WORD '=' NUMBER '+' NUMBER 
-	{		
+    {		
 	  /* calcula(expressao);
     **** encapsular:
 		Linha * linha = criarLinhaB();
@@ -86,8 +87,8 @@ Atribuicao
 		inserirSaida(linha);
     ****
 		*/
-	}
-	;
+    }
+    ;
 
 Declaracao
     : TYPE WORD
@@ -95,16 +96,16 @@ Declaracao
       adicionaSimbolo(escopoAtual, "declarada", $1, $2);
       */
     }
-	| TYPE WORD '=' NUMBER 
-	{ /* 
+    | TYPE WORD '=' NUMBER 
+    { /* 
 	  adicionaSimbolo(escopoAtual, "declarada", $1, $2); valorSimbolo(escopoAtual, $1, $2, $4);
 	  */
-	}
-	;
+    }
+    ;
 
 Printf
     : PRINTF '(' QUOTE ')'
-      { if(p=2) imprimir(&saidaCobol,$3,&printbuff); }
+      { if(p==2) imprimir(&saidaCobol,$3,&printbuff); }
 	;
 
 %%
@@ -118,7 +119,6 @@ void main(int argc, char *argv[]){
 
   arq_entrada = fopen(argv[1], "r");
   nomePrograma = nomeProgramaCob(argv[1]);
-  arq_saida = fopen(nomePrograma, "w+");
 
 	/* --- --- --- --- --- --- --- ---*/
   
@@ -130,40 +130,39 @@ void main(int argc, char *argv[]){
         {
           case 0: /* p=0: Pré-processamento */
             printf("* Pré-processamento...\n");
+            //yyin = arq_entrada;
             //yyparse();
-            yyin = arq_entrada;
             criarDivisions(&saidaCobol);
             escreverIdntDivision(&saidaCobol,nomePrograma);
             break;
           case 1: /* p=1: Escopo e Tabela de Variaveis*/
-            printf("* Montando tabela de variáveis...\n");          
+            printf("* Montando tabela de variáveis...\n"); 
+            //yyin = arq_entrada;
             //yyparse();
             //initEscopo();
             //escreverDataDivision();
             break;
           case 2: /* p=2: Traducao */
-            printf("* Gerando programa Cobol...\n");
+            printf("* Lendo o programa...\n");
+            yyin = arq_entrada;
             yyparse();
             fclose(arq_entrada);
 
-            organizarSaida(&saidaCobol);
-		        escreverArquivo(arq_saida,saidaCobol);
-            free(saidaCobol);
-            fclose(arq_saida);
+            if(verificaLista(listaDeEscopo)) {}
+            else yyerror(2);
 
-            /*
-   	        if(verificaLista(listaDeEscopo) || 1)
-   	        {
-	          organizarSaida(&saidaCobol->conteudo);
-		        escreverArquivo(saidaCobol->conteudo);
-	          }
-	          else
-	          {
-		         yyerror(2);
-	          }
-	          */
-            printf("*** Tradução completa.\n");
+            if(qntErros == 0)
+            {
+              arq_saida = fopen(nomePrograma, "w+");
+              organizarSaida(&saidaCobol);
+		          escreverArquivo(arq_saida,saidaCobol);
+              printf("*** Tradução completa.\n");
+              fclose(arq_saida);
+            }
+
+            free(saidaCobol);
             break;
+
         }
       }
 	}
@@ -175,6 +174,7 @@ void main(int argc, char *argv[]){
 
 yyerror(int error_code){
 
+  qntErros++;
   printf("*** ERRO %i: ", error_code);
   switch ( error_code )
   {
@@ -188,12 +188,14 @@ yyerror(int error_code){
       printf("Erro no arquivo de saída.\n");
       fprintf(arq_saida, "Erro no arquivo, por favor arrumar os erros.\n");
       exit(1);
+    case 3:
+      printf("linha %d.\n", contLinhasC);
+      printf("***         Printf() vazio.\n");
+      break;
     default : 
       printf("Erro encontrado na linha %d.\n", contLinhasC);
       break;
   }
-
-
 }
 
 

@@ -1,12 +1,14 @@
-/*
+#include "estruturaC.h"
 #include <stdio.h>
+
+
+/*
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
-#include "escopo.h"
 */
 
 /* variaveis 
@@ -221,7 +223,7 @@ void imprimeSimbolos(ListaDeEscopo * aux)
 	}
 }
 
-
+*/
 
 int verificaSimbolo(Simbolos * dec, Simbolos * usaHead)
 {
@@ -244,6 +246,8 @@ int verificaSimbolo(Simbolos * dec, Simbolos * usaHead)
 	}
 }
 
+
+
 int verificaEscopo(Escopo * aux)
 {
 	if(aux == NULL)
@@ -264,6 +268,8 @@ int verificaLista(ListaDeEscopo * aux)
 	else
 		return 1;
 }
+
+/*
 
 void adicionaSimbolos()
 {

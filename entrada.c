@@ -9,11 +9,8 @@ int main ()
 	char c;
 	printf("tok\A");
 	printf("tokB\ntokD\nkjdsfhksj\\sdflksd\n");
-	printf("tokC");
-		printf("tokD");
 
-	x = 3 + 2;
-
+    printf("1");
 	printf("tokC\E");
 
 	printf("tokF");
