@@ -6,21 +6,27 @@
 #include "traducao.h"
 
 /* variaveis globais */
-Linha * printbuff = NULL; /* Buffer de string a imprimir */
+Linha      * printbuff = NULL; /* Buffer de string a imprimir */
+extern int   p;                /* Passo de compilacao */
+
 
 
 /* implementacao */
 void abreMain(SaidaCobol ** saidaCobol)
 {
-    escreverProcDivision(saidaCobol);
-    criaEscopo("main");
+    if (p == 1) criaEscopo("main");
+    if (p == 2) escreverProcDivision(saidaCobol);
+    
 }
 
 void fechaMain(SaidaCobol ** saidaCobol)
 {
-    fechaMainSection(saidaCobol);
-    adicionaSimbolos();
-    saiEscopo();
+    if (p ==1)
+    {
+        adicionaSimbolos();
+        saiEscopo();
+    }
+    if (p == 2) fechaMainSection(saidaCobol);
 }
 
 void imprimir(SaidaCobol ** saidaCobol, char * str)

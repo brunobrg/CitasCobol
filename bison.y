@@ -45,9 +45,9 @@ Global
 
 Main
     : TYPE MAIN Argumentos 
-      { if(p==2) abreMain(&saidaCobol); }  
+      { abreMain(&saidaCobol); }  
       Bloco
-      { if(p==2) fechaMain(&saidaCobol); }
+      { fechaMain(&saidaCobol); }
     ;
 
 Argumentos
@@ -123,13 +123,13 @@ Atribuicao_Simples_Valor
 
 Declaracao
     : TYPE WORD
-      { /* if(p==1) */
-        adicionaSimbolo(escopoAtual,"declarada", $1, $2); 
+      {  if(p==1) 
+         adicionaSimbolo(escopoAtual,"declarada", $1, $2); 
       }
     | TYPE WORD '=' NUMBER 
-      { /* if(p==1) */
+      {  if(p==1) {
         adicionaSimbolo(escopoAtual,"declarada", $1, $2); 
-        valorSimbolo($1, $2, $4);
+          valorSimbolo($1, $2, $4);  }
       }
     ;
 
@@ -158,38 +158,29 @@ void main(int argc, char *argv[]){
       {
         switch ( p )
         {
-                                          /*  os 3 passos de parse nao
-                                              estao funcionando pq nao
-                                              consegui usar o yy_flush_buffer. 
-                                              quando conseguir, tirar os comentarios indicados.
-                                          */
-
-          case 0: /* p=0: Pré-processamento */
+          case 0:   /* p=0: Pré-processamento */
             printf("* Pré-processamento...\n");
-            //yyin = arq_entrada;          // tirar comentario
-            //yyparse();                   // tirar comentario
+            yyin = arq_entrada; 
+            yyparse();  
             criarDivisions(&saidaCobol);
             escreverIdntDivision(&saidaCobol,nomePrograma);
             break;
-          case 1: /* p=1: Escopo e Tabela de Variaveis*/
+          case 1:   /* p=1: Escopo e Tabela de Variaveis*/
             printf("* Montando tabela de variáveis...\n"); 
-            //yyin = arq_entrada;           // tirar comentario
-            //yyparse();                    // tirar comentario
-            break;
-          case 2: /* p=2: Traducao */
-            printf("* Lendo o programa...\n");
-            yyin = arq_entrada;
-            initEscopo();                      // mover para o passo 1
-
-            yyparse();
+            rewind(yyin);     
+            initEscopo();    
+            yyparse();     
             terminaEscopo();
-
-            escreverDataDivision(&saidaCobol); //mover para o passo 1
-
+            escreverDataDivision(&saidaCobol);
+            break;
+          case 2:   /* p=2: Traducao */
+            printf("* Lendo o programa...\n");
+            rewind(yyin);
+            yyparse();
             fclose(arq_entrada);
 
             //if(verificaListaEscopo()) {}
-            //else yyerror(2);
+            //selse yyerror(2);
 
             if(qntErros == 0)
             {
