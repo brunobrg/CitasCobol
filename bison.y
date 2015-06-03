@@ -123,13 +123,15 @@ Atribuicao_Simples_Valor
 
 Declaracao
     : TYPE WORD
-      {  if(p==1) 
-         adicionaSimbolo(escopoAtual,"declarada", $1, $2); 
+      { if(p==1) 
+          adicionaSimbolo(escopoAtual,"declarada", $1, $2); 
       }
     | TYPE WORD '=' NUMBER 
-      {  if(p==1) {
-        adicionaSimbolo(escopoAtual,"declarada", $1, $2); 
-          valorSimbolo($1, $2, $4);  }
+      { if(p==1)
+        {
+          adicionaSimbolo(escopoAtual,"declarada", $1, $2); 
+          valorSimbolo($1, $2, $4); 
+        }
       }
     ;
 

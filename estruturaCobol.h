@@ -10,6 +10,7 @@ typedef struct _TokenList
                      exceto se estiver entre aspas.
 	*/
 	char              * token;
+	int                 tklen;
 	struct _TokenList * proximo;
 }TokenList;
 
@@ -23,6 +24,7 @@ typedef struct _Linha
     texto: lista de tokens.
 	*/
     int         numeracao;
+    int         qntToks;
     char        marcador;
 	TokenList * texto;  
 	
@@ -35,6 +37,7 @@ typedef struct _BlocoCobol
     Forma o texto do arquivo de saida.
     */
 	Linha              * linha;
+	int                  qntLinhas;
 	struct _BlocoCobol * anterior;
 	struct _BlocoCobol * proximo;
 }BlocoCobol;

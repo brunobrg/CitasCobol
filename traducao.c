@@ -32,6 +32,9 @@ void inserirToken(Linha ** linha, char * token)
         (TokenList *) malloc(sizeof(TokenList));
     novoTk->token = token;
     novoTk->proximo = NULL;
+    novoTk->tklen = strlen(token);
+
+    ((*linha)->qntToks)++;
 
     TokenList * cursor = (*linha)->texto;
 
@@ -79,6 +82,7 @@ Linha * criarLinhaA()
 {
     Linha * linha = (Linha *) malloc(sizeof(Linha));
     linha->numeracao = 0;
+    linha->qntToks = 0;
     linha->marcador = ' ';
     linha->texto = NULL;
     return linha;
@@ -105,30 +109,36 @@ Linha * linhaVazia()
 	return linha;
 }
 
-void inserirBloco(BlocoCobol ** bloco, Linha * linha)
+void inserirBloco(BlocoCobol ** bloco, Linha * linha,  int posicao)
 {
 
 	BlocoCobol * novoElemento =
 	    (BlocoCobol *) malloc(sizeof(BlocoCobol));
 	novoElemento->linha = linha;
 	novoElemento->proximo = NULL;
-    
+
     if(*bloco == NULL)
     {
     	*bloco = novoElemento;
         (*bloco)->anterior = NULL;
+        (*bloco)->qntLinhas = 1;
 
     }
     else 
     {
     	BlocoCobol * cursor = *bloco;
 
-	    while (cursor->proximo != NULL)
-	    {
-		    cursor = cursor->proximo;
-	    }
+        int i;
+        for(i=0;i<posicao;i++)
+        {
+            if(cursor->proximo != NULL)
+        	    cursor = cursor->proximo;
+        }
+
 	    cursor->proximo = novoElemento;
 	    novoElemento->anterior = cursor;
+	    ((*bloco)->qntLinhas)++;
+
 	}
 
 }
@@ -136,7 +146,10 @@ void inserirBloco(BlocoCobol ** bloco, Linha * linha)
 void inserirIdntDiv(SaidaCobol ** saidaCobol, Linha * linha)
 {              
     BlocoCobol ** idtDiv = &((*saidaCobol)->conteudo);
-    inserirBloco(idtDiv,linha);
+    int posicao = 0;
+    if (*idtDiv != NULL)
+    	posicao = (*idtDiv)->qntLinhas;
+    inserirBloco(idtDiv,linha,posicao);
 }
 
 void inserirDataDiv(SaidaCobol ** saidaCobol, Linha * linha)
@@ -144,7 +157,10 @@ void inserirDataDiv(SaidaCobol ** saidaCobol, Linha * linha)
 	SaidaCobol * cursor = (*saidaCobol)->lateral; /* environment div */
 	cursor = cursor->lateral; /* data division */               
     BlocoCobol ** dtaDiv = &(cursor->conteudo);
-    inserirBloco(dtaDiv,linha);
+    int posicao = 0;
+    if (*dtaDiv != NULL)
+    	posicao = (*dtaDiv)->qntLinhas;
+    inserirBloco(dtaDiv,linha,posicao);
 }
 
 void inserirProcDiv(SaidaCobol ** saidaCobol, Linha * linha)
@@ -153,7 +169,10 @@ void inserirProcDiv(SaidaCobol ** saidaCobol, Linha * linha)
 	cursor = cursor->lateral; /* data division */               
     cursor = cursor->lateral; /* procedure division */
     BlocoCobol ** prcDiv = &(cursor->conteudo);
-    inserirBloco(prcDiv,linha);
+    int posicao = 0;
+    if (*prcDiv != NULL)
+    	posicao = (*prcDiv)->qntLinhas;
+    inserirBloco(prcDiv,linha,posicao);
 }
 
 void criarDivisions(SaidaCobol ** head)
