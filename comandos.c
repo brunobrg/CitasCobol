@@ -59,7 +59,7 @@ void imprimir(SaidaCobol ** saidaCobol, char * str)
 
     while(novaLinha != NULL)
     {
-    	token = (char *) malloc(strlen(novaLinha)*sizeof(char));
+    	token = (char *) malloc(strlen(novaLinha)*sizeof(char)+3);
     	if(str == NULL)
     	{
             sprintf(token,"\"%s\"", novaLinha);

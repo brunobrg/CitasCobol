@@ -1,26 +1,20 @@
 int main ()
 {
+    printf("de1234567890987654321abc");
+        printf("abc1234567890987654321d");
+        printf("aqui sim");
 
-	int x = 1;
-	float y;
-	int z;
-	int vlvvflvv;
-	char c;
-	printf("tok\A");
-	printf("tokB\ntokD\nkjdsfhksj\\sdflksd\n");
-	printf("tokC");
-		printf("tokD");
+    printf("de1234567890987654321abc");
+        printf("abc1234567890987654321d");
+        printf("aqui sim");
 
-	x = 3;
-	y = x;
-	z = 3 / 2;
-	d = 5 * 8;
-	x = 4 - 5;
+        printf("de1234567890987654321abc");
+        printf("abc1234567890987654321d");
+        printf("aqui sim");
 
-    printf("1");
-	printf("tokC\E");
+            printf("de1234567890987654321abc");
+        printf("abc1234567890987654321d");
+        printf("aqui sim");
 
-	printf("tokF");
-
-	return 0;
 }
+

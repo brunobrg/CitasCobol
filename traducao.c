@@ -5,12 +5,14 @@
 #include "estruturaCobol.h"
 #include "traducao.h"
 
-/* variaveis globais */
-int                contLinhasCobol = 1;
-extern Simbolos  * listaDeVariaveis;  
+/* VARIAVEIS GLOBAIS */
+int                contLinhasCobol = 1;   /* Contagem de linhas do arquivo de saida */
+extern Simbolos  * listaDeVariaveis;     
 
 
-/* implementacao */
+/* IMPLEMENTACAO */
+
+/* Rece o nome do programa.c e devolve o nome do programa .cob */
 char * nomeProgramaCob(char * argv)
 {
 	int tamanho = strlen(argv) + 4;
@@ -25,6 +27,7 @@ char * nomeProgramaCob(char * argv)
     return strdup(auxArq);
 }
 
+/* Isere um token em uma linha */
 void inserirToken(Linha ** linha, char * token)
 {
 
@@ -57,6 +60,7 @@ void inserirToken(Linha ** linha, char * token)
 
 }
 
+/* Retorna string contendo os tokens de uma Tokenlist */
 char * imprimirTL(TokenList * TL)
 {
 	char saida[65] = "";
@@ -78,6 +82,7 @@ char * imprimirTL(TokenList * TL)
 
 }
 
+/* Retorna uma linha com inicio na coluna A */
 Linha * criarLinhaA()
 {
     Linha * linha = (Linha *) malloc(sizeof(Linha));
@@ -88,6 +93,7 @@ Linha * criarLinhaA()
     return linha;
 }
 
+/* Retorna uma linha com inicio na coluna B */
 Linha * criarLinhaB()
 {
     Linha * linha = criarLinhaA();
@@ -95,6 +101,7 @@ Linha * criarLinhaB()
     return linha;
 }
 
+/* Retorna uma linha de comentario vazia */
 Linha * criarComentario()
 {
     Linha * linha = criarLinhaA();
@@ -102,6 +109,15 @@ Linha * criarComentario()
     return linha;
 }
 
+/* Retorna uma linha de continuacao */
+Linha * criarContinuacao()
+{
+    Linha * linha = criarLinhaB();
+    linha->marcador = '-';
+    return linha;
+}
+
+/* retorna uma linha em branco */
 Linha * linhaVazia()
 {
 
@@ -109,24 +125,24 @@ Linha * linhaVazia()
 	return linha;
 }
 
-void inserirBloco(BlocoCobol ** bloco, Linha * linha,  int posicao)
+/* Insere linha em um BlocoCobol na posicao dada */
+void inserirLinha(SaidaCobol ** saida, Linha * linha,  int posicao)
 {
 
-	BlocoCobol * novoElemento =
+	BlocoCobol * novoBloco =
 	    (BlocoCobol *) malloc(sizeof(BlocoCobol));
-	novoElemento->linha = linha;
-	novoElemento->proximo = NULL;
+	novoBloco->linha = linha;
 
-    if(*bloco == NULL)
+    if((*saida)->conteudo == NULL)
     {
-    	*bloco = novoElemento;
-        (*bloco)->anterior = NULL;
-        (*bloco)->qntLinhas = 1;
-
+        (*saida)->conteudo = novoBloco;
+        (*saida)->conteudo->anterior = NULL;
+        (*saida)->conteudo->proximo = NULL;
+    	(*saida)->qntLinhas = 1;
     }
     else 
     {
-    	BlocoCobol * cursor = *bloco;
+    	BlocoCobol * cursor = (*saida)->conteudo;
 
         int i;
         for(i=0;i<posicao;i++)
@@ -134,49 +150,48 @@ void inserirBloco(BlocoCobol ** bloco, Linha * linha,  int posicao)
             if(cursor->proximo != NULL)
         	    cursor = cursor->proximo;
         }
-
-	    cursor->proximo = novoElemento;
-	    novoElemento->anterior = cursor;
-	    ((*bloco)->qntLinhas)++;
-
+	    novoBloco->anterior = cursor;
+	    novoBloco->proximo = cursor->proximo;
+	    cursor->proximo = novoBloco;
+	    ((*saida)->qntLinhas)++;
 	}
 
 }
 
+/* Insere linha ao final da Identification Division */
 void inserirIdntDiv(SaidaCobol ** saidaCobol, Linha * linha)
 {              
-    BlocoCobol ** idtDiv = &((*saidaCobol)->conteudo);
+    SaidaCobol ** idtDiv = saidaCobol; /* identification division */
     int posicao = 0;
-    if (*idtDiv != NULL)
-    	posicao = (*idtDiv)->qntLinhas;
-    inserirBloco(idtDiv,linha,posicao);
+    if ((*idtDiv)->conteudo != NULL)
+        posicao = (*idtDiv)->qntLinhas;
+    inserirLinha(idtDiv,linha,posicao);
 }
 
+/* Insere linha ao final da Data Division */
 void inserirDataDiv(SaidaCobol ** saidaCobol, Linha * linha)
 {
-	SaidaCobol * cursor = (*saidaCobol)->lateral; /* environment div */
-	cursor = cursor->lateral; /* data division */               
-    BlocoCobol ** dtaDiv = &(cursor->conteudo);
+	SaidaCobol ** dtaDiv = &((*saidaCobol)->lateral->lateral); /* data division */               
     int posicao = 0;
-    if (*dtaDiv != NULL)
-    	posicao = (*dtaDiv)->qntLinhas;
-    inserirBloco(dtaDiv,linha,posicao);
+    if ((*dtaDiv)->conteudo != NULL)
+        posicao = (*dtaDiv)->qntLinhas;
+    inserirLinha(dtaDiv,linha,posicao);
 }
 
+/* Insere linha ao final da Procedure Division */
 void inserirProcDiv(SaidaCobol ** saidaCobol, Linha * linha)
 {
-	SaidaCobol * cursor = (*saidaCobol)->lateral; /* environment div */
-	cursor = cursor->lateral; /* data division */               
-    cursor = cursor->lateral; /* procedure division */
-    BlocoCobol ** prcDiv = &(cursor->conteudo);
+	SaidaCobol ** prcDiv = &((*saidaCobol)->lateral->lateral->lateral); /* procedure division */               
     int posicao = 0;
-    if (*prcDiv != NULL)
-    	posicao = (*prcDiv)->qntLinhas;
-    inserirBloco(prcDiv,linha,posicao);
+    if ((*prcDiv)->conteudo != NULL)
+        posicao = (*prcDiv)->qntLinhas;
+    inserirLinha(prcDiv,linha,posicao);
 }
 
+/* Cria o tronco principal da arvore SaidaCobol com as 4 divisions */
 void criarDivisions(SaidaCobol ** head)
 {
+
 	*head = 
 	  (SaidaCobol *) malloc (sizeof(SaidaCobol));
 	SaidaCobol * environmentDivision = 
@@ -205,9 +220,15 @@ void criarDivisions(SaidaCobol ** head)
 	environmentDivision->conteudo = NULL;
 	dataDivision->conteudo = NULL;
 	procedureDivision->conteudo = NULL;
+
+	(*head)->qntLinhas = 0;
+	environmentDivision->qntLinhas = 0;
+	dataDivision->qntLinhas = 0;
+	procedureDivision->qntLinhas = 0;
+
 }
 
-
+/* Escreve a Identification Division */
 void escreverIdntDivision(SaidaCobol ** saidaCobol, char * arqCob)
 {
 
@@ -245,6 +266,7 @@ void escreverIdntDivision(SaidaCobol ** saidaCobol, char * arqCob)
 
 }
 
+/* Escreve a Data Division*/
 void escreverDataDivision(SaidaCobol ** saidaCobol)
 {
 	if(listaDeVariaveis != NULL)
@@ -297,6 +319,7 @@ void escreverDataDivision(SaidaCobol ** saidaCobol)
 
 }
 
+/* Escreve o inicio da Procedure Division */
 void escreverProcDivision(SaidaCobol ** saidaCobol)
 {
 
@@ -314,6 +337,7 @@ void escreverProcDivision(SaidaCobol ** saidaCobol)
 
 }
 
+/* Finaliza a 000000-MAIN SECTION */
 void fechaMainSection(SaidaCobol ** saidaCobol)
 {
 
@@ -336,6 +360,49 @@ void fechaMainSection(SaidaCobol ** saidaCobol)
 
 }
 
+/* Quebra linhas com mais de 65 caracteres no conteudo de uma saidaCobol */
+void quebraLinhas(SaidaCobol ** saida)
+{
+	if (*saida != NULL)
+	{
+		int posicao = 0;
+		BlocoCobol * cursor = (*saida)->conteudo;
+		while(cursor != NULL)
+		{
+			TokenList * tk = cursor->linha->texto;
+			if(tk != NULL && tk->tklen < 65)
+			{
+				int acumulaTam = tk->tklen + 1;
+
+			    while(tk->proximo != NULL)
+				{
+				    acumulaTam += tk->proximo->tklen + 1;
+				    if (acumulaTam > 65)
+				    {
+				        Linha * novaLinha = criarContinuacao();
+				        if(tk->proximo->tklen < 52)
+		        		{
+		        			inserirToken(&novaLinha, "       ");
+		        			novaLinha->texto->proximo->proximo = tk->proximo;
+		        		} else
+		        		{
+		        			novaLinha->texto->proximo = tk->proximo;
+		        		} 
+		        		inserirLinha(saida, novaLinha, posicao);
+		                tk->proximo = NULL;
+				    } else
+				    {
+				        tk = tk->proximo;
+				    }
+				}
+		    }
+		    cursor = cursor->proximo;
+		    posicao++;
+		}
+	}
+}
+
+/* Numera as linhas de um blocoCobol */
 void organizarBloco(BlocoCobol ** blocoCobol)
 {
 	if(*blocoCobol != NULL)
@@ -351,8 +418,10 @@ void organizarBloco(BlocoCobol ** blocoCobol)
     }
 }
 
+/* Organiza um saidaCobol, quebrando as linhas grandes e numerando as linhas */
 void organizarSaida(SaidaCobol ** saidaCobol)
 {
+	quebraLinhas(saidaCobol); 
     SaidaCobol * saidaAux = *saidaCobol;
 	if(saidaAux != NULL)
 	{
@@ -360,18 +429,23 @@ void organizarSaida(SaidaCobol ** saidaCobol)
 		organizarSaida(&(saidaAux->inferior));
 		organizarSaida(&(saidaAux->lateral));
 	}
+
 }
 
-
+/* Imprime o conteudo de um blocoCobol no arquivo de saida */
 void escreverBloco(FILE * file, BlocoCobol * blocoCobol)
 {
 
 	while(blocoCobol != NULL)
 	{
 
-		if((blocoCobol->linha->marcador == '*') || 
-			(blocoCobol->linha->texto == NULL))
+		if((blocoCobol->linha == NULL)  ||
+		   (blocoCobol->linha->texto == NULL) ||
+		   (blocoCobol->linha->marcador == '*') ||
+		   (blocoCobol->proximo != NULL &&
+		    blocoCobol->proximo->linha->marcador == '-'))
 		{
+
 	        fprintf(file, "%06d%c%s\n", 
 	        	blocoCobol->linha->numeracao,
 	            blocoCobol->linha->marcador,
@@ -379,16 +453,19 @@ void escreverBloco(FILE * file, BlocoCobol * blocoCobol)
 	    }
 	    else
 	    {
+
 	    	fprintf(file, "%06d%c%s.\n", 
 	            blocoCobol->linha->numeracao,
 	    		blocoCobol->linha->marcador,
 	            imprimirTL(blocoCobol->linha->texto));
 	    }
 	    blocoCobol = blocoCobol->proximo;
+
 	}
 
 }
 
+/* Imprime o conteudo de uma saidaCobol no arquivo de saida */
 void escreverArquivo(FILE * file, SaidaCobol * saidaCobol)
 {
 
