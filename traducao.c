@@ -37,7 +37,7 @@ char * imprimirTL(TokenList * TL)
 	if(TL != NULL)
 	{
 		TokenList * cursor = TL;
-	    strcat(saida,cursor->token);
+	    strcat(saida,cursor->token); 
 
 	    if(cursor->token[strlen(cursor->token)-1] == '\"')
 	    {
@@ -51,7 +51,7 @@ char * imprimirTL(TokenList * TL)
 		while(cursor->proximo != NULL)
 		{
 			if(!dentroDeQuote)
-			    strcat(saida," ");
+			    strcat(saida," "); 
 
 			strcat(saida,cursor->proximo->token);
 
@@ -473,13 +473,13 @@ void quebraLinhas(SaidaCobol ** saida)
 			        dentroDeQuote = 1;
 			    }  
 
-				int acumulaTam = tk->tklen + 1;
+				int acumulaTam = tk->tklen + 1 - dentroDeQuote;
 
 			    while(tk->proximo != NULL)
 				{
 
-				    acumulaTam += tk->proximo->tklen + 1;
-				    if (acumulaTam > 65)
+				    acumulaTam += tk->proximo->tklen + 1 - dentroDeQuote;
+				    if (acumulaTam > 64)
 				    {
 
 				        Linha * novaLinha = criarContinuacao();
@@ -490,7 +490,6 @@ void quebraLinhas(SaidaCobol ** saida)
 				        	strcat(aspatok,tk->proximo->token);
 				        	tk->proximo->token = aspatok;
 				        	tk->proximo->tklen = tk->proximo->tklen + 1;
-				        	acumulaTam ++;
 
 							char * tokaspa = (char *) malloc((strlen(tk->token)+3)*sizeof(char)+2);
 							strcpy(tokaspa,tk->token);
@@ -499,15 +498,8 @@ void quebraLinhas(SaidaCobol ** saida)
 				        	tk->tklen = tk->tklen + 1;
 
 				        } 
-				        if(tk->proximo->tklen < 60)
-		        		{
-		        			inserirTokenApos(&novaLinha, "       ",1);
-		        			//acumulaTam += 8;
-		        			novaLinha->texto->proximo->proximo = tk->proximo;
-		        		} else 
-		        		{
-		        			novaLinha->texto->proximo = tk->proximo;
-		        		} 
+		        		inserirTokenApos(&novaLinha, "       ",1);
+		        		novaLinha->texto->proximo->proximo = tk->proximo;
 		        		tk->proximo = NULL;
 		        	    inserirLinha(saida, novaLinha, posicao);
 

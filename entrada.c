@@ -1,22 +1,10 @@
 int main ()
 {
 
-        printf("oi oi oi ");
-        printf("bla  ");
-        printf("bla \n");
-        printf("barran\n");
-        printf("kjfhkjdfhksjdfhksdjfhskdjfhskdjfhsk ksjdhfksdjhfksdjfhskdjfhskfjhsd");
-        printf("kjfhkjdfhksjdfhksdjfhskdjfhskdjfhsk/ksjdhfksdjhfksdjfhskdjfhskfjhsd");
-                printf("kjfhkjdfhksjdfhksdjfhskdjfhskdjfhsk////ksjdhfksdjhfksdjfhskdjfhskfjhsd");
-        printf("//////////////////////////////////////////////////////////////////////");
+    printf("oi    oi  oi       oi   ,     kkk ,     /   aaaaaaaaaaa ");
+    printf("kkk\n");
+    printf("kkkkkkkkkkkkkkkkkkk\n");
+    printf("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk\n");
 
-
-
-
-
-
-
-
-
-
+	return 0;
 }
