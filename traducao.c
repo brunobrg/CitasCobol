@@ -6,7 +6,8 @@
 #include "traducao.h"
 
 /* VARIAVEIS GLOBAIS */
-int                contLinhasCobol = 1;   /* Contagem de linhas do arquivo de saida */
+int                contLinhasCobol = 1;   /* Contagem de linhas do arquivo
+                                             de saida */
 extern Simbolos  * listaDeVariaveis;     
 
 
@@ -27,14 +28,57 @@ char * nomeProgramaCob(char * argv)
     return strdup(auxArq);
 }
 
+/* Retorna string contendo os tokens de uma Tokenlist */
+char * imprimirTL(TokenList * TL)
+{
+	int dentroDeQuote = 0;
+	char saida[65] = "";
+
+	if(TL != NULL)
+	{
+		TokenList * cursor = TL;
+	    strcat(saida,cursor->token);
+
+	    if(cursor->token[strlen(cursor->token)-1] == '\"')
+	    {
+	        dentroDeQuote = 0;
+
+	    } else if (cursor->token[0] == '\"')
+	    {
+	        dentroDeQuote = 1;
+	    }  
+
+		while(cursor->proximo != NULL)
+		{
+			if(!dentroDeQuote)
+			    strcat(saida," ");
+
+			strcat(saida,cursor->proximo->token);
+
+		    if(cursor->proximo->token[strlen(cursor->proximo->token)-1] == '\"')
+		    {
+		        dentroDeQuote = 0;
+		    } else if (cursor->proximo->token[0] == '\"')
+		    {
+		        dentroDeQuote = 1;
+		    }  		
+
+			cursor = cursor->proximo;
+		}
+	}
+
+    return strdup(saida);
+
+}
+
 /* Isere um token em uma linha */
-void inserirToken(Linha ** linha, char * token)
+void inserirTokenApos(Linha ** linha, char * token, int posicao)
 {
 
     TokenList * novoTk = 
         (TokenList *) malloc(sizeof(TokenList));
-    novoTk->token = token;
-    novoTk->proximo = NULL;
+    novoTk->token = (char *) malloc((strlen(token)+1)*sizeof(char));
+    strcpy(novoTk->token,token);
     novoTk->tklen = strlen(token);
 
     ((*linha)->qntToks)++;
@@ -44,41 +88,82 @@ void inserirToken(Linha ** linha, char * token)
     if(cursor == NULL)
     {
         (*linha)->texto = novoTk;
-    }
+        novoTk->proximo = NULL;
+    } 
     else
     {
     	Linha * guardaLinha = *linha;
 
-        while (cursor->proximo != NULL)
-	    {
-		    cursor = cursor->proximo;
-	    }
+        int i;
+        for(i=0;i<posicao;i++)
+        {
+            if(cursor->proximo != NULL)
+            {
+        	    cursor = cursor->proximo;
+        	} 
+        }    
+        novoTk->proximo = cursor->proximo;
         cursor->proximo = novoTk;
-
         *linha = guardaLinha;
-    }
+    } 
+
 
 }
 
-/* Retorna string contendo os tokens de uma Tokenlist */
-char * imprimirTL(TokenList * TL)
+/* Isere tokens que fazem parte de um comentario */
+void inserirToksInsideQuote(Linha ** linha, char * token, int separador)
 {
-	char saida[65] = "";
+	if(separador == 34)
+		separador++;  /* O caracter 34 eh a aspa ". Causa problemas. */
 
-	if(TL != NULL)
+    char * quebraTk = (char *) malloc((strlen(token)+2)*sizeof(char));
+    char * sep = (char *) malloc(2*sizeof(char));
+    sprintf(sep,"%c",separador);
+    char * guardaTk = (char *) malloc((strlen(token)+2)*sizeof(char));
+    strcpy(guardaTk,token);
+
+    while(quebraTk = strsep (&token, sep))
+    {
+
+    	/* Verifica se ha string apos o separador*/
+    	char * guardaSeparador = (char *) malloc((strlen(quebraTk)+2)*sizeof(char));
+    	if (strcmp(quebraTk,guardaTk) != 0)
+    	{
+    		strcpy(guardaSeparador,quebraTk);
+    		strcat(guardaSeparador,sep);
+    		quebraTk = guardaSeparador;
+    	} 
+
+    	if(strlen(quebraTk) < 53)
+    	{
+            inserirTokenApos(linha,quebraTk,(*linha)->qntToks);
+        } 
+        else
+        { 
+            inserirToksInsideQuote(linha,quebraTk,separador+1);
+        }
+        if(token != NULL)
+            strcpy(guardaTk,token);
+
+    }
+}
+
+/* Isere um token ao final de uma linha */
+void inserirToken(Linha ** linha, char * token)
+{
+	
+	if (token[1] != '\"' && strlen(token) <= 30)
 	{
-		TokenList * cursor = TL;
-	    strcat(saida,cursor->token);
-
-		while(cursor->proximo != NULL)
-		{
-			strcat(saida," ");
-			strcat(saida,cursor->proximo->token);
-			cursor = cursor->proximo;
-		}
-	}
-
-    return strdup(saida);
+        inserirTokenApos(linha,token,(*linha)->qntToks);
+    } else if (token[0] != '\"')
+    {
+		yyerror(4);
+	} else 
+    {
+    	inserirToksInsideQuote(linha,token,32); /* 32 e o primeiro char
+    	                                        ascii, que corresponde 
+    	                                        ao espaco */
+    }
 
 }
 
@@ -132,6 +217,7 @@ void inserirLinha(SaidaCobol ** saida, Linha * linha,  int posicao)
 	BlocoCobol * novoBloco =
 	    (BlocoCobol *) malloc(sizeof(BlocoCobol));
 	novoBloco->linha = linha;
+	novoBloco->proximo = NULL;
 
     if((*saida)->conteudo == NULL)
     {
@@ -148,10 +234,12 @@ void inserirLinha(SaidaCobol ** saida, Linha * linha,  int posicao)
         for(i=0;i<posicao;i++)
         {
             if(cursor->proximo != NULL)
+            {
         	    cursor = cursor->proximo;
+        	    novoBloco->proximo = cursor->proximo;
+        	}
         }
 	    novoBloco->anterior = cursor;
-	    novoBloco->proximo = cursor->proximo;
 	    cursor->proximo = novoBloco;
 	    ((*saida)->qntLinhas)++;
 	}
@@ -363,42 +451,85 @@ void fechaMainSection(SaidaCobol ** saidaCobol)
 /* Quebra linhas com mais de 65 caracteres no conteudo de uma saidaCobol */
 void quebraLinhas(SaidaCobol ** saida)
 {
+
 	if (*saida != NULL)
 	{
 		int posicao = 0;
+		int dentroDeQuote = 0;
 		BlocoCobol * cursor = (*saida)->conteudo;
+
 		while(cursor != NULL)
 		{
+
 			TokenList * tk = cursor->linha->texto;
-			if(tk != NULL && tk->tklen < 65)
+			if(tk != NULL)
 			{
+
+			    if(tk->token[strlen(tk->token)-1] == '\"')
+			    {
+			        dentroDeQuote = 0;
+			    } else if (tk->token[0] == '\"')
+			    {
+			        dentroDeQuote = 1;
+			    }  
+
 				int acumulaTam = tk->tklen + 1;
 
 			    while(tk->proximo != NULL)
 				{
+
 				    acumulaTam += tk->proximo->tklen + 1;
 				    if (acumulaTam > 65)
 				    {
+
 				        Linha * novaLinha = criarContinuacao();
-				        if(tk->proximo->tklen < 52)
+				        if(dentroDeQuote)
+				        {
+				        	char * aspatok = (char *) malloc((strlen(tk->proximo->token)+2)*sizeof(char));
+				        	strcpy(aspatok,"\"");
+				        	strcat(aspatok,tk->proximo->token);
+				        	tk->proximo->token = aspatok;
+				        	tk->proximo->tklen = tk->proximo->tklen + 1;
+				        	acumulaTam ++;
+
+							char * tokaspa = (char *) malloc((strlen(tk->token)+3)*sizeof(char)+2);
+							strcpy(tokaspa,tk->token);
+							strcat(tokaspa,"\"");
+				        	tk->token = tokaspa;
+				        	tk->tklen = tk->tklen + 1;
+
+				        } 
+				        if(tk->proximo->tklen < 60)
 		        		{
-		        			inserirToken(&novaLinha, "       ");
+		        			inserirTokenApos(&novaLinha, "       ",1);
+		        			//acumulaTam += 8;
 		        			novaLinha->texto->proximo->proximo = tk->proximo;
-		        		} else
+		        		} else 
 		        		{
 		        			novaLinha->texto->proximo = tk->proximo;
 		        		} 
-		        		inserirLinha(saida, novaLinha, posicao);
-		                tk->proximo = NULL;
+		        		tk->proximo = NULL;
+		        	    inserirLinha(saida, novaLinha, posicao);
+
 				    } else
 				    {
 				        tk = tk->proximo;
 				    }
+
+					if(tk->token[strlen(tk->token)-1] == '\"')
+					{
+					     dentroDeQuote = 0;
+					} else if (tk->token[0] == '\"')
+					{
+					    dentroDeQuote = 1;
+					}
+
 				}
 		    }
 		    cursor = cursor->proximo;
 		    posicao++;
 		}
+
 	}
 }
 

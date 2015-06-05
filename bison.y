@@ -170,6 +170,7 @@ void main(int argc, char *argv[]){
           case 1:   /* p=1: Escopo e Tabela de Variaveis*/
             printf("* Montando tabela de variáveis...\n"); 
             rewind(yyin);     
+            contLinhasC = 1; 
             initEscopo();    
             yyparse();     
             terminaEscopo();
@@ -178,6 +179,7 @@ void main(int argc, char *argv[]){
           case 2:   /* p=2: Traducao */
             printf("* Lendo o programa...\n");
             rewind(yyin);
+            contLinhasC = 1; 
             yyparse();
             fclose(arq_entrada);
 
@@ -224,6 +226,10 @@ yyerror(int error_code)
     case 3:
       printf("linha %d.\n", contLinhasC);
       printf("***         Printf() vazio.\n");
+      break;
+    case 4:
+      printf("linha %d.\n", contLinhasC);
+      printf("***         Identificador muito grande.\n");
       break;
     default : 
       printf("Erro encontrado na linha %d.\n", contLinhasC);
