@@ -1,7 +1,35 @@
+/* ESTRUTURA C:
+   Aqui estao as principais estruturas de entrada.
+
+ * Escopo: 
+   ======  
+ *** nome:  
+ *** id: 
+ *** s_declarados:
+ *** s_usados:
+ *** anterior:
+
+
+ * ListaDeEscopo:
+   =============   
+ *** proximo: 
+ *** escopo:
+
+
+ * Simbolos: 
+   ========  
+ *** tipo:  
+ *** nome: 
+ *** value:
+ *** proximo: 
+
+ */
+
 #ifndef ESTRUTURAC_H_INCLUDED
 #define ESTRUTURAC_H_INCLUDED
 
-/* structs */
+/* STRUCTS */
+ 
 typedef struct _escopo
 {
 	char nome[40];

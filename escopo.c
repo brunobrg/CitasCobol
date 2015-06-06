@@ -3,19 +3,22 @@
 #include <string.h>
 #include "estruturaC.h"
 
-/* variaveis globais */
+/* VARIAVEIS GLOBAIS */
 int               idEscopo = 0;
 Escopo          * escopoAtual;
 ListaDeEscopo   * listaDeEscopo;
 Simbolos        * listaDeVariaveis;  
 
-/* implementacao */
+/* IMPLEMENTACAO */
+
+/* */
 void entraEscopo(Escopo * temp)
 {
 	escopoAtual = temp;	
 	printf("*** entrou no escopo: %s\n", temp->nome);
 }
 
+/* */
 ListaDeEscopo * addLista()
 {
 	ListaDeEscopo * addLista = (ListaDeEscopo*) malloc(sizeof(ListaDeEscopo));
@@ -25,6 +28,7 @@ ListaDeEscopo * addLista()
 	return addLista;
 }
 
+/* */
 Escopo * addEscopo(char newName[40], Escopo * atual)
 {
 	
@@ -50,6 +54,7 @@ Escopo * addEscopo(char newName[40], Escopo * atual)
 	return add;
 }
 
+/* */
 void criaEscopo(char newName[40])
 {
 	idEscopo+=1;
@@ -75,6 +80,7 @@ void criaEscopo(char newName[40])
 	entraEscopo(add);
 }
 
+/* */
 void initEscopo()
 {
 	listaDeVariaveis = NULL;
@@ -82,11 +88,13 @@ void initEscopo()
 	criaEscopo("global");
 }
 
+/* */
 void terminaEscopo()
 {
     printf("*** saiu do escopo: %s\n", escopoAtual->nome);
 }
 
+/* */
 Simbolos * addSimbolo(char tipo[40], char nome[40])
 {
 	Simbolos * add = (Simbolos *) malloc(sizeof(Simbolos));
@@ -96,6 +104,7 @@ Simbolos * addSimbolo(char tipo[40], char nome[40])
 	add->value = NULL;
 }
 
+/* */
 void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], char nomeSimbolo[40])
 {
 	if(escTemp != NULL)
@@ -160,6 +169,7 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], char nomeSim
 	}
 }
 
+/* */
 void imprimeEscopos(ListaDeEscopo * aux)
 {
 	int posLista = 1;
@@ -176,6 +186,7 @@ void imprimeEscopos(ListaDeEscopo * aux)
 	}
 }
 
+/* */
 int verificaSimbolo(Simbolos * dec, Simbolos * usaHead)
 {
 	if(dec == NULL)
@@ -200,6 +211,7 @@ int verificaSimbolo(Simbolos * dec, Simbolos * usaHead)
 	}
 }
 
+/* */
 int verificaEscopo(Escopo * aux)
 {
 	if(aux == NULL)
@@ -211,6 +223,7 @@ int verificaEscopo(Escopo * aux)
 	}
 }
 
+/* */
 int verificaLista(ListaDeEscopo * aux)
 {
 	if(aux != NULL)
@@ -221,11 +234,13 @@ int verificaLista(ListaDeEscopo * aux)
 		return 1;
 }
 
+/* */
 int verificaListaEscopo()
 {
     return verificaLista(listaDeEscopo);
 }
 
+/* */
 void valorSimbolo(char tipo[5], char nomeSimbolo[30], char * valor)
 {
 	if(escopoAtual != NULL)
@@ -244,14 +259,14 @@ void valorSimbolo(char tipo[5], char nomeSimbolo[30], char * valor)
 	}
 }
 
-
+/* */
 void saiEscopo()
 {
 	printf("*** saiu do escopo: %s\n", escopoAtual->nome);
 	escopoAtual = escopoAtual->anterior;	
 }
 
-
+/* */
 void adicionaSimbolos()
 {
 adicionaSimbolo(escopoAtual, "usada", "int", "x");

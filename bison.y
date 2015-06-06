@@ -26,7 +26,7 @@ extern Escopo   * escopoAtual;
    int    intval;
 }
 
-%token <strval> COMENT1 COMENT2
+%token <strval> COMENT
 %token <strval> WORD NUMBER QUOTE
 %token LE GE EQUAL NEQUAL
 %token AND OR
@@ -75,8 +75,7 @@ Definicao
     ;
 
 Comentario
-    : COMENT1
-    | COMENT2
+    : COMENT { if(p==2) comentario(&saidaCobol,$1); }
     ;
 
 Dec_variavel
@@ -107,13 +106,13 @@ Dec_funcao
 
 Def_funcao
     : TYPE WORD '(' Def_argumentos ')'
-      { abreMain(&saidaCobol); }  
+      { abreSection(&saidaCobol,$2); }  
      '{' Bloco '}'
-      { fechaMain(&saidaCobol); }
+      { fechaSection(&saidaCobol,$2); }
     | TYPE WORD '(' ')'
-      { abreMain(&saidaCobol); }  
+      { abreSection(&saidaCobol,$2); }  
      '{' Bloco '}'
-      { fechaMain(&saidaCobol); }
+      { fechaSection(&saidaCobol,$2); }
     ; 
 
 Dec_argumentos

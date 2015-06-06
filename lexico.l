@@ -17,11 +17,11 @@ IS                      (u|U|l|L)*
 
 "/*"(.|\n)*"*/"         { contaColn(); 
                           yylval.strval = strdup(yytext);
-                          return(COMENT1);
+                          return(COMENT);
                         }
 "//"(.)*"\n"            { contaColn(); 
                           yylval.strval = strdup(yytext);
-                          return(COMENT2);
+                          return(COMENT);
                         }
 "char"                  { contaColn(); 
                           yylval.strval = "CHAR"; 

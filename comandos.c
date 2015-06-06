@@ -5,30 +5,206 @@
 #include "escopo.h"
 #include "traducao.h"
 
-/* variaveis globais */
-Linha      * printbuff = NULL; /* Buffer de string a imprimir */
-extern int   p;                /* Passo de compilacao */
+/* VARIAVEIS GLOBAIS */
+Linha            * printbuff = NULL; /* Buffer de string a imprimir */
+extern int         p;                /* Passo de compilacao */
+extern Simbolos  * listaDeVariaveis;     
 
+/* IMPLEMENTACAO */
 
-
-/* implementacao */
-void abreMain(SaidaCobol ** saidaCobol)
-{
-    if (p == 1) criaEscopo("main");
-    if (p == 2) escreverProcDivision(saidaCobol);
-    
+/* Cria um DISPLAY com o string armazenado no buffer. */
+void limparPrintBuff(SaidaCobol ** saidaCobol)
+ {
+    if ( printbuff != NULL )
+    {
+        inserirProcDiv(saidaCobol,printbuff);
+    }
 }
 
-void fechaMain(SaidaCobol ** saidaCobol)
+/* Escreve a Identification Division */
+void escreverIdntDivision(SaidaCobol ** saidaCobol, char * arqCob)
+{
+
+    // Coloca virgula
+    char * arq_virgula = (char *) 
+        malloc((strlen(arqCob)+1)*sizeof(char));
+    strcpy(arq_virgula, arqCob);
+    strcat(arq_virgula, ",");
+
+    // Cria primera linha
+    Linha * linha = criarComentario();
+    inserirToken(&linha, arq_virgula);
+    inserirToken(&linha, "criado por C it as Cobol v0.2");
+    inserirIdntDiv(saidaCobol,linha);
+    
+    // Cria proximas linhas 
+    Linha * linha2 = criarLinhaA();
+    inserirToken(&linha2, "IDENTIFICATION DIVISION");
+    inserirIdntDiv(saidaCobol,linha2);
+
+    char nomeProg[strlen(arqCob)];
+    strcpy(nomeProg,arqCob);
+
+    int i;
+    for(i = 2; nomeProg[i] != '.' ;i++);
+        nomeProg[i] = '\0';
+
+    Linha * linha3 = criarLinhaA();
+    inserirToken(&linha3, "PROGRAM-ID.");
+    inserirToken(&linha3, strdup(nomeProg));
+    inserirIdntDiv(saidaCobol,linha3); 
+
+    Linha * linhaV = linhaVazia();
+    inserirIdntDiv(saidaCobol,linhaV);
+
+}
+
+/* Escreve a Data Division. */
+void escreverDataDivision(SaidaCobol ** saidaCobol)
+{
+    if(listaDeVariaveis != NULL)
+    {
+        Linha * linha = criarLinhaA();
+        inserirToken(&linha, "DATA DIVISION");
+        inserirDataDiv(saidaCobol,linha);
+
+        linha = criarLinhaA();
+        inserirToken(&linha, "WORKING-STORAGE SECTION");
+        inserirDataDiv(saidaCobol,linha);
+
+        Simbolos * aux = listaDeVariaveis;
+        while(aux != NULL)
+        {
+            
+            linha = criarLinhaB();
+            if(strcmp(aux->tipo, "int"))
+            {
+                inserirToken(&linha, "01");
+                inserirToken(&linha, aux->nome);
+                inserirToken(&linha, "PIC S9(05)");
+            }
+            else if(strcmp(aux->tipo, "float"))
+            {
+                inserirToken(&linha, "01");
+                inserirToken(&linha, aux->nome);
+                inserirToken(&linha, "PIC S9(18)V9(18)");
+            }
+            else if(strcmp(aux->tipo, "char"))
+            {
+                inserirToken(&linha, "01");
+                inserirToken(&linha, aux->nome);
+                inserirToken(&linha, "PICTURE X(10)");
+            }
+            if(aux->value != NULL)
+            {
+                inserirToken(&linha, "VALUE");
+                inserirToken(&linha, aux->value);
+            }
+
+            inserirDataDiv(saidaCobol,linha);
+
+            aux = aux->proximo;
+        }
+        linha = criarLinhaA();
+        inserirDataDiv(saidaCobol,linha);
+
+    }
+
+}
+
+/* Escreve o cabecalho da Procedure Division. */
+void escreverProcDivision(SaidaCobol ** saidaCobol)
+{
+
+    Linha * linha = criarLinhaA();
+    inserirToken(&linha,"PROCEDURE DIVISION");
+    inserirProcDiv(saidaCobol,linha);
+
+    Linha * linhaV = linhaVazia();
+    inserirProcDiv(saidaCobol,linhaV);
+
+    Linha * linha2 = criarLinhaA();
+    inserirToken(&linha2,"000000-MAIN");
+    inserirToken(&linha2,"SECTION");
+    inserirProcDiv(saidaCobol,linha2);
+
+}
+
+/* Finaliza a 000000-MAIN SECTION */
+void fechaMainSection(SaidaCobol ** saidaCobol)
+{
+
+    limparPrintBuff(saidaCobol);
+
+    Linha * linhaV = linhaVazia();
+    inserirProcDiv(saidaCobol,linhaV);
+
+    Linha * linha = criarLinhaB();
+    inserirToken(&linha,"STOP RUN");
+    inserirProcDiv(saidaCobol,linha);
+
+    Linha * linha2 = criarLinhaB();
+    inserirToken(&linha2,"000000-EXIT");
+    inserirProcDiv(saidaCobol,linha2);
+
+    Linha * linha3 = criarLinhaB();
+    inserirToken(&linha3,"EXIT");
+    inserirProcDiv(saidaCobol,linha3);
+
+}
+
+/* Escreve o cabecalho de uma Section. */
+void abreSection(SaidaCobol ** saidaCobol, char * nome)
+{
+    if (p == 1) 
+    {
+        criaEscopo(nome);
+    }
+    else if (p == 2)
+    {
+        if(!strcmp(nome,"main"))
+            escreverProcDivision(saidaCobol);
+    } 
+}
+
+/* Escreve as ultimas linhas de uma Section. */
+void fechaSection(SaidaCobol ** saidaCobol, char * nome)
 {
     if (p ==1)
     {
         adicionaSimbolos();
         saiEscopo();
     }
-    if (p == 2) fechaMainSection(saidaCobol);
+    else if (p == 2)
+    {
+        if(!strcmp(nome,"main"))
+            fechaMainSection(saidaCobol);
+    }
+}
+/* comentario: Cria linhas de comentario */
+void comentario(SaidaCobol ** saidaCobol, char * coment){
+   char segundochar = coment[1];
+
+    // remove // ou /* 
+    coment = coment + 2;
+
+   if(segundochar == '/') /* Comentario entre // ... \n */
+   {
+       // remove \n
+       coment[strlen(coment)-1] = '\0';
+   }
+   else                  /* Comentario entre / * ... * / */
+   {
+       // remove */
+       coment[strlen(coment)-2] = '\0';
+   }
+   //printf("%s\n",coment );
 }
 
+
+/* Cria um DISPLAY para os printf terminados em \n.
+   Os printfs nao terminados em \n sao armazenados no buffer para 
+   ser impressos futuramente.*/
 void imprimir(SaidaCobol ** saidaCobol, char * str)
 {
     // erro se o printf for vazio
@@ -96,12 +272,4 @@ void imprimir(SaidaCobol ** saidaCobol, char * str)
         }
 	}
 
-}
-
-void limparPrintBuff(SaidaCobol ** saidaCobol)
- {
-	if ( printbuff != NULL )
-	{
-		inserirProcDiv(saidaCobol,printbuff);
-	}
 }

@@ -6,14 +6,12 @@
 #include "traducao.h"
 
 /* VARIAVEIS GLOBAIS */
-int                contLinhasCobol = 1;   /* Contagem de linhas do arquivo
-                                             de saida */
-extern Simbolos  * listaDeVariaveis;     
-
+int                contLinhasCobol = 1;   /* Contagem de linhas do 
+                                             arquivo de saida */
 
 /* IMPLEMENTACAO */
 
-/* Rece o nome do programa.c e devolve o nome do programa .cob */
+/* Recebe o nome do programa.c e devolve o nome do programa .cob */
 char * nomeProgramaCob(char * argv)
 {
 	int tamanho = strlen(argv) + 4;
@@ -55,7 +53,8 @@ char * imprimirTL(TokenList * TL)
 
 			strcat(saida,cursor->proximo->token);
 
-		    if(cursor->proximo->token[strlen(cursor->proximo->token)-1] == '\"')
+		    if(cursor->proximo->token[strlen(cursor->proximo->token)-1]
+		       == '\"')
 		    {
 		        dentroDeQuote = 0;
 		    } else if (cursor->proximo->token[0] == '\"')
@@ -126,7 +125,8 @@ void inserirToksInsideQuote(Linha ** linha, char * token, int separador)
     {
 
     	/* Verifica se ha string apos o separador*/
-    	char * guardaSeparador = (char *) malloc((strlen(quebraTk)+2)*sizeof(char));
+    	char * guardaSeparador = (char *) 
+    	    malloc((strlen(quebraTk)+2)*sizeof(char));
     	if (strcmp(quebraTk,guardaTk) != 0)
     	{
     		strcpy(guardaSeparador,quebraTk);
@@ -160,7 +160,7 @@ void inserirToken(Linha ** linha, char * token)
 		erro(4);
 	} else 
     {
-    	inserirToksInsideQuote(linha,token,32); /* 32 e o primeiro char
+    	inserirToksInsideQuote(linha,token,32); /* 32 eh o primeiro char
     	                                        ascii, que corresponde 
     	                                        ao espaco */
     }
@@ -259,7 +259,8 @@ void inserirIdntDiv(SaidaCobol ** saidaCobol, Linha * linha)
 /* Insere linha ao final da Data Division */
 void inserirDataDiv(SaidaCobol ** saidaCobol, Linha * linha)
 {
-	SaidaCobol ** dtaDiv = &((*saidaCobol)->lateral->lateral); /* data division */               
+	SaidaCobol ** dtaDiv = &((*saidaCobol)->lateral->lateral); 
+	                                             /* data division */               
     int posicao = 0;
     if ((*dtaDiv)->conteudo != NULL)
         posicao = (*dtaDiv)->qntLinhas;
@@ -269,7 +270,8 @@ void inserirDataDiv(SaidaCobol ** saidaCobol, Linha * linha)
 /* Insere linha ao final da Procedure Division */
 void inserirProcDiv(SaidaCobol ** saidaCobol, Linha * linha)
 {
-	SaidaCobol ** prcDiv = &((*saidaCobol)->lateral->lateral->lateral); /* procedure division */               
+	SaidaCobol ** prcDiv = &((*saidaCobol)->lateral->lateral->lateral);
+	                                        /* procedure division */               
     int posicao = 0;
     if ((*prcDiv)->conteudo != NULL)
         posicao = (*prcDiv)->qntLinhas;
@@ -316,139 +318,8 @@ void criarDivisions(SaidaCobol ** head)
 
 }
 
-/* Escreve a Identification Division */
-void escreverIdntDivision(SaidaCobol ** saidaCobol, char * arqCob)
-{
-
-    // Coloca virgula
-    char * arq_virgula = (char *) 
-        malloc((strlen(arqCob)+1)*sizeof(char));
-    strcpy(arq_virgula, arqCob);
-    strcat(arq_virgula, ",");
-
-    // Cria primera linha
-	Linha * linha = criarComentario();
-	inserirToken(&linha, arq_virgula);
-	inserirToken(&linha, "criado por C it as Cobol v0.2");
-	inserirIdntDiv(saidaCobol,linha);
-    
-    // Cria proximas linhas 
-	Linha * linha2 = criarLinhaA();
-	inserirToken(&linha2, "IDENTIFICATION DIVISION");
-	inserirIdntDiv(saidaCobol,linha2);
-
-	char nomeProg[strlen(arqCob)];
-	strcpy(nomeProg,arqCob);
-
-    int i;
-	for(i = 2; nomeProg[i] != '.' ;i++);
-        nomeProg[i] = '\0';
-
-	Linha * linha3 = criarLinhaA();
-    inserirToken(&linha3, "PROGRAM-ID.");
-	inserirToken(&linha3, strdup(nomeProg));
-	inserirIdntDiv(saidaCobol,linha3); 
-
-	Linha * linhaV = linhaVazia();
-	inserirIdntDiv(saidaCobol,linhaV);
-
-}
-
-/* Escreve a Data Division*/
-void escreverDataDivision(SaidaCobol ** saidaCobol)
-{
-	if(listaDeVariaveis != NULL)
-	{
-		Linha * linha = criarLinhaA();
-		inserirToken(&linha, "DATA DIVISION");
-		inserirDataDiv(saidaCobol,linha);
-
-		linha = criarLinhaA();
-		inserirToken(&linha, "WORKING-STORAGE SECTION");
-		inserirDataDiv(saidaCobol,linha);
-
-		Simbolos * aux = listaDeVariaveis;
-		while(aux != NULL)
-		{
-			
-			linha = criarLinhaB();
-			if(strcmp(aux->tipo, "int"))
-			{
-				inserirToken(&linha, "01");
-				inserirToken(&linha, aux->nome);
-				inserirToken(&linha, "PIC S9(05)");
-			}
-			else if(strcmp(aux->tipo, "float"))
-			{
-				inserirToken(&linha, "01");
-				inserirToken(&linha, aux->nome);
-				inserirToken(&linha, "PIC S9(18)V9(18)");
-			}
-			else if(strcmp(aux->tipo, "char"))
-			{
-				inserirToken(&linha, "01");
-				inserirToken(&linha, aux->nome);
-				inserirToken(&linha, "PICTURE X(10)");
-			}
-			if(aux->value != NULL)
-			{
-				inserirToken(&linha, "VALUE");
-				inserirToken(&linha, aux->value);
-			}
-
-			inserirDataDiv(saidaCobol,linha);
-
-			aux = aux->proximo;
-		}
-		linha = criarLinhaA();
-		inserirDataDiv(saidaCobol,linha);
-
-	}
-
-}
-
-/* Escreve o inicio da Procedure Division */
-void escreverProcDivision(SaidaCobol ** saidaCobol)
-{
-
-	Linha * linha = criarLinhaA();
-    inserirToken(&linha,"PROCEDURE DIVISION");
-	inserirProcDiv(saidaCobol,linha);
-
-	Linha * linhaV = linhaVazia();
-	inserirProcDiv(saidaCobol,linhaV);
-
-    Linha * linha2 = criarLinhaA();
-    inserirToken(&linha2,"000000-MAIN");
-    inserirToken(&linha2,"SECTION");
-	inserirProcDiv(saidaCobol,linha2);
-
-}
-
-/* Finaliza a 000000-MAIN SECTION */
-void fechaMainSection(SaidaCobol ** saidaCobol)
-{
-
-    limparPrintBuff(saidaCobol);
-
-	Linha * linhaV = linhaVazia();
-	inserirProcDiv(saidaCobol,linhaV);
-
-	Linha * linha = criarLinhaB();
-    inserirToken(&linha,"STOP RUN");
-	inserirProcDiv(saidaCobol,linha);
-
-	Linha * linha2 = criarLinhaB();
-    inserirToken(&linha2,"000000-EXIT");
-	inserirProcDiv(saidaCobol,linha2);
-
-    Linha * linha3 = criarLinhaB();
-    inserirToken(&linha3,"EXIT");
-	inserirProcDiv(saidaCobol,linha3);
-
-}
-
-/* Quebra linhas com mais de 65 caracteres no conteudo de uma saidaCobol */
+/* Quebra linhas com mais de 65 caracteres no conteudo de uma 
+   saidaCobol */
 void quebraLinhas(SaidaCobol ** saida)
 {
 
@@ -478,20 +349,25 @@ void quebraLinhas(SaidaCobol ** saida)
 			    while(tk->proximo != NULL)
 				{
 
-				    acumulaTam += tk->proximo->tklen + 1 - dentroDeQuote;
+				    acumulaTam += tk->proximo->tklen + 1 
+				                               - dentroDeQuote;
 				    if (acumulaTam > 64)
 				    {
 
 				        Linha * novaLinha = criarContinuacao();
 				        if(dentroDeQuote)
 				        {
-				        	char * aspatok = (char *) malloc((strlen(tk->proximo->token)+2)*sizeof(char));
+				        	char * aspatok = (char *) 
+				        	    malloc((strlen(tk->proximo->token)+2)
+				        	    *sizeof(char));
 				        	strcpy(aspatok,"\"");
 				        	strcat(aspatok,tk->proximo->token);
 				        	tk->proximo->token = aspatok;
 				        	tk->proximo->tklen = tk->proximo->tklen + 1;
 
-							char * tokaspa = (char *) malloc((strlen(tk->token)+3)*sizeof(char)+2);
+							char * tokaspa = (char *)
+							    malloc((strlen(tk->token)+3)
+							    *sizeof(char)+2);
 							strcpy(tokaspa,tk->token);
 							strcat(tokaspa,"\"");
 				        	tk->token = tokaspa;
@@ -541,7 +417,8 @@ void organizarBloco(BlocoCobol ** blocoCobol)
     }
 }
 
-/* Organiza um saidaCobol, quebrando as linhas grandes e numerando as linhas */
+/* Organiza uma saidaCobol, quebrando as linhas grandes e numerando 
+as linhas */
 void organizarSaida(SaidaCobol ** saidaCobol)
 {
 	quebraLinhas(saidaCobol); 
