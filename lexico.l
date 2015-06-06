@@ -28,9 +28,6 @@ IS                      (u|U|l|L)*
 "int"                   { contaColn(); 
                           yylval.strval = "INT"; 
                           return(TYPE); }
-"main"                  { contaColn(); 
-                          yylval.strval = strdup(yytext); 
-                          return(MAIN); }
 "printf"                { contaColn(); return(PRINTF); }
 "return"                { contaColn(); return(RETURN); }
 "while"                 { contaColn(); return(WHILE); }

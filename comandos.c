@@ -33,7 +33,7 @@ void imprimir(SaidaCobol ** saidaCobol, char * str)
 {
     // erro se o printf for vazio
 	if(strlen(str)<3)
-       yyerror(3);
+       erro(3);
 
     // busca linha no buffer
 	Linha * linha;

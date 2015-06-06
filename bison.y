@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "estruturaC.h"
 #include "estruturaCobol.h"
 #include "traducao.h"
@@ -30,32 +31,96 @@ extern Escopo   * escopoAtual;
 %token AND OR
 %token <strval> TYPE
 %token IF ELSE WHILE DO RETURN
-%token <strval> PRINTF VARUSE MAIN
+%token <strval> PRINTF VARUSE 
 %token INCLUDE PH
 
-%type <strval> Atribuicao_Simples_Valor Operacao
+%type <strval> Expressao Operacao
 
 %start Global
 
 %%
 
-Global 
-    : Main
+Global
+    : Include
+    | Define
+    | Declaracao ';'
+    | Definicao 
     ;
 
-Main
-    : TYPE MAIN Argumentos 
+Include
+    : "#include<\"" WORD PH '>'
+    | "#include \"" WORD PH '"'
+    ;
+
+Define
+    : "#define" WORD NUMBER
+    | "#define" WORD
+    ;
+
+Definicao
+    : Def_funcao
+    ;
+
+Declaracao
+    : Dec_variavel 
+    | Dec_funcao  
+    | Dec_struct 
+    ;
+
+Dec_variavel
+    : TYPE WORD '=' NUMBER
+      { if(p==1)
+        {
+          adicionaSimbolo(escopoAtual,"declarada", $1, $2);
+          valorSimbolo($1, $2, $4);
+        }
+      }
+    | TYPE WORD '=' QUOTE
+      { if(p==1)
+        {
+          adicionaSimbolo(escopoAtual,"declarada", $1, $2);
+          valorSimbolo($1, $2, $4);
+        }
+      }
+    | TYPE WORD
+      { if(p==1)
+          adicionaSimbolo(escopoAtual,"declarada", $1, $2);
+      } 
+    ;
+
+Dec_funcao
+    : TYPE WORD '(' Dec_argumentos ')'
+    | TYPE WORD '(' ')'
+    ;
+
+Def_funcao
+    : TYPE WORD '(' Def_argumentos ')'
       { abreMain(&saidaCobol); }  
-      Bloco
+     '{' Bloco '}'
       { fechaMain(&saidaCobol); }
+    | TYPE WORD '(' ')'
+      { abreMain(&saidaCobol); }  
+     '{' Bloco '}'
+      { fechaMain(&saidaCobol); }
+    ; 
+
+Dec_argumentos
+    : TYPE
+    | Dec_argumentos ',' TYPE
     ;
 
-Argumentos
-    : '(' ')'
+Def_argumentos
+    : TYPE WORD
+    | Def_argumentos ',' TYPE WORD 
+    ;
+
+Dec_struct
+    : "struct" WORD '{' '}' 
     ;
 
 Bloco
-    : '{' Comandos '}'
+    :  Comandos RETURN NUMBER ';'
+    |  Comandos
     ;
 
 Comandos
@@ -64,10 +129,87 @@ Comandos
     ;
 
 Comando
-    : Printf ';'
-    | Declaracao ';'
-    | Atribuicoes ';'
-    | RETURN NUMBER ';'
+    : Dec_variavel ';'
+    | Atribuicao ';'
+    | Printf ';'
+    ;
+
+Atribuicao
+    : WORD '=' WORD
+      { if (p==2)
+        {
+          /**** encapsular em uma funcao ****/
+          Linha * linha = criarLinhaB();
+          inserirToken(&linha, "MOVE");
+          inserirToken(&linha, $3);
+          inserirToken(&linha, "TO");
+          inserirToken(&linha, $1);
+          inserirProcDiv(&saidaCobol, linha);
+          /**** ****/
+        }
+      }
+    | WORD '=' NUMBER
+      { if (p==2)
+        {
+          /**** encapsular em uma funcao ****/
+          Linha * linha = criarLinhaB();
+          inserirToken(&linha, "MOVE");
+          inserirToken(&linha, $3);
+          inserirToken(&linha, "TO");
+          inserirToken(&linha, $1);
+          inserirProcDiv(&saidaCobol, linha);
+          /**** ****/
+        }
+      }
+    | WORD '=' QUOTE
+      { if (p==2)
+        {
+          /**** encapsular em uma funcao ****/
+          Linha * linha = criarLinhaB();
+          inserirToken(&linha, "MOVE");
+          inserirToken(&linha, $3);
+          inserirToken(&linha, "TO");
+          inserirToken(&linha, $1);
+          inserirProcDiv(&saidaCobol, linha);
+          /**** ****/
+        }
+      }
+    | WORD '=' Expressao
+      { if (p==2)
+        {
+          /**** encapsular em uma funcao ****/
+          Linha * linha = criarLinhaB();
+          inserirToken(&linha, "COMPUTE");
+          inserirToken(&linha, $1);
+          inserirToken(&linha, '=');
+          inserirToken(&linha, $3);
+          inserirProcDiv(&saidaCobol, linha);
+          /**** ****/
+        }
+      }
+    ;
+
+Printf
+    : PRINTF '(' QUOTE ')'
+      { if(p==2) imprimir(&saidaCobol,$3); }
+    ;
+
+Expressao
+    : NUMBER Operacao NUMBER
+      { if (p==2)
+        {
+          /**** encapsular em uma funcao ****/
+          char * tok1 = (char *) malloc(sizeof(char)) ;
+          char * tok2 = (char *) malloc(sizeof(char)) ;
+          char * tok3 = (char *) malloc(sizeof(char)) ;
+          char * expressao = (char *) malloc(sizeof(char)) ;
+          strcpy(expressao,tok1);
+          strcat(expressao,tok2);
+          strcat(expressao,tok3);
+          $$ = expressao;
+          /**** ****/
+        }
+      }
     ;
 
 Operacao
@@ -77,68 +219,6 @@ Operacao
     | '/' {$$ = "/";}
     ;
 
-Atribuicoes
-    : Atribuicao_Simples
-    | Atribuicao_Complex
-    ;
-
-Atribuicao_Complex
-    : WORD '=' NUMBER Operacao NUMBER 
-      { if (p==2)
-        {		
-         /**** encapsular em uma funcao ****/
-		     Linha * linha = criarLinhaB();
-		     inserirToken(&linha, "COMPUTE");
-		     inserirToken(&linha, $1);
-		     inserirToken(&linha, "=");
-		     inserirToken(&linha, $3);
-		     inserirToken(&linha, $4);
-		     inserirToken(&linha, $5);
-		     inserirProcDiv(&saidaCobol, linha);
-         /****                          ****/
-        }
-      }
-    ;
-
-Atribuicao_Simples
-    : WORD '=' Atribuicao_Simples_Valor
-      { if (p==2)
-        {
-         /**** encapsular em uma funcao ****/
-         Linha * linha = criarLinhaB();
-         inserirToken(&linha, "MOVE");
-         inserirToken(&linha, $3);
-         inserirToken(&linha, "TO");
-         inserirToken(&linha, $1);
-         inserirProcDiv(&saidaCobol, linha);
-         /****                          ****/
-        }
-      }
-    ;
-
-Atribuicao_Simples_Valor
-    : WORD   {$$ = $1;}
-    | NUMBER {$$ = $1;}
-    ;
-
-Declaracao
-    : TYPE WORD
-      { if(p==1) 
-          adicionaSimbolo(escopoAtual,"declarada", $1, $2); 
-      }
-    | TYPE WORD '=' NUMBER 
-      { if(p==1)
-        {
-          adicionaSimbolo(escopoAtual,"declarada", $1, $2); 
-          valorSimbolo($1, $2, $4); 
-        }
-      }
-    ;
-
-Printf
-    : PRINTF '(' QUOTE ')'
-      { if(p==2) imprimir(&saidaCobol,$3); }
-	  ;
 
 %%
 
@@ -147,7 +227,7 @@ void main(int argc, char *argv[]){
 	/*--- Abre input: arq_entrada ---*/
 
 	if(argc < 2)
-		yyerror(0);
+		erro(0);
 
   arq_entrada = fopen(argv[1], "r");
   nomePrograma = nomeProgramaCob(argv[1]);
@@ -184,7 +264,7 @@ void main(int argc, char *argv[]){
             fclose(arq_entrada);
 
             //if(verificaListaEscopo()) {}
-            //selse yyerror(2);
+            //selse erro(2);
 
             if(qntErros == 0)
             {
@@ -203,11 +283,19 @@ void main(int argc, char *argv[]){
 	}
 	else /* Arquivo nao encontrado. */
 	{
-	    yyerror(1);
+	    erro(1);
 	}
 }
 
-yyerror(int error_code)
+yyerror(char * msg)
+{
+  qntErros++;
+  printf("*** ERRO: ");
+  printf("linha %d.\n", contLinhasC);
+  printf("*** %s\n", msg);
+}
+
+erro(int error_code)
 {
   qntErros++;
   printf("*** ERRO %i: ", error_code);

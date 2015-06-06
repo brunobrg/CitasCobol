@@ -157,7 +157,7 @@ void inserirToken(Linha ** linha, char * token)
         inserirTokenApos(linha,token,(*linha)->qntToks);
     } else if (token[0] != '\"')
     {
-		yyerror(4);
+		erro(4);
 	} else 
     {
     	inserirToksInsideQuote(linha,token,32); /* 32 e o primeiro char
