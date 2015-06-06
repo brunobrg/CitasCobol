@@ -16,8 +16,9 @@ O ccobol, ao receber um código em C válido, dentro de seu escopo, deve gerar u
 
 ## Entregas
 
+
       DATA     |            RELEASE
----------------|-----------------------------
+:-------------:|:---------------------------:
 06/04/2015     | [Release 0 - "Hello,world"] (https://github.com/brunobrg/CitasCobol/releases/tag/v0.0)
 04/05/2015     |       [Release 1] (https://github.com/brunobrg/CitasCobol/releases/tag/v0.1)
 08/06/2015     |       Release 2 
