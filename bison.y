@@ -41,6 +41,11 @@ extern Escopo   * escopoAtual;
 %%
 
 Global
+    :
+    | Comando_global Global
+    ;
+
+Comando_global
     : Include
     | Define
     | Declaracao ';'
@@ -48,8 +53,8 @@ Global
     ;
 
 Include
-    : "#include<\"" WORD PH '>'
-    | "#include \"" WORD PH '"'
+    : INCLUDE '<' WORD PH '>'
+    | INCLUDE '\"' WORD PH '\"'
     ;
 
 Define
@@ -57,14 +62,14 @@ Define
     | "#define" WORD
     ;
 
-Definicao
-    : Def_funcao
-    ;
-
 Declaracao
     : Dec_variavel 
     | Dec_funcao  
     | Dec_struct 
+    ;
+
+Definicao
+    : Def_funcao
     ;
 
 Dec_variavel

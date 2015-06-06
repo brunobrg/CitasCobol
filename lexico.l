@@ -35,7 +35,7 @@ IS                      (u|U|l|L)*
 (%+(d|f|lf|c|s|u|i))    { contaColn(); 
                           yylval.strval = strdup(yytext);
                           return(VARUSE); }
-".h"                    { contaColn(); return PH; }
+"\.h"                   { contaColn(); return PH; }
 "\n"                    { contaColn(); contLinhasC++; }
 
 {L}({L}|{D})*		        { contaColn(); 
