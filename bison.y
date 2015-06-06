@@ -26,6 +26,7 @@ extern Escopo   * escopoAtual;
    int    intval;
 }
 
+%token <strval> COMENT1 COMENT2
 %token <strval> WORD NUMBER QUOTE
 %token LE GE EQUAL NEQUAL
 %token AND OR
@@ -49,7 +50,8 @@ Comando_global
     : Include
     | Define
     | Declaracao ';'
-    | Definicao 
+    | Definicao
+    | Comentario 
     ;
 
 Include
@@ -70,6 +72,11 @@ Declaracao
 
 Definicao
     : Def_funcao
+    ;
+
+Comentario
+    : COMENT1
+    | COMENT2
     ;
 
 Dec_variavel
@@ -137,6 +144,7 @@ Comando
     : Dec_variavel ';'
     | Atribuicao ';'
     | Printf ';'
+    | Comentario
     ;
 
 Atribuicao
@@ -295,9 +303,9 @@ void main(int argc, char *argv[]){
 yyerror(char * msg)
 {
   qntErros++;
-  printf("*** ERRO: ");
-  printf("linha %d.\n", contLinhasC);
-  printf("*** %s\n", msg);
+  printf("*** ERRO ");
+  printf("(linha %d):", contLinhasC);
+  printf(" %s\n", msg);
 }
 
 erro(int error_code)

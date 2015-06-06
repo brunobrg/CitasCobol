@@ -15,7 +15,14 @@ IS                      (u|U|l|L)*
 
 %% /*REGRAS:*/
 
-"/*"                    { comentario(); }
+"/*"(.|\n)*"*/"         { contaColn(); 
+                          yylval.strval = strdup(yytext);
+                          return(COMENT1);
+                        }
+"//"(.)*"\n"            { contaColn(); 
+                          yylval.strval = strdup(yytext);
+                          return(COMENT2);
+                        }
 "char"                  { contaColn(); 
                           yylval.strval = "CHAR"; 
                           return(TYPE); }
@@ -109,13 +116,7 @@ int yywrap(void)
   return 1; 
 }
 
-comentario()
-{
-    /* implementar */
-}
-
 int coluna = 0;
-
 void contaColn() 
 {
 	/* implementar */
