@@ -74,26 +74,29 @@ void escreverDataDivision(SaidaCobol ** saidaCobol)
         Simbolos * aux = listaDeVariaveis;
         while(aux != NULL)
         {
-            
             linha = criarLinhaB();
-            if(strcmp(aux->tipo, "int"))
+            if(strcmp(aux->tipo, "INT") == 0)
             {
                 inserirToken(&linha, "01");
                 inserirToken(&linha, aux->nome);
                 inserirToken(&linha, "PIC S9(05)");
             }
-            else if(strcmp(aux->tipo, "float"))
+            else if(strcmp(aux->tipo, "FLOAT") == 0)
             {
                 inserirToken(&linha, "01");
                 inserirToken(&linha, aux->nome);
                 inserirToken(&linha, "PIC S9(18)V9(18)");
             }
-            else if(strcmp(aux->tipo, "char"))
+            else if(strcmp(aux->tipo, "CHAR") == 0)
             {
                 inserirToken(&linha, "01");
                 inserirToken(&linha, aux->nome);
-                inserirToken(&linha, "PICTURE X(1)");
+                inserirToken(&linha, "PIC X(1)");
             } 
+            else
+            {
+                erro(5);
+            }
             
             if(aux->value != NULL)
             {

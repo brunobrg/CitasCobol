@@ -5,6 +5,8 @@
 int main ()
 {
 	int x = 10;
+	float y ;
+	char b = 10;
     printf("O restultado vem agora. Ele eh enooooooooooooooooooooooooorme.\n");
 
     // FIM

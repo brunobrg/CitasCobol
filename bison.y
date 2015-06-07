@@ -306,29 +306,33 @@ yyerror(char * msg)
 erro(int error_code)
 {
   qntErros++;
-  printf("*** ERRO %i: ", error_code);
+  printf("*** ERRO %i", error_code);
   switch ( error_code )
   {
     case 0 :
-      printf("Nome do arquivo não informado.\n");
+      printf(": Nome do arquivo não informado.\n");
 	    exit(1);
     case 1 :
-      printf("Arquivo não encontrado.\n");
+      printf(": Arquivo não encontrado.\n");
       exit(1);   
     case 2:
-      printf("Erro no arquivo de saída.\n");
+      printf(": Erro no arquivo de saída.\n");
       fprintf(arq_saida, "Erro no arquivo, por favor arrumar os erros.\n");
       exit(1);
     case 3:
-      printf("linha %d.\n", contLinhasC);
-      printf("***         Printf() vazio.\n");
+      printf(" (linha %d): ", contLinhasC);
+      printf("Printf() vazio.\n");
       break;
     case 4:
-      printf("linha %d.\n", contLinhasC);
-      printf("***         Identificador muito grande.\n");
+      printf(" (linha %d): ", contLinhasC);
+      printf("Identificador muito grande.\n");
+      break;
+    case 5:
+      printf(" (linha %d): ", contLinhasC);
+      printf("Tipo não suportado.\n");
       break;
     default : 
-      printf("Erro encontrado na linha %d.\n", contLinhasC);
+      printf(" (linha %d).\n", contLinhasC);
       break;
   }
 }
