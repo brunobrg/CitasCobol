@@ -143,7 +143,7 @@ void fechaMainSection(SaidaCobol ** saidaCobol)
     inserirToken(&linha,"STOP RUN");
     inserirProcDiv(saidaCobol,linha);
 
-    Linha * linha2 = criarLinhaB();
+    Linha * linha2 = criarLinhaA();
     inserirToken(&linha2,"000000-EXIT");
     inserirProcDiv(saidaCobol,linha2);
 
@@ -182,25 +182,37 @@ void fechaSection(SaidaCobol ** saidaCobol, char * nome)
     }
 }
 /* comentario: Cria linhas de comentario */
-void comentario(SaidaCobol ** saidaCobol, char * coment){
-   char segundochar = coment[1];
+void comentario(SaidaCobol ** saidaCobol, char * coment)
+{
+    char segundochar = coment[1];
+    coment = coment + 2;     // remove // ou /* 
 
-    // remove // ou /* 
-    coment = coment + 2;
+    /* Comentario entre // ... \n */
+    if(segundochar == '/') 
+    {    
+        Linha * linha = criarComentario();
+        coment[strlen(coment)-1] = '\0';       // remove \n
+        inserirToksGrandes(&linha,coment,32);
+        inserirProcDiv(saidaCobol,linha);
+    }
+    /* Comentario entre / * ... * / */
+    else                  
+    {
+       
+       coment[strlen(coment)-2] = '\0';       // remove */
+       char * quebraTk = (char *) malloc((strlen(coment)+2)*sizeof(char));
+       while(quebraTk = strsep (&coment,"\n"))
+       {
+           Linha * linha = criarComentario();
+           inserirToksGrandes(&linha,quebraTk,32);
+           inserirProcDiv(saidaCobol,linha);
+       }
+    }
 
-   if(segundochar == '/') /* Comentario entre // ... \n */
-   {
-       // remove \n
-       coment[strlen(coment)-1] = '\0';
-   }
-   else                  /* Comentario entre / * ... * / */
-   {
-       // remove */
-       coment[strlen(coment)-2] = '\0';
-   }
-   //printf("%s\n",coment );
+   Linha * linha = linhaVazia();
+   inserirProcDiv(saidaCobol,linha);
+   
 }
-
 
 /* Cria um DISPLAY para os printf terminados em \n.
    Os printfs nao terminados em \n sao armazenados no buffer para 

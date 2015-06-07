@@ -1,17 +1,13 @@
 #include<stdio.h>
 
-/* ksjdhfksdjhfs
-kjshkjsh
-dshkdjskhdk */ 
-
-// oi
+/* Programa de teste - C it as Cobol */
 
 int main ()
 {
-	int i = 10 ;
-	float x = 10;
-	char b = "bla";
-    printf("oioioi        ksdjfsdkfjh     ksdjfskdjfh");
-    x = 5;
-    printf("/////////////////////////////////////////////////////////////////////////////////////////");
+	int x;
+	x = 10;
+    printf("O restultado vem agora. Ele eh enooooooooooooooooooooooooorme.\n");
+
+    // FIM
+    
 }

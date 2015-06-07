@@ -4,6 +4,9 @@
 
  * nomeProgramaCob: Recebe o nome do programa.c e devolve o nome do 
        programa .cob 
+ * inserirToken: Isere um token ao final de uma linha.
+ * inserirToksGrandes: Isere tokens que fazem parte de um quote ou 
+   comentario e tem mais do que 30 caracteres.
  * criarLinhaA: Retorna uma linha com inicio na coluna A.
  * criarLinhaB: Retorna uma linha com inicio na coluna B.
  * criarComentario: Retorna uma linha de comentario vazia.
@@ -27,6 +30,8 @@
 
 /* prototipos */
 char            * nomeProgramaCob(char *);
+void              inserirToken(Linha **, char *);
+void              inserirToksGrandes(Linha **, char *, int);
 Linha           * criarLinhaA();
 Linha           * criarLinhaB();
 Linha           * criarComentario();

@@ -8,6 +8,8 @@
 /* VARIAVEIS GLOBAIS */
 int                contLinhasCobol = 1;   /* Contagem de linhas do 
                                              arquivo de saida */
+int foraDeQuote  = 1;          /* 0 quando dentro de um quote */
+int foraDeComent = 1;     /* 0 quando dentro de um comentario */
 
 /* IMPLEMENTACAO */
 
@@ -26,10 +28,47 @@ char * nomeProgramaCob(char * argv)
     return strdup(auxArq);
 }
 
+/* Verifica se estah dentro de um Quote */
+int verificaQuote(char * string)
+{
+	if(string[strlen(string)-1] == '\"')
+    {
+        return 1;
+    } 
+    else if (string[0] == '\"')
+    {
+        return 0;
+    } 
+    else
+    {
+    	return foraDeQuote;
+    } 
+}
+
+/* Verifica se estah dentro de um comentario */
+int verificaComent(Linha * linha)
+{
+	if(linha != NULL)
+	{
+		if(linha->marcador == '*')
+	    {
+	        return 0;
+	    } 
+	    else
+	    {
+	    	return 1;
+	    } 
+	} 
+	else
+	{
+		return 1;
+	}
+}
+
 /* Retorna string contendo os tokens de uma Tokenlist */
 char * imprimirTL(TokenList * TL)
 {
-	int dentroDeQuote = 0;
+	foraDeQuote = 1;
 	char saida[65] = "";
 
 	if(TL != NULL)
@@ -37,31 +76,17 @@ char * imprimirTL(TokenList * TL)
 		TokenList * cursor = TL;
 	    strcat(saida,cursor->token); 
 
-	    if(cursor->token[strlen(cursor->token)-1] == '\"')
-	    {
-	        dentroDeQuote = 0;
-
-	    } else if (cursor->token[0] == '\"')
-	    {
-	        dentroDeQuote = 1;
-	    }  
+        foraDeQuote = verificaQuote(cursor->token);
 
 		while(cursor->proximo != NULL)
 		{
-			if(!dentroDeQuote)
+			if(foraDeQuote && foraDeComent)
 			    strcat(saida," "); 
 
 			strcat(saida,cursor->proximo->token);
 
-		    if(cursor->proximo->token[strlen(cursor->proximo->token)-1]
-		       == '\"')
-		    {
-		        dentroDeQuote = 0;
-		    } else if (cursor->proximo->token[0] == '\"')
-		    {
-		        dentroDeQuote = 1;
-		    }  		
-
+            foraDeQuote = verificaQuote(cursor->proximo->token); 
+	
 			cursor = cursor->proximo;
 		}
 	}
@@ -109,8 +134,27 @@ void inserirTokenApos(Linha ** linha, char * token, int posicao)
 
 }
 
-/* Isere tokens que fazem parte de um comentario */
-void inserirToksInsideQuote(Linha ** linha, char * token, int separador)
+/* Isere um token ao final de uma linha */
+void inserirToken(Linha ** linha, char * token)
+{
+	if(token[0] == '\"')
+    {
+    	inserirToksGrandes(linha,token,32); /* 32 eh o primeiro char
+    	                                        ascii, que corresponde 
+    	                                        ao espaco */
+    }
+	else if (strlen(token) <= 30)
+	{
+        inserirTokenApos(linha,token,(*linha)->qntToks);
+    } else 
+    {
+		erro(4);
+	} 
+}
+
+/* Isere tokens que fazem parte de um quote ou comentario e tem 
+   mais do que 30 caracteres. */
+void inserirToksGrandes(Linha ** linha, char * token, int separador)
 {
 	if(separador == 34)
 		separador++;  /* O caracter 34 eh a aspa ". Causa problemas. */
@@ -140,31 +184,12 @@ void inserirToksInsideQuote(Linha ** linha, char * token, int separador)
         } 
         else
         { 
-            inserirToksInsideQuote(linha,quebraTk,separador+1);
+            inserirToksGrandes(linha,quebraTk,separador+1);
         }
         if(token != NULL)
             strcpy(guardaTk,token);
 
     }
-}
-
-/* Isere um token ao final de uma linha */
-void inserirToken(Linha ** linha, char * token)
-{
-	
-	if (token[1] != '\"' && strlen(token) <= 30)
-	{
-        inserirTokenApos(linha,token,(*linha)->qntToks);
-    } else if (token[0] != '\"')
-    {
-		erro(4);
-	} else 
-    {
-    	inserirToksInsideQuote(linha,token,32); /* 32 eh o primeiro char
-    	                                        ascii, que corresponde 
-    	                                        ao espaco */
-    }
-
 }
 
 /* Retorna uma linha com inicio na coluna A */
@@ -191,6 +216,7 @@ Linha * criarComentario()
 {
     Linha * linha = criarLinhaA();
     linha->marcador = '*';
+    inserirToken(&linha," ");
     return linha;
 }
 
@@ -326,37 +352,48 @@ void quebraLinhas(SaidaCobol ** saida)
 	if (*saida != NULL)
 	{
 		int posicao = 0;
-		int dentroDeQuote = 0;
+		
 		BlocoCobol * cursor = (*saida)->conteudo;
 
 		while(cursor != NULL)
 		{
+			foraDeComent = verificaComent(cursor->linha);
 
 			TokenList * tk = cursor->linha->texto;
 			if(tk != NULL)
 			{
+                foraDeQuote = verificaQuote(tk->token);
+                foraDeComent = verificaComent(cursor->linha);
 
-			    if(tk->token[strlen(tk->token)-1] == '\"')
-			    {
-			        dentroDeQuote = 0;
-			    } else if (tk->token[0] == '\"')
-			    {
-			        dentroDeQuote = 1;
-			    }  
-
-				int acumulaTam = tk->tklen + 1 - dentroDeQuote;
+				int acumulaTam = tk->tklen 
+				                 + (foraDeQuote && foraDeComent);
 
 			    while(tk->proximo != NULL)
 				{
+				    acumulaTam += tk->proximo->tklen 
+				                  + (foraDeQuote && foraDeComent);
 
-				    acumulaTam += tk->proximo->tklen + 1 
-				                               - dentroDeQuote;
-				    if (acumulaTam > 64)
+
+				    if (acumulaTam < 65)
 				    {
+				    	tk = tk->proximo;
+				    }
+				    else
+				    {
+			            Linha * novaLinha;
 
-				        Linha * novaLinha = criarContinuacao();
-				        if(dentroDeQuote)
+                        if(!foraDeComent)
+                        {
+                            novaLinha = criarComentario();	
+                            novaLinha->texto = tk->proximo;
+			        		tk->proximo = NULL;
+
+                        }
+				        else if(!foraDeQuote)
 				        {
+
+				        	novaLinha = criarContinuacao();
+
 				        	char * aspatok = (char *) 
 				        	    malloc((strlen(tk->proximo->token)+2)
 				        	    *sizeof(char));
@@ -373,25 +410,22 @@ void quebraLinhas(SaidaCobol ** saida)
 				        	tk->token = tokaspa;
 				        	tk->tklen = tk->tklen + 1;
 
-				        } 
-		        		inserirTokenApos(&novaLinha, "       ",1);
-		        		novaLinha->texto->proximo->proximo = tk->proximo;
-		        		tk->proximo = NULL;
-		        	    inserirLinha(saida, novaLinha, posicao);
+			        		inserirTokenApos(&novaLinha, "       ",1);
 
-				    } else
-				    {
-				        tk = tk->proximo;
-				    }
+			        		novaLinha->texto->proximo->proximo = tk->proximo;
+			        		tk->proximo = NULL;
+			            } 
+			            else
+			            {
+			            	novaLinha = criarContinuacao();
+			        	    novaLinha->texto = tk->proximo;
+			        		tk->proximo = NULL;
+			            }
 
-					if(tk->token[strlen(tk->token)-1] == '\"')
-					{
-					     dentroDeQuote = 0;
-					} else if (tk->token[0] == '\"')
-					{
-					    dentroDeQuote = 1;
-					}
+			            inserirLinha(saida, novaLinha, posicao);
 
+				    } 
+					foraDeQuote = verificaQuote(tk->token);
 				}
 		    }
 		    cursor = cursor->proximo;
@@ -438,6 +472,7 @@ void escreverBloco(FILE * file, BlocoCobol * blocoCobol)
 
 	while(blocoCobol != NULL)
 	{
+		foraDeComent = verificaComent(blocoCobol->linha);
 
 		if((blocoCobol->linha == NULL)  ||
 		   (blocoCobol->linha->texto == NULL) ||

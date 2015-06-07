@@ -193,7 +193,7 @@ Atribuicao
           Linha * linha = criarLinhaB();
           inserirToken(&linha, "COMPUTE");
           inserirToken(&linha, $1);
-          inserirToken(&linha, '=');
+          inserirToken(&linha, "=");
           inserirToken(&linha, $3);
           inserirProcDiv(&saidaCobol, linha);
           /**** ****/
