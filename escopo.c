@@ -80,7 +80,7 @@ void criaEscopo(char newName[40])
 	entraEscopo(add);
 }
 
-/* */
+/* Inicializa o escopo global */
 void initEscopo()
 {
 	listaDeVariaveis = NULL;
@@ -88,32 +88,48 @@ void initEscopo()
 	criaEscopo("global");
 }
 
-/* */
+/* Diz que saiu do escopo atual */
 void terminaEscopo()
 {
     printf("*** saiu do escopo: %s\n", escopoAtual->nome);
 }
 
+/* Sai do escopo atual e volta para o escopo anterior */
+void saiEscopo()
+{
+	terminaEscopo();
+	escopoAtual = escopoAtual->anterior;	
+}
+
 /* */
-Simbolos * addSimbolo(char tipo[40], char nome[40])
+Simbolos * addSimbolo(char * tipo, char * nome, char * valor)
 {
 	Simbolos * add = (Simbolos *) malloc(sizeof(Simbolos));
 	strcpy(add->tipo, tipo);
 	strcpy(add->nome, nome);
 	add->proximo = NULL;
-	add->value = NULL;
+	if (valor == NULL)
+	{
+	    add->value = NULL;
+	}
+	else
+    {
+    	add->value = (char *) malloc((strlen(valor)+1)*sizeof(char));
+    	strcpy(add->value, valor);
+    }
+    return add;
 }
 
 /* */
-void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], char nomeSimbolo[40])
+void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], 
+	char nomeSimbolo[40], char * valor)
 {
 	if(escTemp != NULL)
 	{
-		if(!strcmp(pos, "declarada"))
+		if(strcmp(pos, "declarada") == 0)
 		{
-			Simbolos * add = addSimbolo(tipo, nomeSimbolo);
+			Simbolos * add = addSimbolo(tipo, nomeSimbolo, valor);
 
-            //printf("Escopo: %s, Variavel: %s %s\n", escTemp->nome, tipo, nomeSimbolo);
 			if(escTemp->s_declarados == NULL)
 			{
 				escTemp->s_declarados = add;
@@ -128,10 +144,7 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], char nomeSim
 				aux->proximo = add;
 			}
 
-			if(escTemp->anterior!=NULL)
-                adicionaSimbolo(escTemp->anterior, pos, tipo, nomeSimbolo);
-
-			Simbolos * add2 = addSimbolo(tipo, nomeSimbolo);
+			Simbolos * add2 = addSimbolo(tipo, nomeSimbolo, valor);
 
 			if(listaDeVariaveis == NULL)
 			{
@@ -147,10 +160,12 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], char nomeSim
 				aux2->proximo = add2;
 			}
 
+
+
 		}
-		else if(!strcmp(pos, "usada"))
+		else if(strcmp(pos, "usada") == 0)
 		{
-			Simbolos * add = addSimbolo(tipo, nomeSimbolo);
+			Simbolos * add = addSimbolo(tipo, nomeSimbolo, valor);
 
 			if(escTemp->s_usados == NULL)
 			{
@@ -166,6 +181,7 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], char nomeSim
 				aux->proximo = add;
 			}
 		}
+
 	}
 }
 
@@ -241,40 +257,14 @@ int verificaListaEscopo()
 }
 
 /* */
-void valorSimbolo(char tipo[5], char nomeSimbolo[30], char * valor)
-{
-	if(escopoAtual != NULL)
-	{
-		Simbolos * aux = escopoAtual->s_declarados;
-		while(aux != NULL)
-		{
-			if(!strcmp(aux->nome, nomeSimbolo) && !strcmp(aux->tipo, tipo))
-			{
-				aux->value = valor;
-				return;
-			}
-
-			aux = aux->proximo;
-		}
-	}
-}
-
-/* */
-void saiEscopo()
-{
-	printf("*** saiu do escopo: %s\n", escopoAtual->nome);
-	escopoAtual = escopoAtual->anterior;	
-}
-
-/* */
 void adicionaSimbolos()
 {
-adicionaSimbolo(escopoAtual, "usada", "int", "x");
-adicionaSimbolo(escopoAtual, "usada", "int", "y");
-adicionaSimbolo(escopoAtual, "usada", "int", "z");
-adicionaSimbolo(escopoAtual, "usada", "int", "x1");
-adicionaSimbolo(escopoAtual, "usada", "int", "x2");
-adicionaSimbolo(escopoAtual, "usada", "int", "x3");
-adicionaSimbolo(escopoAtual, "usada", "int", "x4");
-adicionaSimbolo(escopoAtual, "usada", "int", "x5");
+adicionaSimbolo(escopoAtual, "usada", "int", "x", NULL);
+adicionaSimbolo(escopoAtual, "usada", "int", "y", NULL);
+adicionaSimbolo(escopoAtual, "usada", "int", "z", NULL);
+adicionaSimbolo(escopoAtual, "usada", "int", "x1", NULL);
+adicionaSimbolo(escopoAtual, "usada", "int", "x2", NULL);
+adicionaSimbolo(escopoAtual, "usada", "int", "x3", NULL);
+adicionaSimbolo(escopoAtual, "usada", "int", "x4", NULL);
+adicionaSimbolo(escopoAtual, "usada", "int", "x5", NULL);
 }

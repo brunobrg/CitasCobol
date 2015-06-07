@@ -80,23 +80,11 @@ Comentario
 
 Dec_variavel
     : TYPE WORD '=' NUMBER
-      { if(p==1)
-        {
-          adicionaSimbolo(escopoAtual,"declarada", $1, $2);
-          valorSimbolo($1, $2, $4);
-        }
-      }
+      { if(p==1) adicionaSimbolo(escopoAtual,"declarada", $1, $2, $4); }
     | TYPE WORD '=' QUOTE
-      { if(p==1)
-        {
-          adicionaSimbolo(escopoAtual,"declarada", $1, $2);
-          valorSimbolo($1, $2, $4);
-        }
-      }
+      { if(p==1) adicionaSimbolo(escopoAtual,"declarada", $1, $2, $4); }
     | TYPE WORD
-      { if(p==1)
-          adicionaSimbolo(escopoAtual,"declarada", $1, $2);
-      } 
+      { if(p==1) adicionaSimbolo(escopoAtual,"declarada", $1, $2, NULL); }
     ;
 
 Dec_funcao
@@ -106,13 +94,21 @@ Dec_funcao
 
 Def_funcao
     : TYPE WORD '(' Def_argumentos ')'
-      { abreSection(&saidaCobol,$2); }  
+      { if (p == 1) criaEscopo($2);
+        if (p == 2) abreSection(&saidaCobol,$2); 
+      }  
      '{' Bloco '}'
-      { fechaSection(&saidaCobol,$2); }
+      { if (p == 1) saiEscopo();
+        if (p == 2) fechaSection(&saidaCobol,$2);
+      }
     | TYPE WORD '(' ')'
-      { abreSection(&saidaCobol,$2); }  
+      {  if (p == 1) criaEscopo($2);
+         if (p == 2) abreSection(&saidaCobol,$2);
+      }    
      '{' Bloco '}'
-      { fechaSection(&saidaCobol,$2); }
+      { if (p == 1) saiEscopo();
+        if (p == 2) fechaSection(&saidaCobol,$2); 
+      }
     ; 
 
 Dec_argumentos

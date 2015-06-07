@@ -6,10 +6,10 @@
 #include "traducao.h"
 
 /* VARIAVEIS GLOBAIS */
-int                contLinhasCobol = 1;   /* Contagem de linhas do 
-                                             arquivo de saida */
-int foraDeQuote  = 1;          /* 0 quando dentro de um quote */
-int foraDeComent = 1;     /* 0 quando dentro de um comentario */
+int contLinhasCobol = 1;   /* Contagem de linhas do 
+                              arquivo de saida */
+int foraDeQuote  = 1;      /* 0 quando dentro de um quote */
+int foraDeComent = 1;      /* 0 quando dentro de um comentario */
 
 /* IMPLEMENTACAO */
 

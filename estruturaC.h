@@ -48,7 +48,7 @@ typedef struct _listaDeEscopo
 typedef struct _simbolos
 {
 	char tipo[6];
-	char nome[15];
+	char nome[30];
 	char * value;
 	struct _simbolos * proximo; 
 }Simbolos;

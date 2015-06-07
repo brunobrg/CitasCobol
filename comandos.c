@@ -7,7 +7,6 @@
 
 /* VARIAVEIS GLOBAIS */
 Linha            * printbuff = NULL; /* Buffer de string a imprimir */
-extern int         p;                /* Passo de compilacao */
 extern Simbolos  * listaDeVariaveis;     
 
 /* IMPLEMENTACAO */
@@ -93,19 +92,20 @@ void escreverDataDivision(SaidaCobol ** saidaCobol)
             {
                 inserirToken(&linha, "01");
                 inserirToken(&linha, aux->nome);
-                inserirToken(&linha, "PICTURE X(10)");
-            }
+                inserirToken(&linha, "PICTURE X(1)");
+            } 
+            
             if(aux->value != NULL)
             {
                 inserirToken(&linha, "VALUE");
                 inserirToken(&linha, aux->value);
-            }
+            } 
 
-            inserirDataDiv(saidaCobol,linha);
+            inserirDataDiv(saidaCobol,linha); 
 
-            aux = aux->proximo;
+            aux = aux->proximo; 
         }
-        linha = criarLinhaA();
+        linha = linhaVazia();
         inserirDataDiv(saidaCobol,linha);
 
     }
@@ -156,31 +156,21 @@ void fechaMainSection(SaidaCobol ** saidaCobol)
 /* Escreve o cabecalho de uma Section. */
 void abreSection(SaidaCobol ** saidaCobol, char * nome)
 {
-    if (p == 1) 
-    {
-        criaEscopo(nome);
-    }
-    else if (p == 2)
-    {
-        if(!strcmp(nome,"main"))
-            escreverProcDivision(saidaCobol);
-    } 
+   
+    if(strcmp(nome,"main") == 0)
+        escreverProcDivision(saidaCobol);
+
 }
 
 /* Escreve as ultimas linhas de uma Section. */
 void fechaSection(SaidaCobol ** saidaCobol, char * nome)
 {
-    if (p ==1)
-    {
-        adicionaSimbolos();
-        saiEscopo();
-    }
-    else if (p == 2)
-    {
-        if(!strcmp(nome,"main"))
-            fechaMainSection(saidaCobol);
-    }
+
+    if(strcmp(nome,"main") == 0)
+        fechaMainSection(saidaCobol);
+
 }
+
 /* comentario: Cria linhas de comentario */
 void comentario(SaidaCobol ** saidaCobol, char * coment)
 {
@@ -211,7 +201,7 @@ void comentario(SaidaCobol ** saidaCobol, char * coment)
 
    Linha * linha = linhaVazia();
    inserirProcDiv(saidaCobol,linha);
-   
+
 }
 
 /* Cria um DISPLAY para os printf terminados em \n.
