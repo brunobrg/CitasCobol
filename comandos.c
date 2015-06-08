@@ -7,7 +7,8 @@
 
 /* VARIAVEIS GLOBAIS */
 Linha            * printbuff = NULL; /* Buffer de string a imprimir */
-extern Simbolos  * listaDeVariaveis;     
+extern Simbolos  * listaDeVariaveis;
+bool             include_stdio = false;     
 
 /* IMPLEMENTACAO */
 
@@ -277,4 +278,14 @@ void imprimir(SaidaCobol ** saidaCobol, char * str)
         }
 	}
 
+}
+
+/* Armazena um valor booleano que informa se o #include<stdio.h> foi adicionado.*/
+void inclui_includeStdio(bool valor){
+    if (valor == true) include_stdio = true;
+}
+
+/* Verifica se o #include<stdio.h> foi adicionado ou nao.*/
+bool verifica_includeStdio(){
+        return include_stdio;
 }

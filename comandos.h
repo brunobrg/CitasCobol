@@ -12,6 +12,8 @@
  * imprimir: Cria um DISPLAY para os printf terminados em \n.
        Os printfs nao terminados em \n sao armazenados no buffer para 
        ser impressos futuramente.
+ * inclui_includeStdio: Armazena um valor booleano que informa se o #include<stdio.h> foi adicionado.
+ * verifica_includeSt: verifica se o #include<stdio.h> foi adicionado ou nao.
  */
 
 #ifndef COMANDOS_H_INCLUDED
@@ -28,6 +30,8 @@ void   abreSection(SaidaCobol **, char *);
 void   fechaSection(SaidaCobol **, char *);
 void   comentario(SaidaCobol **, char *);
 void   imprimir(SaidaCobol **, char *, Linha **);
+void   inclui_includeStdio(bool valor);
+bool   verifica_includeStdio();
 
 #endif /* !COMANDOS_H_INCLUDED  */
  

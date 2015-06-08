@@ -55,7 +55,7 @@ Comando_global
     ;
 
 Include
-    : INCLUDE
+    : INCLUDE { inclui_includeStdio(true);}
     ; 
 
 Define
@@ -198,7 +198,10 @@ Atribuicao
 
 Printf
     : PRINTF '(' QUOTE ')'
-      { if(p==2) imprimir(&saidaCobol,$3); }
+      { 
+        if((p==0) && (verifica_includeStdio()==false)) erro(6);
+        if(p==2) imprimir(&saidaCobol,$3); 
+      }
     ;
 
 Expressao
@@ -329,6 +332,10 @@ erro(int error_code)
     case 5:
       printf(" (linha %d): ", contLinhasC);
       printf("Tipo não suportado.\n");
+      break;
+    case 6:
+      printf(" (linha %d): ", contLinhasC);
+      printf("Include stdio.h nao encontrado.\n");
       break;
     default : 
       printf(" (linha %d).\n", contLinhasC);
