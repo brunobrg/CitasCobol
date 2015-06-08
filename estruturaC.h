@@ -47,6 +47,7 @@ typedef struct _listaDeEscopo
 
 typedef struct _simbolos
 {
+	int linha;
 	char tipo[6];
 	char nome[30];
 	char * value;

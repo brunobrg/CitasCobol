@@ -15,7 +15,7 @@ Simbolos        * listaDeVariaveis;
 void entraEscopo(Escopo * temp)
 {
 	escopoAtual = temp;	
-	printf("*** entrou no escopo: %s\n", temp->nome);
+	//printf("*** entrou no escopo: %s\n", temp->nome);
 }
 
 /* */
@@ -91,7 +91,7 @@ void initEscopo()
 /* Diz que saiu do escopo atual */
 void terminaEscopo()
 {
-    printf("*** saiu do escopo: %s\n", escopoAtual->nome);
+    //printf("*** saiu do escopo: %s\n", escopoAtual->nome);
 }
 
 /* Sai do escopo atual e volta para o escopo anterior */
@@ -102,9 +102,30 @@ void saiEscopo()
 }
 
 /* */
-Simbolos * addSimbolo(char * tipo, char * nome, char * valor)
+Simbolos * addSimbolo(int l, char * tipo, char * nome, char * valor)
 {
+	if(!strcmp(tipo, "INT"))
+	{
+		if(valor != NULL)
+		{
+			//tratando float em int...
+			int i;
+			for(i = 0; i <= (int) strlen(valor); i++)
+			{
+				if(valor[i] == '.')
+				{
+					valor[i] = '\0';
+					break;
+				}
+					
+			}
+		}
+
+	}
+
+
 	Simbolos * add = (Simbolos *) malloc(sizeof(Simbolos));
+	add->linha = l;
 	strcpy(add->tipo, tipo);
 	strcpy(add->nome, nome);
 	add->proximo = NULL;
@@ -121,14 +142,14 @@ Simbolos * addSimbolo(char * tipo, char * nome, char * valor)
 }
 
 /* */
-void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40], 
+void adicionaSimbolo(Escopo * escTemp, char pos[40], int l, char tipo[40], 
 	char nomeSimbolo[40], char * valor)
 {
 	if(escTemp != NULL)
 	{
 		if(strcmp(pos, "declarada") == 0)
 		{
-			Simbolos * add = addSimbolo(tipo, nomeSimbolo, valor);
+			Simbolos * add = addSimbolo(l, tipo, nomeSimbolo, valor);
 
 			if(escTemp->s_declarados == NULL)
 			{
@@ -144,7 +165,7 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40],
 				aux->proximo = add;
 			}
 
-			Simbolos * add2 = addSimbolo(tipo, nomeSimbolo, valor);
+			Simbolos * add2 = addSimbolo(l, tipo, nomeSimbolo, valor);
 
 			if(listaDeVariaveis == NULL)
 			{
@@ -165,7 +186,7 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], char tipo[40],
 		}
 		else if(strcmp(pos, "usada") == 0)
 		{
-			Simbolos * add = addSimbolo(tipo, nomeSimbolo, valor);
+			Simbolos * add = addSimbolo(l, tipo, nomeSimbolo, valor);
 
 			if(escTemp->s_usados == NULL)
 			{
@@ -202,9 +223,100 @@ void imprimeEscopos(ListaDeEscopo * aux)
 	}
 }
 
-/* */
-int verificaSimbolo(Simbolos * dec, Simbolos * usaHead)
+void atualizaSimbolo(Simbolos **usada)
 {
+	Simbolos * temp = listaDeVariaveis;
+	while(strcmp(temp->nome,(*usada)->nome) != 0)
+		temp = temp->proximo;
+
+	strcpy(temp->value,(*usada)->value);
+}
+
+/* */
+int validaSimboloUsado(Simbolos **declarada, Simbolos **usada)
+{
+
+	Simbolos * auxAll = listaDeVariaveis;
+
+	while(auxAll != NULL)
+	{
+		if(strcmp((*usada)->value, auxAll->nome) == 0)
+		{
+			sprintf((*usada)->value,"%s", auxAll->value);			
+			atualizaSimbolo(usada);
+		}
+		auxAll = auxAll->proximo;
+	}
+
+	if(!strcmp((*declarada)->tipo, "INT") || !strcmp((*declarada)->tipo, "FLOAT"))
+	{
+		if((*usada)->value != NULL)
+		{
+			//tratando float em int...
+			if(!strcmp((*declarada)->tipo, "INT"))
+			{
+				int i;
+				for(i = 0; i <= (int) strlen((*usada)->value); i++)
+				{
+					
+					if((*usada)->value[i] == '.')
+					{
+						(*usada)->value[i] = '\0';
+						atualizaSimbolo(usada);
+						break;
+					}
+						
+				}
+			}
+
+			//tratando string em int...
+			if((*usada)->value[0] == '\"')
+			{
+				char msg[256];
+				sprintf(msg, "Variavel %s do tipo %s, porem estah sendo atribuindo um valor string", (*declarada)->nome, (*declarada)->tipo);
+				warning(msg, (*usada)->linha);
+				return 0;
+			}
+		}
+
+	}
+
+
+	
+	return 1;
+}
+
+/* */
+int verificaSimbolosUsados(Simbolos * decHead, Simbolos * usa)
+{
+
+	if(usa == NULL)
+		return 1;
+	else
+	{
+		Simbolos * dec = decHead;;
+		while(dec !=NULL)
+		{
+			if(!strcmp(usa->nome, dec->nome))
+			{
+				return 1 * validaSimboloUsado(&dec, &usa) * verificaSimbolosUsados(decHead, usa->proximo);
+			}
+			
+			dec = dec->proximo;
+		}
+
+		char msg[50];
+		sprintf(msg, "\"%s %s\" utilizada e nao declarada.",
+		    usa->tipo, usa->nome);
+		warning(msg, usa->linha);
+		return 0 * verificaSimbolosUsados(decHead, usa->proximo);
+	}
+}
+
+/* */
+int verificaSimbolosDeclarados(Simbolos * dec, Simbolos * usaHead)
+{
+
 	if(dec == NULL)
 		return 1;
 	else
@@ -214,16 +326,17 @@ int verificaSimbolo(Simbolos * dec, Simbolos * usaHead)
 		{
 			if(!strcmp(dec->nome, usa->nome))
 			{
-				return 1 * verificaSimbolo(dec->proximo, usaHead);
+				return 1 * verificaSimbolosDeclarados(dec->proximo, usaHead);
 			}
 			
 			usa = usa->proximo;
 		}
+
 		char msg[50];
 		sprintf(msg, "\"%s %s\" declarada e nao utilizada.",
 		    dec->tipo, dec->nome);
-		warning(msg);
-		return 0 * verificaSimbolo(dec->proximo, usaHead);
+		warning(msg, dec->linha);
+		return 0 * verificaSimbolosDeclarados(dec->proximo, usaHead);
 	}
 }
 
@@ -234,8 +347,8 @@ int verificaEscopo(Escopo * aux)
 		return 1;
 	else
 	{
-		printf("*** Dentro de: %s\n", aux->nome);
-		return 1 * verificaSimbolo(aux->s_declarados, aux->s_usados) ;
+		//printf("*** Dentro de: %s\n", aux->nome);
+		return 1 * verificaSimbolosDeclarados(aux->s_declarados, aux->s_usados) * verificaSimbolosUsados(aux->s_declarados, aux->s_usados);
 	}
 }
 
@@ -259,12 +372,5 @@ int verificaListaEscopo()
 /* */
 void adicionaSimbolos()
 {
-adicionaSimbolo(escopoAtual, "usada", "int", "x", NULL);
-adicionaSimbolo(escopoAtual, "usada", "int", "y", NULL);
-adicionaSimbolo(escopoAtual, "usada", "int", "z", NULL);
-adicionaSimbolo(escopoAtual, "usada", "int", "x1", NULL);
-adicionaSimbolo(escopoAtual, "usada", "int", "x2", NULL);
-adicionaSimbolo(escopoAtual, "usada", "int", "x3", NULL);
-adicionaSimbolo(escopoAtual, "usada", "int", "x4", NULL);
-adicionaSimbolo(escopoAtual, "usada", "int", "x5", NULL);
+
 }
