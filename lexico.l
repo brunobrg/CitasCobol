@@ -42,11 +42,11 @@ PH                      "\.h"
 "return"                { contaColn(); return(RETURN); }
 "while"                 { contaColn(); return(WHILE); }
 
-"#include"[ \t]+"<"{L}({L}|{D})*{PH}">" { contaColn();
+("#include"[ \t]+|"#include")"<"{L}({L}|{D})*{PH}">" { contaColn();
 						  yylval.strval = strdup(yytext);
 						  return(INCLUDE); }
 
-"#include"[ \t]+"\""{L}({L}|{D})*{PH}"\"" { contaColn();
+("#include"[ \t]+|"#include")"\""{L}({L}|{D})*{PH}"\"" { contaColn();
 						  yylval.strval = strdup(yytext);
 						  return(INCLUDE); }
 
