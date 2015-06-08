@@ -142,6 +142,11 @@ Comando
     ;
 
 Atribuicao
+	: Atribuicao_Simples
+	| Atribuicao_Complexa
+	;
+
+Atribuicao_Simples
     : WORD '=' WORD
       { if (p==2)
         {
@@ -181,7 +186,10 @@ Atribuicao
           /**** ****/
         }
       }
-    | WORD '=' Expressao
+    ;
+
+Atribuicao_Complexa
+	: WORD '=' Expressao
       { if (p==2)
         {
           /**** encapsular em uma funcao ****/
@@ -194,7 +202,6 @@ Atribuicao
           /**** ****/
         }
       }
-    ;
 
 Printf
     : PRINTF '(' QUOTE ')'
@@ -204,29 +211,27 @@ Printf
       }
     ;
 
-Expressao
-    : NUMBER Operacao NUMBER
-      { if (p==2)
+Expressao 
+	: Expressao Operacao Expressao
+	  { if (p==2)
         {
-          /**** encapsular em uma funcao ****/
-          char * tok1 = (char *) malloc(sizeof(char)) ;
-          char * tok2 = (char *) malloc(sizeof(char)) ;
-          char * tok3 = (char *) malloc(sizeof(char)) ;
           char * expressao = (char *) malloc(sizeof(char)) ;
-          strcpy(expressao,tok1);
-          strcat(expressao,tok2);
-          strcat(expressao,tok3);
+          strcpy(expressao,$1);
+          strcat(expressao,$2);
+          strcat(expressao,$3);
           $$ = expressao;
-          /**** ****/
         }
       }
+    | NUMBER
+    | WORD
     ;
 
 Operacao
-    : '+' {$$ = "+";}
-    | '-' {$$ = "-";}
-    | '*' {$$ = "*";}
-    | '/' {$$ = "/";}
+    : '+' {$$ = " + ";}
+    | '-' {$$ = " - ";}
+    | '*' {$$ = " * ";}
+    | '/' {$$ = " / ";}
+    | '^' {$$ = " ** ";}
     ;
 
 
