@@ -281,6 +281,24 @@ int validaSimboloUsado(Simbolos **declarada, Simbolos **usada)
 
 	}
 
+	if(!strcmp((*declarada)->tipo, "CHAR"))
+	{
+		if((*usada)->value[0] == '\"')
+		{
+			char msg[256];
+			sprintf(msg, "Variavel %s do tipo %s, porem estah sendo atribuindo um valor string", (*declarada)->nome, (*declarada)->tipo);
+			warning(msg, (*usada)->linha);
+			return 0;
+		}
+		if(strlen((*usada)->value) > 3)
+		{
+			char msg[256];
+			sprintf(msg, "Variavel %s do tipo %s, porem estah sendo atribuido mais de um char", (*declarada)->nome, (*declarada)->tipo);
+			warning(msg, (*usada)->linha);
+			return 0;
+		}
+	}
+
 
 	
 	return 1;

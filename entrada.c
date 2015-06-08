@@ -4,7 +4,7 @@
 
 int main ()
 {
-	int x = 'o';
+	char x = 'o';
 	float y = x ;
     printf("O restultado vem agora. Ele eh enooooooooooooooooooooooooorme.\n");
 
