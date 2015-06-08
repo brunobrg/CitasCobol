@@ -12,6 +12,7 @@ H                       [a-fA-F0-9]
 E                       [Ee][+-]?{D}+
 FS                      (f|F|l|L)
 IS                      (u|U|l|L)*
+PH                      "\.h"
 
 %% /*REGRAS:*/
 
@@ -35,17 +36,27 @@ IS                      (u|U|l|L)*
 "int"                   { contaColn(); 
                           yylval.strval = "INT"; 
                           return(TYPE); }
-"printf"                { contaColn(); return(PRINTF); }
+"printf"                { contaColn();
+						  yylval.strval = strdup(yytext);
+						  return(PRINTF); }
 "return"                { contaColn(); return(RETURN); }
 "while"                 { contaColn(); return(WHILE); }
-"#include"              { contaColn(); return(INCLUDE); }
+
+"#include"[ \t]+"<"{L}({L}|{D})*{PH}">" { contaColn();
+						  yylval.strval = strdup(yytext);
+						  return(INCLUDE); }
+
+"#include"[ \t]+"\""{L}({L}|{D})*{PH}"\"" { contaColn();
+						  yylval.strval = strdup(yytext);
+						  return(INCLUDE); }
+
 (%+(d|f|lf|c|s|u|i))    { contaColn(); 
                           yylval.strval = strdup(yytext);
                           return(VARUSE); }
-"\.h"                   { contaColn(); return PH; }
+
 "\n"                    { contaColn(); contLinhasC++; }
 
-{L}({L}|{D})*		        { contaColn(); 
+{L}({L}|{D})*		    { contaColn(); 
                           yylval.strval = strdup(yytext); 
                           return(WORD); }
  

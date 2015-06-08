@@ -33,7 +33,7 @@ extern Escopo   * escopoAtual;
 %token <strval> TYPE
 %token IF ELSE WHILE DO RETURN
 %token <strval> PRINTF VARUSE 
-%token INCLUDE PH
+%token <strval> INCLUDE PH
 
 %type <strval> Expressao Operacao
 
@@ -55,13 +55,8 @@ Comando_global
     ;
 
 Include
-    : INCLUDE '<' Include_Sintaxe PH '>'
-    | INCLUDE '\"' Include_Sintaxe PH '\"'
-    ;
-
-Include_Sintaxe
-	: WORD { printf("%s", $1); if (hasBlankSpace($1)) erro(6); }
-	;
+    : INCLUDE
+    ; 
 
 Define
     : "#define" WORD NUMBER
@@ -334,10 +329,6 @@ erro(int error_code)
     case 5:
       printf(" (linha %d): ", contLinhasC);
       printf("Tipo não suportado.\n");
-      break;
-    case 6:
-      printf(" (linha %d): ", contLinhasC);
-      printf("Nome do arquivo de include invalido.\n");
       break;
     default : 
       printf(" (linha %d).\n", contLinhasC);
