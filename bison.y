@@ -55,9 +55,13 @@ Comando_global
     ;
 
 Include
-    : INCLUDE '<' WORD PH '>'
-    | INCLUDE '\"' WORD PH '\"'
+    : INCLUDE '<' Include_Sintaxe PH '>'
+    | INCLUDE '\"' Include_Sintaxe PH '\"'
     ;
+
+Include_Sintaxe
+	: WORD { printf("%s", $1); if (hasBlankSpace($1)) erro(6); }
+	;
 
 Define
     : "#define" WORD NUMBER
@@ -330,6 +334,10 @@ erro(int error_code)
     case 5:
       printf(" (linha %d): ", contLinhasC);
       printf("Tipo não suportado.\n");
+      break;
+    case 6:
+      printf(" (linha %d): ", contLinhasC);
+      printf("Nome do arquivo de include invalido.\n");
       break;
     default : 
       printf(" (linha %d).\n", contLinhasC);

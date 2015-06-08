@@ -21,12 +21,14 @@
        e numerando as linhas.
  * escreverArquivo: Imprime o conteudo de uma saidaCobol no arquivo 
      de saida.
+ * hasBlankSpace: Verifica se uma string tem espaco em branco
  */
 
 #ifndef TRADUCAO_H_INCLUDED
 #define TRADUCAO_H_INCLUDED
 
 #include "estruturaCobol.h"
+#include <stdbool.h>
 
 /* prototipos */
 char            * nomeProgramaCob(char *);
@@ -43,5 +45,6 @@ void              inserirProcDiv(SaidaCobol **, Linha *);
 void              criarDivisions(SaidaCobol **);
 void              organizarSaida(SaidaCobol **);
 void              escreverArquivo(FILE *, SaidaCobol *);
+bool              hasBlankSpace(const char *);
 
 #endif /* !TRADUCAO_H_INCLUDED */
