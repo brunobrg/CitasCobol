@@ -102,7 +102,7 @@ Dec_variavel
         if(p==1) 
         {
           adicionaSimbolo(escopoAtual,"declarada", contLinhasC,$1, $2, NULL); 
-          }
+        }
         }
     ;
 
@@ -267,6 +267,7 @@ void main(int argc, char *argv[]){
 
   arq_entrada = fopen(argv[1], "r");
   nomePrograma = nomeProgramaCob(argv[1]);
+  arq_saida = fopen(nomePrograma, "w+");
 
 	/* --- --- --- --- --- --- --- ---*/
   
@@ -298,13 +299,9 @@ void main(int argc, char *argv[]){
             yyparse();
             fclose(arq_entrada);
 
-            qntErros = verificaListaEscopo();
-            //selse erro(2);
-
-            if(qntErros != 0)
+            if(qntErros == 0 && verificaListaEscopo())
             {
               escreverDataDivision(&saidaCobol);
-              arq_saida = fopen(nomePrograma, "w+");
               organizarSaida(&saidaCobol);
 		          escreverArquivo(arq_saida,saidaCobol);
               printf("***** Tradução completa.\n");
@@ -312,17 +309,13 @@ void main(int argc, char *argv[]){
             }
             else
             {
-              arq_saida = fopen(nomePrograma, "w+");
-              
               SaidaErro * aux = saidaErro;
               while(aux!=NULL)
               {
                 fprintf(arq_saida, "%s\n", aux->mensagem);
                 aux = aux->proximo;
               }
-
               printf("*\n*Salvando log de erros em %s.\n*saindo...\n", nomePrograma);
-
               fclose(arq_saida);
             }
 
@@ -365,21 +358,30 @@ erro(int error_code)
     case 3:
       printf(" (linha %d): ", contLinhasC);
       printf("Printf() vazio.\n");
+      fprintf(arq_saida,"*** ERRO %i  (linha %d): ", error_code, contLinhasC);
+      fprintf(arq_saida,"Printf() vazio.\n");
       break;
     case 4:
       printf(" (linha %d): ", contLinhasC);
       printf("Identificador muito grande.\n");
+      fprintf(arq_saida,"*** ERRO %i  (linha %d): ", error_code, contLinhasC);
+      fprintf(arq_saida,"Identificador muito grande.\n");
       break;
     case 5:
       printf(" (linha %d): ", contLinhasC);
       printf("Tipo não suportado.\n");
+      fprintf(arq_saida,"*** ERRO %i  (linha %d): ", error_code, contLinhasC);
+      fprintf(arq_saida,"Tipo não suportado.\n");
       break;
     case 6:
       printf(" (linha %d): ", contLinhasC);
       printf("Include stdio.h nao encontrado.\n");
+      fprintf(arq_saida,"*** ERRO %i  (linha %d): ", error_code, contLinhasC);
+      fprintf(arq_saida,"Include stdio.h nao encontrado.\n");
       break;
     default : 
       printf(" (linha %d).\n", contLinhasC);
+      fprintf(arq_saida,"*** ERRO %i  (linha %d): ", error_code, contLinhasC);
       break;
   }
 }
