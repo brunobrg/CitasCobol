@@ -21,6 +21,6 @@ O ccobol, ao receber um código em C válido, dentro de seu escopo, deve gerar u
 :-------------:|:---------------------------:
 06/04/2015     | [Release 0 - "Hello,world"] (https://github.com/brunobrg/CitasCobol/releases/tag/v0.0)
 04/05/2015     |       [Release 1] (https://github.com/brunobrg/CitasCobol/releases/tag/v0.1)
-08/06/2015     |       Release 2 
+08/06/2015     |       [Release 2] (https://github.com/brunobrg/CitasCobol/releases/tag/v0.2)
 29/06/2015     |  Release 3 - "Stop Run"
 
