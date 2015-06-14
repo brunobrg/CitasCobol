@@ -10,7 +10,7 @@ int contLinhasCobol = 1;   /* Contagem de linhas do
                               arquivo de saida */
 int foraDeQuote  = 1;      /* 0 quando dentro de um quote */
 int foraDeComent = 1;      /* 0 quando dentro de um comentario */
-
+SaidaErro * saidaErro = NULL;
 /* IMPLEMENTACAO */
 
 /* Recebe o nome do programa.c e devolve o nome do programa .cob */
@@ -513,3 +513,28 @@ void escreverArquivo(FILE * file, SaidaCobol * saidaCobol)
 
 }
 
+SaidaErro * addSaidaErro(char * erro)
+{
+	SaidaErro * add = (SaidaErro*) malloc(sizeof(SaidaErro));
+	sprintf(add->mensagem, "%s", erro);
+	add->proximo = NULL;
+
+	return add;
+}
+
+void inserirSaidaErros(char * erro)
+{
+	SaidaErro * add = addSaidaErro(erro);
+	if(saidaErro == NULL)
+	{
+		saidaErro = add;
+	}
+	else
+	{
+		SaidaErro* aux = saidaErro;
+		while(aux->proximo != NULL)
+			aux = aux->proximo;
+
+		aux->proximo = add;
+	}
+}

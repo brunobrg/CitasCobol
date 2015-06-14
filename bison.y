@@ -15,6 +15,7 @@ int               contLinhasC = 1;   /* Contador de linha arq de entrada */
 int               contColunaC = 1;   /* Contador de coluna arq de entrada */ 
 char            * nomePrograma;      /* Nome do programa */
 SaidaCobol      * saidaCobol = NULL; /* Arvore de blocosCobol */
+extern SaidaErro * saidaErro;   /* estrutura para os erros */
 int               p;                 /* Passo de compilacao */
 int               qntErros=0;        /* Quantidade de erros */
 extern Escopo   * escopoAtual;
@@ -73,11 +74,36 @@ Comentario
 
 Dec_variavel
     : TYPE WORD '=' NUMBER
-      { if(p==1) adicionaSimbolo(escopoAtual,"declarada", $1, $2, $4); }
+      { 
+        if(p==1)
+        {
+          adicionaSimbolo(escopoAtual,"declarada", contLinhasC, $1, $2, $4);
+          adicionaSimbolo(escopoAtual, "usada", contLinhasC, $1, $2, $4); 
+        }
+      }
+    | TYPE WORD '=' WORD
+      { 
+        if(p==1)
+        {
+        adicionaSimbolo(escopoAtual,"declarada", contLinhasC,$1, $2, $4); 
+        adicionaSimbolo(escopoAtual, "usada", contLinhasC, $1, $2, $4);
+        }
+      }
     | TYPE WORD '=' QUOTE
-      { if(p==1) adicionaSimbolo(escopoAtual,"declarada", $1, $2, $4); }
+      { 
+        if(p==1) 
+        {
+        adicionaSimbolo(escopoAtual,"declarada", contLinhasC,$1, $2, $4); 
+        adicionaSimbolo(escopoAtual, "usada", contLinhasC, $1, $2, $4);
+        }
+      }
     | TYPE WORD
-      { if(p==1) adicionaSimbolo(escopoAtual,"declarada", $1, $2, NULL); }
+      {  
+        if(p==1) 
+        {
+          adicionaSimbolo(escopoAtual,"declarada", contLinhasC,$1, $2, NULL); 
+          }
+        }
     ;
 
 Dec_funcao
@@ -151,6 +177,7 @@ Atribuicao_Simples
           inserirToken(&linha, "TO");
           inserirToken(&linha, $1);
           inserirProcDiv(&saidaCobol, linha);
+          adicionaSimbolo(escopoAtual, "usada", contLinhasC, "null", $1, $3);
           /**** ****/
         }
       }
@@ -164,6 +191,7 @@ Atribuicao_Simples
           inserirToken(&linha, "TO");
           inserirToken(&linha, $1);
           inserirProcDiv(&saidaCobol, linha);
+          adicionaSimbolo(escopoAtual, "usada", contLinhasC, "null", $1, $3);
           /**** ****/
         }
       }
@@ -177,6 +205,7 @@ Atribuicao_Simples
           inserirToken(&linha, "TO");
           inserirToken(&linha, $1);
           inserirProcDiv(&saidaCobol, linha);
+          adicionaSimbolo(escopoAtual, "usada", contLinhasC, "null", $1, $3);
           /**** ****/
         }
       }
@@ -193,6 +222,7 @@ Atribuicao_Complexa
           inserirToken(&linha, "=");
           inserirToken(&linha, $3);
           inserirProcDiv(&saidaCobol, linha);
+          adicionaSimbolo(escopoAtual, "usada", contLinhasC, "null", $1, $3);
           /**** ****/
         }
       }
@@ -260,7 +290,6 @@ void main(int argc, char *argv[]){
             initEscopo();    
             yyparse();     
             terminaEscopo();
-            escreverDataDivision(&saidaCobol);
             break;
           case 2:   /* p=2: Traducao */
             printf("* Lendo o programa...\n");
@@ -269,15 +298,31 @@ void main(int argc, char *argv[]){
             yyparse();
             fclose(arq_entrada);
 
-            //if(verificaListaEscopo()) {}
+            qntErros = verificaListaEscopo();
             //selse erro(2);
 
-            if(qntErros == 0)
+            if(qntErros != 0)
             {
+              escreverDataDivision(&saidaCobol);
               arq_saida = fopen(nomePrograma, "w+");
               organizarSaida(&saidaCobol);
 		          escreverArquivo(arq_saida,saidaCobol);
               printf("***** Tradução completa.\n");
+              fclose(arq_saida);
+            }
+            else
+            {
+              arq_saida = fopen(nomePrograma, "w+");
+              
+              SaidaErro * aux = saidaErro;
+              while(aux!=NULL)
+              {
+                fprintf(arq_saida, "%s\n", aux->mensagem);
+                aux = aux->proximo;
+              }
+
+              printf("*\n*Salvando log de erros em %s.\n*saindo...\n", nomePrograma);
+
               fclose(arq_saida);
             }
 
@@ -339,8 +384,10 @@ erro(int error_code)
   }
 }
 
-warning(char * msg)
+warning(char * msg, int l)
 {
-  printf("*** WARNING: linha %d.\n", contLinhasC);
-  printf("***          %s\n",msg);
+  char buffer[256];
+  sprintf(buffer,"*** WARNING: linha %d.\n***          %s\n", l, msg);
+  inserirSaidaErros(buffer);
+  printf("*** WARNING: linha %d.\n***          %s\n", l, msg);
 }

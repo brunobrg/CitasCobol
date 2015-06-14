@@ -70,4 +70,10 @@ typedef struct _SaidaCobol
 	struct _SaidaCobol * inferior;
 }SaidaCobol;
 
+typedef struct _SaidaErro
+{
+	char mensagem[256];
+	struct _SaidaErro * proximo;
+}SaidaErro;
+
 #endif /* !ESTRUTURACOBOL_H_INCLUDED */
