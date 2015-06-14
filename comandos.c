@@ -306,3 +306,78 @@ void inclui(char * include){
     if (!strcmp(include,"stdio.h") == true)
         include_stdio = 1;
 }
+
+/* Armazena defines */
+void define(char * define, char * valor)
+{
+    /* implementar */
+}
+
+atribuiValor(SaidaCobol ** saidaCobol, Escopo * escopoAtual, 
+    int contLinhasC, char * simbolo, char * valor)
+{
+      Linha * linha = criarLinhaB();
+
+      char * mais = strchr(valor,'+');
+      char * menos = strchr(valor,'-');
+      char * neg = strchr(valor,'n');
+      char * vezes = strchr(valor,'*');
+      char * divide = strchr(valor,'/');
+
+      if(mais == NULL && vezes == NULL 
+         && divide == NULL && menos == NULL)
+      {
+          char valor2[strlen(valor)];
+          valor2[0] = '\0';
+
+          while(valor[0] == '(' || valor[0] == 'n'  )
+          {
+              if(valor[0] == '(')
+              {
+                  valor[strlen(valor)-1] = '\0';
+              } else if(valor[0] == 'n')
+              {
+                  strcat(valor2,"-");
+              } 
+              valor = valor + 1;
+
+          }
+          strcat(valor2,valor);
+ 
+          inserirToken(&linha, "MOVE");
+          inserirToken(&linha, valor2);
+          inserirToken(&linha, "TO");
+          inserirToken(&linha, simbolo);
+          inserirProcDiv(saidaCobol, linha);
+      }
+      else
+      {
+
+          while(neg != NULL)
+          {
+              *neg = '-';
+              neg = strchr(valor,'n');
+          }
+          inserirToken(&linha, "COMPUTE");
+          inserirToken(&linha, simbolo);
+          inserirToken(&linha, "=");
+          inserirToken(&linha, valor);
+          inserirProcDiv(saidaCobol, linha);
+      }
+
+      adicionaSimbolo(escopoAtual, "usada", contLinhasC, "null", simbolo, valor);
+
+}
+
+
+atribuiString(SaidaCobol ** saidaCobol, Escopo * escopoAtual, 
+    int contLinhasC, char * simbolo, char * string)
+{
+    Linha * linha = criarLinhaB();
+    inserirToken(&linha, "MOVE");
+    inserirToken(&linha, string);
+    inserirToken(&linha, "TO");
+    inserirToken(&linha, simbolo);
+    inserirProcDiv(saidaCobol, linha);
+    adicionaSimbolo(escopoAtual, "usada", contLinhasC, "null", simbolo, string);
+}

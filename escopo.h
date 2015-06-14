@@ -18,7 +18,7 @@
 /* prototipos */
 void            initEscopo();
 void            terminaEscopo();
-void            adicionaSimbolo(Escopo *, char *, char *, char *, char *);
+void            adicionaSimbolo(Escopo *, char *, int, char *, char *, char *);
 void            imprimeEscopos(ListaDeEscopo *);
 int             verificaListaEscopo();
 void            saiEscopo();

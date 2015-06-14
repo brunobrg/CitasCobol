@@ -8,17 +8,17 @@
 #include "traducao.h"
 
 /* Variaveis globais */
-extern FILE     * yyin;              /* Arquivo do parser */
-FILE            * arq_entrada;       /* Arquivo de entrada */
-FILE            * arq_saida;         /* Arquivo de saida */
-int               contLinhasC = 1;   /* Contador de linha arq de entrada */ 
-int               contColunaC = 1;   /* Contador de coluna arq de entrada */ 
-char            * nomePrograma;      /* Nome do programa */
-SaidaCobol      * saidaCobol = NULL; /* Arvore de blocosCobol */
-extern SaidaErro * saidaErro;   /* estrutura para os erros */
-int               p;                 /* Passo de compilacao */
-int               qntErros=0;        /* Quantidade de erros */
-extern Escopo   * escopoAtual;
+extern FILE      * yyin;              /* Arquivo do parser */
+FILE             * arq_entrada;       /* Arquivo de entrada */
+FILE             * arq_saida;         /* Arquivo de saida */
+int                contLinhasC = 1;   /* Contador de linha arq de entrada */ 
+int                contColunaC = 1;   /* Contador de coluna arq de entrada */ 
+char             * nomePrograma;      /* Nome do programa */
+SaidaCobol       * saidaCobol = NULL; /* Arvore de blocosCobol */
+extern SaidaErro * saidaErro;         /* estrutura para os erros */
+int                p;                 /* Passo de compilacao */
+int                qntErros=0;        /* Quantidade de erros */
+extern Escopo    * escopoAtual;
 
 
 %}
@@ -39,6 +39,8 @@ extern Escopo   * escopoAtual;
 
 %type <strval> Expressao Operacao
 
+%left '+' '-' '/' '*' 
+
 %start Global
 
 %%
@@ -52,7 +54,9 @@ Comando_global
     : INCLUDE 
       { if(p==0) inclui($1); }
     | DEFINE
+      { if(p==0) define($1,NULL); }
     | DEFINE NUMBER
+      { if(p==0) define($1,$2); }
     | Declaracao ';'
     | Definicao
     | Comentario 
@@ -103,7 +107,7 @@ Dec_variavel
         {
           adicionaSimbolo(escopoAtual,"declarada", contLinhasC,$1, $2, NULL); 
         }
-        }
+      }
     ;
 
 Dec_funcao
@@ -162,70 +166,57 @@ Comando
     ;
 
 Atribuicao
-	: Atribuicao_Simples
-	| Atribuicao_Complexa
-	;
-
-Atribuicao_Simples
-    : WORD '=' WORD
-      { if (p==2)
-        {
-          /**** encapsular em uma funcao ****/
-          Linha * linha = criarLinhaB();
-          inserirToken(&linha, "MOVE");
-          inserirToken(&linha, $3);
-          inserirToken(&linha, "TO");
-          inserirToken(&linha, $1);
-          inserirProcDiv(&saidaCobol, linha);
-          adicionaSimbolo(escopoAtual, "usada", contLinhasC, "null", $1, $3);
-          /**** ****/
-        }
-      }
-    | WORD '=' NUMBER
-      { if (p==2)
-        {
-          /**** encapsular em uma funcao ****/
-          Linha * linha = criarLinhaB();
-          inserirToken(&linha, "MOVE");
-          inserirToken(&linha, $3);
-          inserirToken(&linha, "TO");
-          inserirToken(&linha, $1);
-          inserirProcDiv(&saidaCobol, linha);
-          adicionaSimbolo(escopoAtual, "usada", contLinhasC, "null", $1, $3);
-          /**** ****/
-        }
-      }
+    : WORD '=' Expressao
+      { if (p==2) atribuiValor(&saidaCobol, escopoAtual, contLinhasC, $1, $3); }
     | WORD '=' QUOTE
-      { if (p==2)
-        {
-          /**** encapsular em uma funcao ****/
-          Linha * linha = criarLinhaB();
-          inserirToken(&linha, "MOVE");
-          inserirToken(&linha, $3);
-          inserirToken(&linha, "TO");
-          inserirToken(&linha, $1);
-          inserirProcDiv(&saidaCobol, linha);
-          adicionaSimbolo(escopoAtual, "usada", contLinhasC, "null", $1, $3);
-          /**** ****/
-        }
-      }
+      { if (p==2) atribuiString(&saidaCobol, escopoAtual, contLinhasC, $1, $3); }
     ;
 
-Atribuicao_Complexa
-	: WORD '=' Expressao
-      { if (p==2)
-        {
-          /**** encapsular em uma funcao ****/
-          Linha * linha = criarLinhaB();
-          inserirToken(&linha, "COMPUTE");
-          inserirToken(&linha, $1);
-          inserirToken(&linha, "=");
-          inserirToken(&linha, $3);
-          inserirProcDiv(&saidaCobol, linha);
-          adicionaSimbolo(escopoAtual, "usada", contLinhasC, "null", $1, $3);
-          /**** ****/
-        }
+Expressao 
+  : NUMBER { if (p==2) $$ = $1; }
+  | WORD   { if (p==2) $$ = $1; }
+  | Expressao Operacao Expressao
+    { if (p==2)
+      {
+        int size = strlen($1) + strlen($2) +strlen($3);
+        char * expr = (char *) malloc (size*sizeof(char)+3);
+        strcpy(expr,$1);
+        strcat(expr," ");
+        strcat(expr,$2);
+        strcat(expr," ");
+        strcat(expr,$3);
+        $$ = expr;
       }
+    }
+  | '-' Expressao 
+    { if (p==2)
+      {
+        int size = strlen($2);
+        char * expr = (char *) malloc (size*sizeof(char)+2);
+        strcpy(expr,"n");
+        strcat(expr,$2);
+        $$ = expr;
+      }
+    }
+  | '(' Expressao ')'
+    { if (p==2)
+      {
+        int size = strlen($2);
+        char * expr = (char *) malloc (size*sizeof(char)+3);
+        strcpy(expr,"(");
+        strcat(expr,$2);
+        strcat(expr,")");
+        $$ = expr;
+      }
+    }
+  ;
+
+Operacao
+    : '+' { $$ = "+"; }
+    | '-' { $$ = "-"; }
+    | '*' { $$ = "*"; }
+    | '/' { $$ = "/"; }
+    ;
 
 Printf
     : PRINTF '(' QUOTE ')'
@@ -233,28 +224,6 @@ Printf
         if(p==2) imprimir(&saidaCobol,$3); 
       }
     ;
-
-Expressao 
-	: NUMBER Operacao NUMBER
-	  { if (p==2)
-        {
-          char * expressao = (char *) malloc(sizeof(char)) ;
-          strcpy(expressao,$1);
-          strcat(expressao,$2);
-          strcat(expressao,$3);
-          $$ = expressao;
-        }
-      }
-    ;
-
-Operacao
-    : '+' {$$ = " + ";}
-    | '-' {$$ = " - ";}
-    | '*' {$$ = " * ";}
-    | '/' {$$ = " / ";}
-    | '^' {$$ = " ** ";}
-    ;
-
 
 %%
 
@@ -299,7 +268,7 @@ void main(int argc, char *argv[]){
             yyparse();
             fclose(arq_entrada);
 
-            if(qntErros == 0 && verificaListaEscopo())
+            if(qntErros == 0 /* && verificaListaEscopo() */  )
             {
               escreverDataDivision(&saidaCobol);
               organizarSaida(&saidaCobol);

@@ -31,7 +31,10 @@ void   fechaSection(SaidaCobol **, char *);
 void   comentario(SaidaCobol **, char *);
 void   imprimir(SaidaCobol **, char *, Linha **);
 void   inclui(char *);
-bool   verifica_includeStdio();
+void   define(char *,char *);
+void   atribuiValor(SaidaCobol **, Escopo *, int, char *, char *);
+void   atribuiString(SaidaCobol **, Escopo *, int, char *, char *);
+
 
 #endif /* !COMANDOS_H_INCLUDED  */
  
