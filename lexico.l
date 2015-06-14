@@ -1,6 +1,7 @@
 %{option main
  #include "bison.h"
- extern int contLinhasC;
+ extern int contLinhasC;   /* Contador de linha arq de entrada */ 
+ extern int contColunaC;   /* Contador de coluna arq de entrada */ 
 
  void contaColn();
 %}
@@ -12,7 +13,8 @@ H                       [a-fA-F0-9]
 E                       [Ee][+-]?{D}+
 FS                      (f|F|l|L)
 IS                      (u|U|l|L)*
-PH                      "\.h"
+WORD                    {L}({L}|{D})*
+FILENAME                {WORD}("\."{WORD})?
 
 %% /*REGRAS:*/
 
@@ -37,29 +39,21 @@ PH                      "\.h"
                           yylval.strval = "INT"; 
                           return(TYPE); }
 "printf"                { contaColn();
-						  yylval.strval = strdup(yytext);
-						  return(PRINTF); }
+                          yylval.strval = strdup(yytext);
+                          return(PRINTF); }
 "return"                { contaColn(); return(RETURN); }
 "while"                 { contaColn(); return(WHILE); }
-
-("#include"[ \t]+|"#include")"<"{L}({L}|{D})*{PH}">" { contaColn();
-						  yylval.strval = strdup(yytext);
-						  return(INCLUDE); }
-
-("#include"[ \t]+|"#include")"\""{L}({L}|{D})*{PH}"\"" { contaColn();
-						  yylval.strval = strdup(yytext);
-						  return(INCLUDE); }
 
 (%+(d|f|lf|c|s|u|i))    { contaColn(); 
                           yylval.strval = strdup(yytext);
                           return(VARUSE); }
 
-"\n"                    { contaColn(); contLinhasC++; }
+"\n"                    { contColunaC = 1;
+                          contLinhasC++; }
 
-{L}({L}|{D})*		    { contaColn(); 
+{WORD}                  { contaColn(); 
                           yylval.strval = strdup(yytext); 
                           return(WORD); }
- 
 0[xX]{H}+{IS}?          { contaColn(); 
                           yylval.strval = strdup(yytext);
                           return(NUMBER); }
@@ -87,6 +81,19 @@ L?\"(\\.|[^\\"])*\"     { contaColn();
 	                        yylval.strval = strdup(yytext); 
                           return(QUOTE); }
 
+("#")[ \t]*("include")[ \t]*"\""{FILENAME}"\""  { 
+                          contaColn(); 
+                          yylval.strval = strdup(yytext); 
+                          return(INCLUDE); }   
+("#")[ \t]*("include")[ \t]*"<"{FILENAME}">"    {
+                          contaColn(); 
+                          yylval.strval = strdup(yytext); 
+                          return(INCLUDE); }                                                
+("#")[ \t]*("define")[ \t]*{WORD}               { 
+                          contaColn(); 
+                          yylval.strval = strdup(yytext); 
+                          return(DEFINE); } 
+                          
 "&&"                    { contaColn(); return(AND); }
 "||"                    { contaColn(); return(OR); }
 "<="                    { contaColn(); return(LE); }
@@ -118,7 +125,7 @@ L?\"(\\.|[^\\"])*\"     { contaColn();
 "|"                     { contaColn(); return('|'); }
 "?"                     { contaColn(); return('?'); }
 
-[ \t\v\n\f]             { contaColn(); /*ignore*/ }
+[ \t\v\f]               { contaColn(); /*ignore*/ }
 
 %%
 
@@ -127,7 +134,6 @@ int yywrap(void)
   return 1; 
 }
 
-int coluna = 0;
 void contaColn() 
 {
 	/* implementar */

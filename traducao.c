@@ -1,7 +1,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <stdbool.h>
 #include "estruturaC.h"
 #include "estruturaCobol.h"
 #include "traducao.h"
@@ -514,17 +513,3 @@ void escreverArquivo(FILE * file, SaidaCobol * saidaCobol)
 
 }
 
-/* Verifica se uma string tem espaco em branco */
-bool hasBlankSpace(const char * token)
-{
-
-	char * guardaTk = (char *) malloc((strlen(token)+2)*sizeof(char));
-    strcpy(guardaTk,token);
-
-    while (*guardaTk) 
-    {
-    	if (isspace(guardaTk)) return true;
-    	guardaTk++;
-  	}
-  	return false;
-}

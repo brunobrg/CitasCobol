@@ -8,7 +8,7 @@
 /* VARIAVEIS GLOBAIS */
 Linha            * printbuff = NULL; /* Buffer de string a imprimir */
 extern Simbolos  * listaDeVariaveis;
-bool             include_stdio = false;     
+int                include_stdio = 0;     
 
 /* IMPLEMENTACAO */
 
@@ -215,7 +215,11 @@ void imprimir(SaidaCobol ** saidaCobol, char * str)
 {
     // erro se o printf for vazio
 	if(strlen(str)<3)
-       erro(3);
+        erro(3);
+
+    // erro se nao houver o include do stdio.h
+    if(include_stdio == 0)
+        erro(6);
 
     // busca linha no buffer
 	Linha * linha;
@@ -280,12 +284,25 @@ void imprimir(SaidaCobol ** saidaCobol, char * str)
 
 }
 
-/* Armazena um valor booleano que informa se o #include<stdio.h> foi adicionado.*/
-void inclui_includeStdio(bool valor){
-    if (valor == true) include_stdio = true;
-}
+/* Armazena includes */
+void inclui(char * include){
 
-/* Verifica se o #include<stdio.h> foi adicionado ou nao.*/
-bool verifica_includeStdio(){
-        return include_stdio;
+    while (include[0] != '<' && include[0] != '\"')
+      { include = include + 1;
+      }
+
+    char cfim;
+    if (include[0] == '<')
+    {   
+        cfim = '>';
+    } else
+    {
+        cfim = '\"';
+    }
+
+    include = include + 1; 
+    include[strlen(include)-1] = '\0'; 
+
+    if (!strcmp(include,"stdio.h") == true)
+        include_stdio = 1;
 }

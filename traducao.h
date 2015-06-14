@@ -45,6 +45,5 @@ void              inserirProcDiv(SaidaCobol **, Linha *);
 void              criarDivisions(SaidaCobol **);
 void              organizarSaida(SaidaCobol **);
 void              escreverArquivo(FILE *, SaidaCobol *);
-bool              hasBlankSpace(const char *);
 
 #endif /* !TRADUCAO_H_INCLUDED */

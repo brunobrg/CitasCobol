@@ -11,7 +11,8 @@
 extern FILE     * yyin;              /* Arquivo do parser */
 FILE            * arq_entrada;       /* Arquivo de entrada */
 FILE            * arq_saida;         /* Arquivo de saida */
-int               contLinhasC = 1;   /* Contador do arq de entrada */   
+int               contLinhasC = 1;   /* Contador de linha arq de entrada */ 
+int               contColunaC = 1;   /* Contador de coluna arq de entrada */ 
 char            * nomePrograma;      /* Nome do programa */
 SaidaCobol      * saidaCobol = NULL; /* Arvore de blocosCobol */
 int               p;                 /* Passo de compilacao */
@@ -27,13 +28,13 @@ extern Escopo   * escopoAtual;
 }
 
 %token <strval> COMENT
-%token <strval> WORD NUMBER QUOTE
+%token <strval> WORD FILENAME NUMBER QUOTE
 %token LE GE EQUAL NEQUAL
 %token AND OR
 %token <strval> TYPE
 %token IF ELSE WHILE DO RETURN
 %token <strval> PRINTF VARUSE 
-%token <strval> INCLUDE PH
+%token <strval> INCLUDE DEFINE
 
 %type <strval> Expressao Operacao
 
@@ -47,20 +48,13 @@ Global
     ;
 
 Comando_global
-    : Include
-    | Define
+    : INCLUDE 
+      { if(p==0) inclui($1); }
+    | DEFINE
+    | DEFINE NUMBER
     | Declaracao ';'
     | Definicao
     | Comentario 
-    ;
-
-Include
-    : INCLUDE { inclui_includeStdio(true);}
-    ; 
-
-Define
-    : "#define" WORD NUMBER
-    | "#define" WORD
     ;
 
 Declaracao
@@ -206,13 +200,12 @@ Atribuicao_Complexa
 Printf
     : PRINTF '(' QUOTE ')'
       { 
-        if((p==0) && (verifica_includeStdio()==false)) erro(6);
         if(p==2) imprimir(&saidaCobol,$3); 
       }
     ;
 
 Expressao 
-	: Expressao Operacao Expressao
+	: NUMBER Operacao NUMBER
 	  { if (p==2)
         {
           char * expressao = (char *) malloc(sizeof(char)) ;
@@ -222,8 +215,6 @@ Expressao
           $$ = expressao;
         }
       }
-    | NUMBER
-    | WORD
     ;
 
 Operacao

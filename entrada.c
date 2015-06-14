@@ -1,8 +1,14 @@
-#include<stdio.h>
+
+#include  "stdio.h"		        
+
+
+#define PIW
+
+#define PI 3.14
 
 /* Programa de teste - C it as Cobol */
 
-int main ()
+int main()
 {
 	int x = 10;
 	float y ;

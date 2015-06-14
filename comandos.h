@@ -30,7 +30,7 @@ void   abreSection(SaidaCobol **, char *);
 void   fechaSection(SaidaCobol **, char *);
 void   comentario(SaidaCobol **, char *);
 void   imprimir(SaidaCobol **, char *, Linha **);
-void   inclui_includeStdio(bool valor);
+void   inclui(char *);
 bool   verifica_includeStdio();
 
 #endif /* !COMANDOS_H_INCLUDED  */
