@@ -304,7 +304,7 @@ void main(int argc, char *argv[]){
               escreverDataDivision(&saidaCobol);
               organizarSaida(&saidaCobol);
 		          escreverArquivo(arq_saida,saidaCobol);
-              printf("***** Tradução completa.\n");
+              printf("***** Tradução completa: %s.\n", nomePrograma);
               fclose(arq_saida);
             }
             else
@@ -315,7 +315,7 @@ void main(int argc, char *argv[]){
                 fprintf(arq_saida, "%s\n", aux->mensagem);
                 aux = aux->proximo;
               }
-              printf("*\n*Salvando log de erros em %s.\n*saindo...\n", nomePrograma);
+              printf("* Log de erros salvo em %s.\n", nomePrograma);
               fclose(arq_saida);
             }
 
