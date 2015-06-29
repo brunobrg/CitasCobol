@@ -4,7 +4,7 @@
 
 int main()
 {
-	int y
+	int y;
 	float comp
 	
     // FIM

@@ -17,6 +17,7 @@ int                contColunaC = 1;   /* Contador de coluna arq de entrada */
 char             * nomePrograma;      /* Nome do programa */
 SaidaCobol       * saidaCobol = NULL; /* Arvore de blocosCobol */
 extern SaidaErro * saidaErro;         /* estrutura para os erros */
+extern SaidaErro * saidaWarning;      /* estrutura para os warnings */
 int                p;                 /* Passo de compilacao */
 int                qntErros=0;        /* Quantidade de erros */
 extern Escopo    * escopoAtual;
@@ -306,11 +307,13 @@ void main(int argc, char *argv[]){
 yyerror(char * msg)
 {
   qntErros++;
-  printf("*** ERRO ");
-  printf("(linha %d):", contLinhasC);
-  printf(" %s\n", msg);
-  warning(msg, contLinhasC);
-  }
+  char buffer[256];
+  sprintf(buffer, "*** ERRO ");
+  sprintf(buffer, "%s (linha %d):",buffer, contLinhasC);
+  sprintf(buffer, "%s %s\n",buffer, msg);
+  printf("%s", buffer);
+  inserirSaidaErros(&saidaErro, buffer);
+}
 
 erro(int error_code)
 {
@@ -363,6 +366,6 @@ warning(char * msg, int l)
 {
   char buffer[256];
   sprintf(buffer,"*** WARNING: linha %d.\n***          %s\n", l, msg);
-  inserirSaidaErros(buffer);
+  inserirSaidaErros(saidaWarning, buffer);
   printf("*** WARNING: linha %d.\n***          %s\n", l, msg);
 }
