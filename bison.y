@@ -317,6 +317,7 @@ yyerror(char * msg)
 
 erro(int error_code)
 {
+char msg[256];
   qntErros++;
   printf("*** ERRO %i", error_code);
   switch ( error_code )
@@ -354,6 +355,13 @@ erro(int error_code)
       printf("Include stdio.h nao encontrado.\n");
       fprintf(arq_saida,"*** ERRO %i  (linha %d): ", error_code, contLinhasC);
       fprintf(arq_saida,"Include stdio.h nao encontrado.\n");
+      break;
+    case 7:
+      
+      sprintf(msg," (linha %d): ", contLinhasC);
+      sprintf(msg,"variaveis são iguais. Não devem haver variáveis com o mesmo nome.\n");
+      printf("%s", msg);
+      inserirSaidaErros(&saidaErro, msg);
       break;
     default : 
       printf(" (linha %d).\n", contLinhasC);

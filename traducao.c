@@ -527,17 +527,16 @@ void inserirSaidaErros(SaidaErro ** temp, char * erro)
 {
 	SaidaErro * add = addSaidaErro(erro);
 
-	if(temp == NULL)
+	if(*temp == NULL)
 	{
-		temp = &add;
+		*temp = add;
 	}
 	else
 	{
 		SaidaErro *aux = *temp;
 		while(aux->proximo != NULL)
 			{
-				aux = aux->proximo;
-				
+				aux = aux->proximo;		
 			}
 		aux->proximo = add;
 	}

@@ -5,11 +5,8 @@
 int main()
 {
 
-	int y;
-
-	int y =1;
-	int y =8;
-
+	int y=3;
+	int y=10;
 	float comp;
 	
     // FIM

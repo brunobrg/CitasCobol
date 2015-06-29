@@ -160,15 +160,17 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], int l, char tipo[40],
 				Simbolos * aux = escTemp->s_declarados;
 				if(strcmp(aux->nome, add->nome)==0)
 				{
-					char msg[100];
-					sprintf(msg,"'%s' e '%s'  são iguais. Não devem haver variáveis com o mesmo nome.\n", aux->nome, add->nome);
-					yyerror(msg);
+					erro(7);
+					
 					return;					
-				}	
-				while(aux->proximo!= NULL)
-					aux = aux->proximo;
+				}
+				else
+				{
+					while(aux->proximo!= NULL)
+						aux = aux->proximo;
 
-				aux->proximo = add;
+					aux->proximo = add;
+				}
 			}
 
 			Simbolos * add2 = addSimbolo(l, tipo, nomeSimbolo, valor);
