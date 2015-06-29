@@ -161,7 +161,6 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], int l, char tipo[40],
 				if(strcmp(aux->nome, add->nome)==0)
 				{
 					erro(7);
-					
 					return;					
 				}
 				else

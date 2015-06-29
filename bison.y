@@ -357,9 +357,8 @@ char msg[256];
       fprintf(arq_saida,"Include stdio.h nao encontrado.\n");
       break;
     case 7:
-      
       sprintf(msg," (linha %d): ", contLinhasC);
-      sprintf(msg,"variaveis são iguais. Não devem haver variáveis com o mesmo nome.\n");
+      sprintf(msg," (linha %d): variaveis são iguais. Não devem haver variáveis com o mesmo nome.\n", error_code);
       printf("%s", msg);
       inserirSaidaErros(&saidaErro, msg);
       break;
@@ -373,7 +372,7 @@ char msg[256];
 warning(char * msg, int l)
 {
   char buffer[256];
-  sprintf(buffer,"*** WARNING: linha %d.\n*** ERRO: %s\n", l, msg);
+  sprintf(buffer,"*** WARNING: linha %d.\n     %s\n", l, msg);
   inserirSaidaErros(saidaWarning, buffer);
-  printf("*** WARNING: linha %d.\n*** ERRO: %s\n", l, msg);
+  printf("*** WARNING: linha %d.\n     %s\n", l, msg);
 }
