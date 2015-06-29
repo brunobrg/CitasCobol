@@ -354,7 +354,7 @@ int verificaSimbolosDeclarados(Simbolos * dec, Simbolos * usaHead)
 		sprintf(msg, "\"%s %s\" declarada e nao utilizada.",
 		    dec->tipo, dec->nome);
 		warning(msg, dec->linha);
-		return 0 * verificaSimbolosDeclarados(dec->proximo, usaHead);
+		return 1 * verificaSimbolosDeclarados(dec->proximo, usaHead);
 	}
 }
 

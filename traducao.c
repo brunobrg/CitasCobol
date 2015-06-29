@@ -533,8 +533,10 @@ void inserirSaidaErros(char * erro)
 	{
 		SaidaErro* aux = saidaErro;
 		while(aux->proximo != NULL)
-			aux = aux->proximo;
-
+			{
+				aux = aux->proximo;
+				printf("entrou no while\n");
+			}
 		aux->proximo = add;
 	}
 }

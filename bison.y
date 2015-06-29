@@ -11,6 +11,7 @@
 extern FILE      * yyin;              /* Arquivo do parser */
 FILE             * arq_entrada;       /* Arquivo de entrada */
 FILE             * arq_saida;         /* Arquivo de saida */
+FILE             * arq_erros;         /* Arquivo de erros e warnings */
 int                contLinhasC = 1;   /* Contador de linha arq de entrada */ 
 int                contColunaC = 1;   /* Contador de coluna arq de entrada */ 
 char             * nomePrograma;      /* Nome do programa */
@@ -237,7 +238,7 @@ void main(int argc, char *argv[]){
   arq_entrada = fopen(argv[1], "r");
   nomePrograma = nomeProgramaCob(argv[1]);
   arq_saida = fopen(nomePrograma, "w+");
-
+  arq_erros = fopen("log", "w+");
 	/* --- --- --- --- --- --- --- ---*/
   
 	if(arq_entrada)
@@ -268,24 +269,26 @@ void main(int argc, char *argv[]){
             yyparse();
             fclose(arq_entrada);
 
-            if(qntErros == 0 /* && verificaListaEscopo() */  )
+            if(qntErros == 0 && verificaListaEscopo())
             {
               escreverDataDivision(&saidaCobol);
               organizarSaida(&saidaCobol);
 		          escreverArquivo(arq_saida,saidaCobol);
               printf("***** Tradução completa: %s.\n", nomePrograma);
               fclose(arq_saida);
+              fprintf(arq_erros, "Tradução completa.\n");
+              fclose(arq_erros);
             }
             else
             {
               SaidaErro * aux = saidaErro;
               while(aux!=NULL)
               {
-                fprintf(arq_saida, "%s\n", aux->mensagem);
+                fprintf(arq_erros, "%s\n", aux->mensagem);
                 aux = aux->proximo;
               }
-              printf("* Log de erros salvo em %s.\n", nomePrograma);
-              fclose(arq_saida);
+              printf("* Log de erros salvo em log.\n");
+              fclose(arq_erros);
             }
 
             free(saidaCobol);
@@ -306,7 +309,8 @@ yyerror(char * msg)
   printf("*** ERRO ");
   printf("(linha %d):", contLinhasC);
   printf(" %s\n", msg);
-}
+  warning(msg, contLinhasC);
+  }
 
 erro(int error_code)
 {
