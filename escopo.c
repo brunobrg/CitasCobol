@@ -158,7 +158,13 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], int l, char tipo[40],
 			else
 			{
 				Simbolos * aux = escTemp->s_declarados;
-				
+				if(strcmp(aux->nome, add->nome)==0)
+				{
+					char msg[100];
+					sprintf(msg,"'%s' e '%s'  são iguais. Não devem haver variáveis com o mesmo nome.\n", aux->nome, add->nome);
+					yyerror(msg);
+					return;					
+				}	
 				while(aux->proximo!= NULL)
 					aux = aux->proximo;
 
@@ -195,11 +201,8 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], int l, char tipo[40],
 			else
 			{
 				Simbolos * aux = escTemp->s_usados;
-				
 				while(aux->proximo!= NULL)
-					aux = aux->proximo;
-
-				aux->proximo = add;
+					aux->proximo = add;
 			}
 		}
 
@@ -307,7 +310,6 @@ int validaSimboloUsado(Simbolos **declarada, Simbolos **usada)
 /* */
 int verificaSimbolosUsados(Simbolos * decHead, Simbolos * usa)
 {
-
 	if(usa == NULL)
 		return 1;
 	else
@@ -334,7 +336,6 @@ int verificaSimbolosUsados(Simbolos * decHead, Simbolos * usa)
 /* */
 int verificaSimbolosDeclarados(Simbolos * dec, Simbolos * usaHead)
 {
-
 	if(dec == NULL)
 		return 1;
 	else
@@ -365,7 +366,7 @@ int verificaEscopo(Escopo * aux)
 		return 1;
 	else
 	{
-		//printf("*** Dentro de: %s\n", aux->nome);
+	//	printf("*** Dentro de: %s\n", aux->nome);
 		return 1 * verificaSimbolosDeclarados(aux->s_declarados, aux->s_usados) * verificaSimbolosUsados(aux->s_declarados, aux->s_usados);
 	}
 }

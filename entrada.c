@@ -4,8 +4,9 @@
 
 int main()
 {
-	int y;
-	float comp
+	int y =1;
+	int y =8;
+	float comp;
 	
     // FIM
 
