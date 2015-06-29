@@ -4,7 +4,12 @@
 
 int main()
 {
+
 	int y;
+
+	int y =1;
+	int y =8;
+
 	float comp;
 	
     // FIM

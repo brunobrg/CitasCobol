@@ -365,7 +365,7 @@ erro(int error_code)
 warning(char * msg, int l)
 {
   char buffer[256];
-  sprintf(buffer,"*** WARNING: linha %d.\n***          %s\n", l, msg);
+  sprintf(buffer,"*** WARNING: linha %d.\n*** ERRO: %s\n", l, msg);
   inserirSaidaErros(saidaWarning, buffer);
-  printf("*** WARNING: linha %d.\n***          %s\n", l, msg);
+  printf("*** WARNING: linha %d.\n*** ERRO: %s\n", l, msg);
 }
