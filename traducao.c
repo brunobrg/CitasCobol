@@ -523,20 +523,21 @@ SaidaErro * addSaidaErro(char * erro)
 	return add;
 }
 
-void inserirSaidaErros(SaidaErro * saidaErroWarning, char * erro)
+void inserirSaidaErros(SaidaErro ** temp, char * erro)
 {
 	SaidaErro * add = addSaidaErro(erro);
-	if(saidaErroWarning == NULL)
+
+	if(temp == NULL)
 	{
-		saidaErroWarning = add;
+		temp = &add;
 	}
 	else
 	{
-		SaidaErro* aux = saidaErroWarning;
+		SaidaErro *aux = *temp;
 		while(aux->proximo != NULL)
 			{
 				aux = aux->proximo;
-				printf("entrou no while\n");
+				
 			}
 		aux->proximo = add;
 	}
