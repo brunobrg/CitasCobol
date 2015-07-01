@@ -325,11 +325,7 @@ int verificaSimbolosUsados(Simbolos * decHead, Simbolos * usa)
 			
 			dec = dec->proximo;
 		}
-
-		char msg[50];
-		sprintf(msg, "\"%s %s\" utilizada e nao declarada.",
-		    usa->tipo, usa->nome);
-		warning(msg, usa->linha);
+		erro(8);
 		return 0 * verificaSimbolosUsados(decHead, usa->proximo);
 	}
 }
@@ -351,11 +347,7 @@ int verificaSimbolosDeclarados(Simbolos * dec, Simbolos * usaHead)
 			
 			usa = usa->proximo;
 		}
-
-		char msg[50];
-		sprintf(msg, "\"%s %s\" declarada e nao utilizada.",
-		    dec->tipo, dec->nome);
-		warning(msg, dec->linha);
+		warning(1);
 		return 1 * verificaSimbolosDeclarados(dec->proximo, usaHead);
 	}
 }

@@ -8,19 +8,20 @@
 #include "traducao.h"
 
 /* Variaveis globais */
-extern FILE      * yyin;              /* Arquivo do parser */
-FILE             * arq_entrada;       /* Arquivo de entrada */
-FILE             * arq_saida;         /* Arquivo de saida */
-FILE             * arq_erros;         /* Arquivo de erros e warnings */
-int                contLinhasC = 1;   /* Contador de linha arq de entrada */ 
-int                contColunaC = 1;   /* Contador de coluna arq de entrada */ 
-char             * nomePrograma;      /* Nome do programa */
-SaidaCobol       * saidaCobol = NULL; /* Arvore de blocosCobol */
-extern SaidaErro * saidaErro;         /* estrutura para os erros */
-extern SaidaErro * saidaWarning;      /* estrutura para os warnings */
-int                p;                 /* Passo de compilacao */
-int                qntErros=0;        /* Quantidade de erros */
-extern Escopo    * escopoAtual;
+extern FILE          * yyin;              /* Arquivo do parser */
+FILE                 * arq_entrada;       /* Arquivo de entrada */
+FILE                 * arq_saida;         /* Arquivo de saida */
+FILE                 * arq_erros;         /* Arquivo de erros e warnings */
+int                    contLinhasC = 1;   /* Contador de linha arq de entrada */ 
+int                    contColunaC = 1;   /* Contador de coluna arq de entrada */ 
+char                 * nomePrograma;      /* Nome do programa */
+SaidaCobol           * saidaCobol = NULL; /* Arvore de blocosCobol */
+extern SaidaErro     * saidaErro;         /* estrutura para os erros */
+extern SaidaWarning  * saidaWarning;      /* estrutura para os warnings */
+int                    p;                 /* Passo de compilacao */
+int                    qntErros=0;        /* Quantidade de erros */
+int                    qntWarnings=0;     /* Quantidade de warnings */
+extern Escopo        * escopoAtual;
 
 
 %}
@@ -277,8 +278,21 @@ void main(int argc, char *argv[]){
 		          escreverArquivo(arq_saida,saidaCobol);
               printf("***** Tradução completa: %s.\n", nomePrograma);
               fclose(arq_saida);
-              fprintf(arq_erros, "Tradução completa.\n");
-              fclose(arq_erros);
+              if(qntWarnings == 0 && verificaListaEscopo())
+              {
+                fprintf(arq_erros, "Tradução completa.\n");
+                fclose(arq_erros);
+              }
+              else
+              {
+                SaidaWarning * aux = saidaWarning;
+                while(aux!=NULL)
+                {
+                  fprintf(arq_erros, "%s\n", aux->mensagem);
+                  aux = aux->proximo;
+                }
+                fclose(arq_erros);
+              }
             }
             else
             {
@@ -288,7 +302,7 @@ void main(int argc, char *argv[]){
                 fprintf(arq_erros, "%s\n", aux->mensagem);
                 aux = aux->proximo;
               }
-              printf("* Log de erros salvo em log.\n");
+              printf("* Log de erros e warnings salvo em log.\n");
               fclose(arq_erros);
             }
 
@@ -313,6 +327,31 @@ yyerror(char * msg)
   sprintf(buffer, "%s %s\n",buffer, msg);
   printf("%s", buffer);
   inserirSaidaErros(&saidaErro, buffer);
+  qntWarnings++;
+  char bufmsg[256];
+  sprintf(bufmsg, "*** WARNING ");
+  sprintf(bufmsg, "%s (linha %d):", bufmsg, contLinhasC);
+  printf("%s",bufmsg);
+  inserirSaidaWarnings(&saidaWarning, bufmsg);
+}
+
+
+warning(int warning_code)
+{
+  char msg[256];
+  qntWarnings++;
+  fprintf(arq_erros,"*** WARNING %i", warning_code);
+  switch (warning_code)
+  {
+    case 1:
+      fprintf(arq_erros," (linha %d): Variável declarada e não utilizada. \n", contLinhasC);
+      inserirSaidaWarnings(&saidaWarning, msg);
+      break;
+    default : 
+      printf(" (linha %d).\n", contLinhasC);
+      fprintf(arq_erros,"*** WARNING %i  (linha %d): ", warning_code, contLinhasC);
+      break;
+  }  
 }
 
 erro(int error_code)
@@ -320,6 +359,7 @@ erro(int error_code)
 char msg[256];
   qntErros++;
   printf("*** ERRO %i", error_code);
+  fprintf(arq_erros,"*** ERRO %i", error_code);
   switch ( error_code )
   {
     case 0 :
@@ -357,11 +397,15 @@ char msg[256];
       fprintf(arq_saida,"Include stdio.h nao encontrado.\n");
       break;
     case 7:
-      sprintf(msg," (linha %d): ", contLinhasC);
-      sprintf(msg," (linha %d): variaveis são iguais. Não devem haver variáveis com o mesmo nome.\n", error_code);
+      sprintf(msg," (linha %d): variaveis são iguais. Não devem haver variáveis com o mesmo nome.\n", contLinhasC);
       printf("%s", msg);
       inserirSaidaErros(&saidaErro, msg);
       break;
+    case 8:
+      sprintf(msg," (linha %d): Variável utilizada e não declarada. \n", contLinhasC);
+      printf("%s", msg);
+      inserirSaidaErros(&saidaErro, msg);
+      break;  
     default : 
       printf(" (linha %d).\n", contLinhasC);
       fprintf(arq_saida,"*** ERRO %i  (linha %d): ", error_code, contLinhasC);
@@ -369,10 +413,10 @@ char msg[256];
   }
 }
 
-warning(char * msg, int l)
-{
-  char buffer[256];
-  sprintf(buffer,"*** WARNING: linha %d.\n     %s\n", l, msg);
-  inserirSaidaErros(saidaWarning, buffer);
-  printf("*** WARNING: linha %d.\n     %s\n", l, msg);
-}
+//warning(char * msg, int l)
+//{
+//  char buffer[256];
+//  sprintf(buffer,"*** WARNING: linha %d.\n     %s\n", l, msg);
+//  inserirSaidaErros(saidaWarning, buffer);
+//  printf("*** WARNING: linha %d.\n     %s\n", l, msg);
+//}

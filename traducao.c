@@ -541,3 +541,31 @@ void inserirSaidaErros(SaidaErro ** temp, char * erro)
 		aux->proximo = add;
 	}
 }
+
+SaidaWarning * addSaidaWarning(char * warning)
+{
+	SaidaWarning * add = (SaidaWarning*) malloc(sizeof(SaidaWarning));
+	sprintf(add->mensagem, "%s", warning);
+	add->proximo = NULL;
+
+	return add;
+}
+
+void inserirSaidaWarnings(SaidaWarning ** temp, char * warning)
+{
+	SaidaWarning * add = addSaidaWarning(warning);
+
+	if(*temp == NULL)
+	{
+		*temp = add;
+	}
+	else
+	{
+		SaidaWarning *aux = *temp;
+		while(aux->proximo !=NULL)
+		{
+			aux = aux->proximo;
+		}
+		aux->proximo = add;
+	}
+}

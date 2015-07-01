@@ -1,2 +1,4 @@
- (linha 7): variaveis são iguais. Não devem haver variáveis com o mesmo nome.
+*** WARNING 1 (linha 11): Variável declarada e não utilizada. 
+*** WARNING 1 (linha 11): Variável declarada e não utilizada. 
+*** ERRO 8 (linha 11): Variável utilizada e não declarada. 
 

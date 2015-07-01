@@ -75,5 +75,10 @@ typedef struct _SaidaErro
 	char mensagem[256];
 	struct _SaidaErro * proximo;
 }SaidaErro;
+typedef struct _SaidaWarning
+{
+	char mensagem[256];
+	struct _SaidaWarning * proximo;;
+}SaidaWarning;
 
 #endif /* !ESTRUTURACOBOL_H_INCLUDED */
