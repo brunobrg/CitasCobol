@@ -284,6 +284,13 @@ void imprimir(SaidaCobol ** saidaCobol, char * str)
 
 }
 
+void imprimirComArgs(SaidaCobol ** saidaCobol, char * str, char * simbolos)
+{
+
+    
+}
+
+
 /* Armazena includes */
 void inclui(char * include){
 

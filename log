@@ -1,4 +1,6 @@
-*** WARNING 1 (linha 11): Variável declarada e não utilizada. 
-*** WARNING 1 (linha 11): Variável declarada e não utilizada. 
-*** ERRO 8 (linha 11): Variável utilizada e não declarada. 
+*** ERRO  (linha 8): syntax error
+
+*** ERRO  (linha 1): syntax error
+
+*** ERRO  (linha 1): syntax error
 
