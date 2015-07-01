@@ -37,7 +37,7 @@ extern Escopo    * escopoAtual;
 %token <strval> PRINTF VARUSE 
 %token <strval> INCLUDE DEFINE
 
-%type <strval> Expressao Operacao
+%type <strval> Expressao Operacao Lista_variaveis
 
 %left '+' '-' '/' '*' 
 
@@ -144,6 +144,11 @@ Def_argumentos
     | Def_argumentos ',' TYPE WORD 
     ;
 
+Lista_variaveis
+    : WORD
+    | Lista_variaveis ',' WORD
+    ;
+
 Dec_struct
     : "struct" WORD '{' '}' 
     ;
@@ -222,6 +227,10 @@ Printf
     : PRINTF '(' QUOTE ')'
       { 
         if(p==2) imprimir(&saidaCobol,$3); 
+      }
+    | PRINTF '(' QUOTE ',' Lista_variaveis ')'
+      { 
+        if(p==2) imprimirComArgs(&saidaCobol,$3, $5); 
       }
     ;
 

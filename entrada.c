@@ -8,16 +8,14 @@
 
 /* Programa de teste - C it as Cobol */
 
+char y;
+
 int main()
 {
-	char x = 'o';
-	float y ;
-    printf("O restultado vem agora. Ele eh enooooooooooooooooooooooooorme.\n");
-    y = ((((2))));
-    y = -(((2)));
-    y = y+3;
-    y = (1*2)+(-4)/(-5.4*y);
-
+	char y;
+	printf("%d", y);
     // FIM
 
+
 }
+
