@@ -347,7 +347,7 @@ warning(int warning_code, int linha)
   switch (warning_code)
   {
     case 1:
-      fprintf(arq_erros," (linha %d): Variável declarada e não utilizada. \n", linha);
+      fprintf(arq_erros," (linha %d): Variavel declarada e nao utilizada. \n", linha);
       inserirSaidaWarnings(&saidaWarning, msg);
       break;
     default : 
@@ -366,14 +366,14 @@ char msg[256];
   switch ( error_code )
   {
     case 0 :
-      printf(": Nome do arquivo não informado.\n");
+      printf(": Nome do arquivo nao informado.\n");
 	    exit(1);
     case 1 :
-      printf(": Arquivo não encontrado.\n");
+      printf(": Arquivo nao encontrado.\n");
       exit(1);   
     case 2:
       printf(": Erro no arquivo de saída.\n");
-      fprintf(arq_saida, "Erro no arquivo, por favor arrumar os erros.\n");
+      fprintf(arq_saida, "Erro no arquivo, favor corrigir os erros.\n");
       exit(1);
     case 3:
       printf(" (linha %d): ", contLinhasC);
@@ -389,9 +389,9 @@ char msg[256];
       break;
     case 5:
       printf(" (linha %d): ", contLinhasC);
-      printf("Tipo não suportado.\n");
+      printf("Tipo nao suportado.\n");
       fprintf(arq_saida,"*** ERRO %i  (linha %d): ", error_code, contLinhasC);
-      fprintf(arq_saida,"Tipo não suportado.\n");
+      fprintf(arq_saida,"Tipo nao suportado.\n");
       break;
     case 6:
       printf(" (linha %d): ", contLinhasC);
@@ -400,12 +400,12 @@ char msg[256];
       fprintf(arq_saida,"Include stdio.h nao encontrado.\n");
       break;
     case 7:
-      sprintf(msg," (linha %d): variaveis são iguais. Não devem haver variáveis com o mesmo nome.\n", contLinhasC);
+      sprintf(msg," (linha %d): 2 ou mais variaveis iguais. Nao devem existir variaveis com o mesmo nome.\n", contLinhasC);
       printf("%s", msg);
       inserirSaidaErros(&saidaErro, msg);
       break;
     case 8:
-      sprintf(msg," (linha %d): Variável utilizada e não declarada. \n", contLinhasC);
+      sprintf(msg," (linha %d): Variavel utilizada e nao declarada. \n", contLinhasC);
       printf("%s", msg);
       inserirSaidaErros(&saidaErro, msg);
       break;  
