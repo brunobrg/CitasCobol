@@ -23,15 +23,11 @@ void entraEscopoNome(Escopo * tempEsc, char * temp)
 	{
 		char buffer[256];
 		sprintf(buffer, "%s.%s", tempEsc->nome, temp);
-		printf("\n\ntemp: %s\n\n", buffer);
-
 		temp = (char *) malloc(sizeof(buffer));
 		sprintf(temp, "%s", buffer);
 
 		while(strcmp(aux->escopo->nome, temp) != 0)
 		{
-			printf("escopo: %s, temp: %s\n\n", aux->escopo->nome, temp);
-
 			if(aux->proximo != NULL)
 				aux = aux->proximo;
 			else
@@ -41,7 +37,6 @@ void entraEscopoNome(Escopo * tempEsc, char * temp)
 		}
 
 		entraEscopo(aux->escopo);
-		printf("entrou no escopo: %s", temp);
 	}
 }
 
@@ -199,7 +194,20 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], int l, char tipo[40],
 				else
 				{
 					while(aux->proximo!= NULL)
+					{
+						if(strcmp(aux->nome, add->nome)==0)
+						{
+							erro(7);
+							return;					
+						}
 						aux = aux->proximo;
+					}
+
+					if(strcmp(aux->nome, add->nome)==0)
+					{
+						erro(7);
+						return;					
+					}
 
 					aux->proximo = add;
 				}
