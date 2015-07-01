@@ -36,6 +36,5 @@ void   define(char *,char *);
 void   atribuiValor(SaidaCobol **, Escopo *, int, char *, char *);
 void   atribuiString(SaidaCobol **, Escopo *, int, char *, char *);
 
-
 #endif /* !COMANDOS_H_INCLUDED  */
  

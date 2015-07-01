@@ -3,9 +3,15 @@
 
 int main()
 {
-	char y = 81;
-	char y;
-	char y;
-    // FIM
+	int y = 81;
+	int x;
+	x = 20;
+
+	printf("%d", x);
+
+	x = y + x;
+
+	printf("gagagga", x);
+
 }
 

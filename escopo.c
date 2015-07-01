@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "estruturaC.h"
+#include "escopo.h"
 
 /* VARIAVEIS GLOBAIS */
 int               idEscopo = 0;
@@ -12,6 +13,38 @@ Simbolos        * listaDeVariaveis;
 /* IMPLEMENTACAO */
 
 /* */
+
+void entraEscopoNome(Escopo * tempEsc, char * temp)
+{
+	ListaDeEscopo * aux = listaDeEscopo;
+	if(aux == NULL)
+		return;
+	else
+	{
+		char buffer[256];
+		sprintf(buffer, "%s.%s", tempEsc->nome, temp);
+		printf("\n\ntemp: %s\n\n", buffer);
+
+		temp = (char *) malloc(sizeof(buffer));
+		sprintf(temp, "%s", buffer);
+
+		while(strcmp(aux->escopo->nome, temp) != 0)
+		{
+			printf("escopo: %s, temp: %s\n\n", aux->escopo->nome, temp);
+
+			if(aux->proximo != NULL)
+				aux = aux->proximo;
+			else
+			{
+				return;
+			}
+		}
+
+		entraEscopo(aux->escopo);
+		printf("entrou no escopo: %s", temp);
+	}
+}
+
 void entraEscopo(Escopo * temp)
 {
 	escopoAtual = temp;	
@@ -238,6 +271,26 @@ void atualizaSimbolo(Simbolos **usada)
 	strcpy(temp->value,(*usada)->value);
 }
 
+/*void atualizaValor(Escopo ** esc, char * nome, char * valor)
+{
+	Simbolos * var = (*esc)->s_usados;
+	if(var == NULL)
+		return;
+	else
+	{
+		while(strcmp(var->nome, nome) != 0)
+		{
+			if(var->proximo == NULL)
+				return;
+			var = var->proximo;
+		}
+
+		printf("valor: %s\n\n", valor);
+		var->value = valor;
+		atualizaSimbolo(&var);
+	}
+}*/
+
 /* */
 int validaSimboloUsado(Simbolos **declarada, Simbolos **usada)
 {
@@ -319,7 +372,8 @@ int validaSimboloUsado(Simbolos **declarada, Simbolos **usada)
 			valor = atoi((*usada)->value);
 			sprintf(novo_valor,"%c", valor);
 			strcpy((*usada)->value, novo_valor);
-			atualizaSimbolo(usada);
+			if(strcmp((*usada)->tipo, "null") != 0) 
+				atualizaSimbolo(usada);
 		}
 		if((*usada)->value[0] == '\"')
 		{
@@ -349,7 +403,7 @@ int verificaSimbolosUsados(Simbolos * decHead, Simbolos * usa)
 		return 1;
 	else
 	{
-		Simbolos * dec = decHead;;
+		Simbolos * dec = decHead;
 		while(dec !=NULL)
 		{
 			if(!strcmp(usa->nome, dec->nome))
@@ -393,7 +447,7 @@ int verificaEscopo(Escopo * aux)
 		return 1;
 	else
 	{
-	//	printf("*** Dentro de: %s\n", aux->nome);
+		printf("*** Dentro de: %s\n", aux->nome);
 		return 1 * verificaSimbolosDeclarados(aux->s_declarados, aux->s_usados) * verificaSimbolosUsados(aux->s_declarados, aux->s_usados);
 	}
 }

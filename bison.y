@@ -121,7 +121,11 @@ Dec_funcao
 Def_funcao
     : TYPE WORD '(' Def_argumentos ')'
       { if (p == 1) criaEscopo($2);
-        if (p == 2) abreSection(&saidaCobol,$2); 
+        if (p == 2)
+        {
+          abreSection(&saidaCobol,$2); 
+          entraEscopoNome(escopoAtual, $2);
+        }
       }  
      '{' Bloco '}'
       { if (p == 1) saiEscopo();
@@ -129,7 +133,11 @@ Def_funcao
       }
     | TYPE WORD '(' ')'
       {  if (p == 1) criaEscopo($2);
-         if (p == 2) abreSection(&saidaCobol,$2);
+         if (p == 2)
+         {  
+          abreSection(&saidaCobol,$2);
+          entraEscopoNome(escopoAtual, $2);
+        }
       }    
      '{' Bloco '}'
       { if (p == 1) saiEscopo();

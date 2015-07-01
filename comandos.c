@@ -373,7 +373,7 @@ atribuiValor(SaidaCobol ** saidaCobol, Escopo * escopoAtual,
       }
 
       adicionaSimbolo(escopoAtual, "usada", contLinhasC, "null", simbolo, valor);
-
+      //atualizaValor(&escopoAtual, simbolo, valor);
 }
 
 

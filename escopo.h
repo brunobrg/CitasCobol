@@ -22,7 +22,9 @@ void            adicionaSimbolo(Escopo *, char *, int, char *, char *, char *);
 void            imprimeEscopos(ListaDeEscopo *);
 int             verificaListaEscopo();
 void            saiEscopo();
-
+void			entraEscopo(struct _escopo *);
+void 			entraEscopoNome(struct _escopo *, char *);
+void   			atualizaValor(Escopo **, char* , char * );
 
 #endif /* !ESCOPO_H_INCLUDED  */
 
