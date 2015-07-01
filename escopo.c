@@ -203,7 +203,9 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], int l, char tipo[40],
 			{
 				Simbolos * aux = escTemp->s_usados;
 				while(aux->proximo!= NULL)
-					aux->proximo = add;
+					aux = aux->proximo;
+
+				aux->proximo = add;
 			}
 		}
 
@@ -262,7 +264,6 @@ int validaSimboloUsado(Simbolos **declarada, Simbolos **usada)
 				int i;
 				for(i = 0; i <= (int) strlen((*usada)->value); i++)
 				{
-					
 					if((*usada)->value[i] == '.')
 					{
 						(*usada)->value[i] = '\0';
@@ -298,6 +299,21 @@ int validaSimboloUsado(Simbolos **declarada, Simbolos **usada)
 	{
 		if((*usada)->value[0] != '\'' && (*usada)->value[0] != '\"')
 		{
+			int i;
+			char float_int[32];
+			strcpy(float_int, "");
+			//transformando itens floats em inteiros
+			for(i = 0; i < (int) strlen((*usada)->value); i++)
+			{
+				
+				if((*usada)->value[i] == '.')
+				{
+					strcpy((*usada)->value, float_int);
+					atualizaSimbolo(usada);
+					break;
+				}
+				sprintf(float_int, "%s%c", float_int, (*usada)->value[i]);
+			}
 			int valor;
 			char novo_valor[32];
 			valor = atoi((*usada)->value);

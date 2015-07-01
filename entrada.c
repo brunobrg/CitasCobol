@@ -4,6 +4,8 @@
 int main()
 {
 	char y = 81;
+	char y;
+	char y;
     // FIM
 }
 
