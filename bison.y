@@ -11,11 +11,13 @@
 extern FILE      * yyin;              /* Arquivo do parser */
 FILE             * arq_entrada;       /* Arquivo de entrada */
 FILE             * arq_saida;         /* Arquivo de saida */
+FILE             * arq_erros;         /* Arquivo de erros e warnings */
 int                contLinhasC = 1;   /* Contador de linha arq de entrada */ 
 int                contColunaC = 1;   /* Contador de coluna arq de entrada */ 
 char             * nomePrograma;      /* Nome do programa */
 SaidaCobol       * saidaCobol = NULL; /* Arvore de blocosCobol */
 extern SaidaErro * saidaErro;         /* estrutura para os erros */
+extern SaidaErro * saidaWarning;      /* estrutura para os warnings */
 int                p;                 /* Passo de compilacao */
 int                qntErros=0;        /* Quantidade de erros */
 extern Escopo    * escopoAtual;
@@ -246,7 +248,7 @@ void main(int argc, char *argv[]){
   arq_entrada = fopen(argv[1], "r");
   nomePrograma = nomeProgramaCob(argv[1]);
   arq_saida = fopen(nomePrograma, "w+");
-
+  arq_erros = fopen("log", "w+");
 	/* --- --- --- --- --- --- --- ---*/
   
 	if(arq_entrada)
@@ -277,24 +279,26 @@ void main(int argc, char *argv[]){
             yyparse();
             fclose(arq_entrada);
 
-            if(qntErros == 0 /* && verificaListaEscopo() */  )
+            if(qntErros == 0 && verificaListaEscopo())
             {
               escreverDataDivision(&saidaCobol);
               organizarSaida(&saidaCobol);
 		          escreverArquivo(arq_saida,saidaCobol);
               printf("***** Tradução completa: %s.\n", nomePrograma);
               fclose(arq_saida);
+              fprintf(arq_erros, "Tradução completa.\n");
+              fclose(arq_erros);
             }
             else
             {
               SaidaErro * aux = saidaErro;
               while(aux!=NULL)
               {
-                fprintf(arq_saida, "%s\n", aux->mensagem);
+                fprintf(arq_erros, "%s\n", aux->mensagem);
                 aux = aux->proximo;
               }
-              printf("* Log de erros salvo em %s.\n", nomePrograma);
-              fclose(arq_saida);
+              printf("* Log de erros salvo em log.\n");
+              fclose(arq_erros);
             }
 
             free(saidaCobol);
@@ -312,13 +316,17 @@ void main(int argc, char *argv[]){
 yyerror(char * msg)
 {
   qntErros++;
-  printf("*** ERRO ");
-  printf("(linha %d):", contLinhasC);
-  printf(" %s\n", msg);
+  char buffer[256];
+  sprintf(buffer, "*** ERRO ");
+  sprintf(buffer, "%s (linha %d):",buffer, contLinhasC);
+  sprintf(buffer, "%s %s\n",buffer, msg);
+  printf("%s", buffer);
+  inserirSaidaErros(&saidaErro, buffer);
 }
 
 erro(int error_code)
 {
+char msg[256];
   qntErros++;
   printf("*** ERRO %i", error_code);
   switch ( error_code )
@@ -357,6 +365,12 @@ erro(int error_code)
       fprintf(arq_saida,"*** ERRO %i  (linha %d): ", error_code, contLinhasC);
       fprintf(arq_saida,"Include stdio.h nao encontrado.\n");
       break;
+    case 7:
+      sprintf(msg," (linha %d): ", contLinhasC);
+      sprintf(msg," (linha %d): variaveis são iguais. Não devem haver variáveis com o mesmo nome.\n", error_code);
+      printf("%s", msg);
+      inserirSaidaErros(&saidaErro, msg);
+      break;
     default : 
       printf(" (linha %d).\n", contLinhasC);
       fprintf(arq_saida,"*** ERRO %i  (linha %d): ", error_code, contLinhasC);
@@ -367,7 +381,7 @@ erro(int error_code)
 warning(char * msg, int l)
 {
   char buffer[256];
-  sprintf(buffer,"*** WARNING: linha %d.\n***          %s\n", l, msg);
-  inserirSaidaErros(buffer);
-  printf("*** WARNING: linha %d.\n***          %s\n", l, msg);
+  sprintf(buffer,"*** WARNING: linha %d.\n     %s\n", l, msg);
+  inserirSaidaErros(saidaWarning, buffer);
+  printf("*** WARNING: linha %d.\n     %s\n", l, msg);
 }

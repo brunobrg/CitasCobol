@@ -11,6 +11,7 @@ int contLinhasCobol = 1;   /* Contagem de linhas do
 int foraDeQuote  = 1;      /* 0 quando dentro de um quote */
 int foraDeComent = 1;      /* 0 quando dentro de um comentario */
 SaidaErro * saidaErro = NULL;
+SaidaErro * saidaWarning = NULL;
 /* IMPLEMENTACAO */
 
 /* Recebe o nome do programa.c e devolve o nome do programa .cob */
@@ -522,19 +523,21 @@ SaidaErro * addSaidaErro(char * erro)
 	return add;
 }
 
-void inserirSaidaErros(char * erro)
+void inserirSaidaErros(SaidaErro ** temp, char * erro)
 {
 	SaidaErro * add = addSaidaErro(erro);
-	if(saidaErro == NULL)
+
+	if(*temp == NULL)
 	{
-		saidaErro = add;
+		*temp = add;
 	}
 	else
 	{
-		SaidaErro* aux = saidaErro;
+		SaidaErro *aux = *temp;
 		while(aux->proximo != NULL)
-			aux = aux->proximo;
-
+			{
+				aux = aux->proximo;		
+			}
 		aux->proximo = add;
 	}
 }

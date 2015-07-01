@@ -158,11 +158,18 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], int l, char tipo[40],
 			else
 			{
 				Simbolos * aux = escTemp->s_declarados;
-				
-				while(aux->proximo!= NULL)
-					aux = aux->proximo;
+				if(strcmp(aux->nome, add->nome)==0)
+				{
+					erro(7);
+					return;					
+				}
+				else
+				{
+					while(aux->proximo!= NULL)
+						aux = aux->proximo;
 
-				aux->proximo = add;
+					aux->proximo = add;
+				}
 			}
 
 			Simbolos * add2 = addSimbolo(l, tipo, nomeSimbolo, valor);
@@ -195,11 +202,8 @@ void adicionaSimbolo(Escopo * escTemp, char pos[40], int l, char tipo[40],
 			else
 			{
 				Simbolos * aux = escTemp->s_usados;
-				
 				while(aux->proximo!= NULL)
-					aux = aux->proximo;
-
-				aux->proximo = add;
+					aux->proximo = add;
 			}
 		}
 
@@ -307,7 +311,6 @@ int validaSimboloUsado(Simbolos **declarada, Simbolos **usada)
 /* */
 int verificaSimbolosUsados(Simbolos * decHead, Simbolos * usa)
 {
-
 	if(usa == NULL)
 		return 1;
 	else
@@ -334,7 +337,6 @@ int verificaSimbolosUsados(Simbolos * decHead, Simbolos * usa)
 /* */
 int verificaSimbolosDeclarados(Simbolos * dec, Simbolos * usaHead)
 {
-
 	if(dec == NULL)
 		return 1;
 	else
@@ -354,7 +356,7 @@ int verificaSimbolosDeclarados(Simbolos * dec, Simbolos * usaHead)
 		sprintf(msg, "\"%s %s\" declarada e nao utilizada.",
 		    dec->tipo, dec->nome);
 		warning(msg, dec->linha);
-		return 0 * verificaSimbolosDeclarados(dec->proximo, usaHead);
+		return 1 * verificaSimbolosDeclarados(dec->proximo, usaHead);
 	}
 }
 
@@ -365,7 +367,7 @@ int verificaEscopo(Escopo * aux)
 		return 1;
 	else
 	{
-		//printf("*** Dentro de: %s\n", aux->nome);
+	//	printf("*** Dentro de: %s\n", aux->nome);
 		return 1 * verificaSimbolosDeclarados(aux->s_declarados, aux->s_usados) * verificaSimbolosUsados(aux->s_declarados, aux->s_usados);
 	}
 }
