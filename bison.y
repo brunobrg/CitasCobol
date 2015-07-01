@@ -336,16 +336,10 @@ yyerror(char * msg)
   sprintf(buffer, "%s %s\n",buffer, msg);
   printf("%s", buffer);
   inserirSaidaErros(&saidaErro, buffer);
-  qntWarnings++;
-  char bufmsg[256];
-  sprintf(bufmsg, "*** WARNING ");
-  sprintf(bufmsg, "%s (linha %d):", bufmsg, contLinhasC);
-  printf("%s",bufmsg);
-  inserirSaidaWarnings(&saidaWarning, bufmsg);
 }
 
 
-warning(int warning_code)
+warning(int warning_code, int linha)
 {
   char msg[256];
   qntWarnings++;
@@ -353,12 +347,12 @@ warning(int warning_code)
   switch (warning_code)
   {
     case 1:
-      fprintf(arq_erros," (linha %d): Variável declarada e não utilizada. \n", contLinhasC);
+      fprintf(arq_erros," (linha %d): Variável declarada e não utilizada. \n", linha);
       inserirSaidaWarnings(&saidaWarning, msg);
       break;
     default : 
       printf(" (linha %d).\n", contLinhasC);
-      fprintf(arq_erros,"*** WARNING %i  (linha %d): ", warning_code, contLinhasC);
+      fprintf(arq_erros,"*** WARNING %i  (linha %d): ", warning_code, linha);
       break;
   }  
 }

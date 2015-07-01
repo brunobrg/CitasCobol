@@ -278,7 +278,7 @@ int validaSimboloUsado(Simbolos **declarada, Simbolos **usada)
 			{
 				char msg[256];
 				sprintf(msg, "Variavel %s do tipo %s, porem estah sendo atribuindo um valor string", (*declarada)->nome, (*declarada)->tipo);
-				warning(msg, (*usada)->linha);
+				//warning(msg, (*usada)->linha);
 				return 0;
 			}
 		}
@@ -347,7 +347,7 @@ int verificaSimbolosDeclarados(Simbolos * dec, Simbolos * usaHead)
 			
 			usa = usa->proximo;
 		}
-		warning(1);
+		warning(1, dec->linha);
 		return 1 * verificaSimbolosDeclarados(dec->proximo, usaHead);
 	}
 }
