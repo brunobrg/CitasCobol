@@ -281,12 +281,30 @@ int validaSimboloUsado(Simbolos **declarada, Simbolos **usada)
 				//warning(msg, (*usada)->linha);
 				return 0;
 			}
+			if((*usada)->value[0] == '\'')
+			{
+				int valor;
+				char novo_valor[32];
+				valor = (*usada)->value[1];
+				sprintf(novo_valor, "%d", valor);
+				strcpy((*usada)->value, novo_valor);
+				atualizaSimbolo(usada);
+			}
 		}
 
 	}
 
 	if(!strcmp((*declarada)->tipo, "CHAR"))
 	{
+		if((*usada)->value[0] != '\'' && (*usada)->value[0] != '\"')
+		{
+			int valor;
+			char novo_valor[32];
+			valor = atoi((*usada)->value);
+			sprintf(novo_valor,"%c", valor);
+			strcpy((*usada)->value, novo_valor);
+			atualizaSimbolo(usada);
+		}
 		if((*usada)->value[0] == '\"')
 		{
 			char msg[256];

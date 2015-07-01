@@ -3,9 +3,7 @@
 
 int main()
 {
-	int y = 8;
-	float f;
-	char T;
+	char y = 81;
     // FIM
 }
 

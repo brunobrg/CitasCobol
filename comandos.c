@@ -34,7 +34,7 @@ void escreverIdntDivision(SaidaCobol ** saidaCobol, char * arqCob)
     // Cria primera linha
     Linha * linha = criarComentario();
     inserirToken(&linha, arq_virgula);
-    inserirToken(&linha, "criado por C it as Cobol v0.2");
+    inserirToken(&linha, " criado por C it as Cobol v0.2");
     inserirIdntDiv(saidaCobol,linha);
     
     // Cria proximas linhas 
@@ -147,11 +147,11 @@ void fechaMainSection(SaidaCobol ** saidaCobol)
     inserirToken(&linha,"STOP RUN");
     inserirProcDiv(saidaCobol,linha);
 
-    Linha * linha2 = criarLinhaA();
-    inserirToken(&linha2,"000000-EXIT");
-    inserirProcDiv(saidaCobol,linha2);
+    //Linha * linha2 = criarLinhaA();
+    //inserirToken(&linha2,"000000-EXIT");
+    //inserirProcDiv(saidaCobol,linha2);
 
-    Linha * linha3 = criarLinhaB();
+    Linha * linha3 = criarLinhaA();
     inserirToken(&linha3,"EXIT");
     inserirProcDiv(saidaCobol,linha3);
 
